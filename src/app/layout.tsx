@@ -15,7 +15,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className={`antialiased bg-background text-foreground min-h-screen flex w-full overflow-hidden`}
+        className={`antialiased bg-background text-foreground min-h-screen`}
       >
         <Providers>{children}</Providers>
       </body>
