@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Search, ChevronLeft, ChevronRight, Heart, MessageCircle, Share, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import WelcomeModal from "@/components/WelcomeModal";
+import Image from "next/image";
 
 const taskCards = [
   {
@@ -98,7 +99,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#161616] text-white">
       {/* Header */}
-      <motion.header 
+      <motion.header
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         className="flex items-center justify-between p-4 lg:p-6 border-b border-[#3F3F3F]"
@@ -126,19 +127,23 @@ export default function Home() {
         <div className="flex items-center gap-2 lg:gap-4">
           <div className="flex items-center gap-2 bg-[#FEC4171A] px-2 lg:px-3 py-1.5 rounded-full">
             <div className="w-3 h-3 lg:w-4 lg:h-4 bg-yellow-400 rounded-full"></div>
-            <span className="text-xs lg:text-sm font-medium text-yellow-400">Earn $CLS</span>
+            <span className="text-xs lg:text-sm font-medium text-yellow-400">
+              Earn $CLS
+            </span>
           </div>
           <button className="bg-[#5D3FD1] hover:bg-[#5D3FD1]/80 px-3 lg:px-4 py-1.5 rounded-lg text-xs lg:text-sm font-medium transition-colors">
             Plant Seeds
           </button>
-          <div className="text-xs lg:text-sm text-gray-400 hidden lg:block">Dx45u...0987</div>
+          <div className="text-xs lg:text-sm text-gray-400 hidden lg:block">
+            Dx45u...0987
+          </div>
           <div className="w-6 h-6 lg:w-8 lg:h-8 bg-gradient-to-r from-orange-400 to-pink-400 rounded-full"></div>
         </div>
       </motion.header>
 
       <div className="p-4 lg:p-6">
         {/* Engage Section */}
-        <motion.div 
+        <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.1 }}
@@ -189,7 +194,7 @@ export default function Home() {
         </motion.div>
 
         {/* Engage Cards Header */}
-        <motion.div 
+        <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2 }}
@@ -219,10 +224,16 @@ export default function Home() {
               className="bg-[#212121] rounded-xl overflow-hidden group cursor-pointer"
             >
               <div className="relative h-48 overflow-hidden">
-                <img
+                <Image
+                  width={400}
+                  height={300}
                   src={card.image}
                   alt={card.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  quality={75}
+                  loader={({ src, width, quality }) =>
+                    `${src}?w=${width}&q=${quality || 75}`
+                  }
                 />
                 <div className="absolute top-4 right-4 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center">
                   <span className="text-xs font-bold text-black">⭐</span>
@@ -266,7 +277,9 @@ export default function Home() {
             <div className="relative z-10">
               <h3 className="text-xl font-bold mb-2">Purchase $CLS</h3>
               <p className="text-sm opacity-90 mb-4">
-                By staking $CLS to support a project, users can show their support and potentially earn a share of the project's future success. (Tokens, NFTs, whitelists).
+                By staking $CLS to support a project, users can show their
+                support and potentially earn a share of the project&apos;s
+                future success. (Tokens, NFTs, whitelists).
               </p>
               <button className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg font-medium transition-colors">
                 Buy $CLS
@@ -303,7 +316,7 @@ export default function Home() {
         </div>
 
         {/* Trending Tasks */}
-        <motion.div 
+        <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.8 }}
@@ -332,10 +345,16 @@ export default function Home() {
               className="bg-[#212121] rounded-xl overflow-hidden group cursor-pointer"
             >
               <div className="relative h-48 overflow-hidden">
-                <img
+                <Image
+                  width={400}
+                  height={300}
                   src={card.image}
                   alt={card.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  quality={75}
+                  loader={({ src, width, quality }) =>
+                    `${src}?w=${width}&q=${quality || 75}`
+                  }
                 />
                 <div className="absolute top-4 right-4 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center">
                   <span className="text-xs font-bold text-black">⭐</span>
@@ -376,11 +395,14 @@ export default function Home() {
           className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-xl p-6 lg:p-8 relative overflow-hidden"
         >
           <div className="relative z-10 max-w-2xl">
-            <h3 className="text-xl lg:text-2xl font-bold mb-2">Earn, Engage and Expand with Creatorslab.</h3>
+            <h3 className="text-xl lg:text-2xl font-bold mb-2">
+              Earn, Engage and Expand with Creatorslab.
+            </h3>
             <p className="text-sm opacity-90 mb-6">
-              Creating a long term relationship among builders and content creators, to a wider global web3 communities.
+              Creating a long term relationship among builders and content
+              creators, to a wider global web3 communities.
             </p>
-            <button 
+            <button
               onClick={handleSignUp}
               className="bg-white/20 hover:bg-white/30 px-6 py-3 rounded-lg font-medium transition-colors"
             >
@@ -395,9 +417,9 @@ export default function Home() {
         </motion.div>
       </div>
 
-      <WelcomeModal 
-        isOpen={showWelcomeModal} 
-        onClose={() => setShowWelcomeModal(false)} 
+      <WelcomeModal
+        isOpen={showWelcomeModal}
+        onClose={() => setShowWelcomeModal(false)}
       />
     </div>
   );
