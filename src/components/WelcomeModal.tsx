@@ -26,7 +26,7 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
             exit={{ scale: 0.8, opacity: 0 }}
             transition={{ type: "spring", duration: 0.5 }}
             className="bg-gradient-to-b from-gray-800 to-gray-900 rounded-2xl p-8 max-w-md w-full relative border border-gray-700"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e: any) => e.stopPropagation()}
           >
             <button
               onClick={onClose}
@@ -103,7 +103,7 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
                   className="w-full bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 block text-center"
                   onClick={onClose}
                 >
-                  Let's Go!
+                  Let&apos;s Go!
                 </Link>
               </motion.div>
             </div>

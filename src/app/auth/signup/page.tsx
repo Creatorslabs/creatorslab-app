@@ -196,7 +196,7 @@ export default function SignUp() {
                 
                 <h1 className="text-2xl font-bold text-white mb-2">Enter verification code</h1>
                 <p className="text-gray-400 mb-8">
-                  We've sent a 6-digit code to <span className="text-white">{email}</span>
+                  We&apos;ve sent a 6-digit code to <span className="text-white">{email}</span>
                 </p>
 
                 <form onSubmit={handleOtpSubmit}>
@@ -235,7 +235,7 @@ export default function SignUp() {
                 </form>
 
                 <div className="mt-6 text-center">
-                  <p className="text-sm text-gray-400 mb-2">Didn't receive the code?</p>
+                  <p className="text-sm text-gray-400 mb-2">Didn&apos;t receive the code?</p>
                   <button className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors">
                     Resend code
                   </button>
