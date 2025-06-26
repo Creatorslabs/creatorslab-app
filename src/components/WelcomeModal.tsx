@@ -25,7 +25,7 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.8, opacity: 0 }}
             transition={{ type: "spring", duration: 0.5 }}
-            className="bg-gradient-to-b from-gray-800 to-gray-900 rounded-2xl p-8 max-w-md w-full relative"
+            className="bg-gradient-to-b from-gray-800 to-gray-900 rounded-2xl p-8 max-w-md w-full relative border border-gray-700"
             onClick={(e) => e.stopPropagation()}
           >
             <button
