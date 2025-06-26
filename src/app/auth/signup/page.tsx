@@ -35,13 +35,57 @@ export default function SignUp() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 flex items-center justify-center p-4 relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-20 left-20 w-32 h-32 bg-blue-500 rounded-full blur-3xl"></div>
-        <div className="absolute top-40 right-32 w-24 h-24 bg-purple-500 rounded-full blur-2xl"></div>
-        <div className="absolute bottom-32 left-1/3 w-40 h-40 bg-pink-500 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 right-20 w-28 h-28 bg-cyan-500 rounded-full blur-2xl"></div>
+        <motion.div 
+          animate={{ 
+            scale: [1, 1.2, 1],
+            rotate: [0, 180, 360]
+          }}
+          transition={{ 
+            duration: 20,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+          className="absolute top-20 left-20 w-32 h-32 bg-blue-500 rounded-full blur-3xl"
+        />
+        <motion.div 
+          animate={{ 
+            scale: [1.2, 1, 1.2],
+            rotate: [360, 180, 0]
+          }}
+          transition={{ 
+            duration: 15,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+          className="absolute top-40 right-32 w-24 h-24 bg-purple-500 rounded-full blur-2xl"
+        />
+        <motion.div 
+          animate={{ 
+            scale: [1, 1.3, 1],
+            rotate: [0, -180, -360]
+          }}
+          transition={{ 
+            duration: 25,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+          className="absolute bottom-32 left-1/3 w-40 h-40 bg-pink-500 rounded-full blur-3xl"
+        />
+        <motion.div 
+          animate={{ 
+            scale: [1.1, 1, 1.1],
+            rotate: [-360, -180, 0]
+          }}
+          transition={{ 
+            duration: 18,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+          className="absolute bottom-20 right-20 w-28 h-28 bg-cyan-500 rounded-full blur-2xl"
+        />
       </div>
 
       <div className="w-full max-w-md relative z-10">
@@ -52,7 +96,7 @@ export default function SignUp() {
           className="flex items-center justify-between mb-8"
         >
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">C</span>
             </div>
             <span className="text-xl font-bold text-white">creatorslab</span>
@@ -99,7 +143,7 @@ export default function SignUp() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="address@email.com"
-                      className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                      className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                       required
                     />
                   </div>
@@ -164,7 +208,7 @@ export default function SignUp() {
                       value={otp}
                       onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                       placeholder="000000"
-                      className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-center text-2xl tracking-widest"
+                      className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-center text-2xl tracking-widest"
                       maxLength={6}
                       required
                     />
@@ -190,7 +234,7 @@ export default function SignUp() {
 
                 <div className="mt-6 text-center">
                   <p className="text-sm text-gray-400 mb-2">Didn't receive the code?</p>
-                  <button className="text-primary hover:text-primary/80 text-sm font-medium transition-colors">
+                  <button className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors">
                     Resend code
                   </button>
                 </div>

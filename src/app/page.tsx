@@ -96,16 +96,16 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-white">
+    <div className="min-h-screen bg-[#161616] text-white">
       {/* Header */}
       <motion.header 
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="flex items-center justify-between p-6 border-b border-border"
+        className="flex items-center justify-between p-6 border-b border-[#3F3F3F]"
       >
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">C</span>
             </div>
             <span className="text-xl font-bold">creatorslab</span>
@@ -118,17 +118,17 @@ export default function Home() {
             <input
               type="text"
               placeholder="Search projects, quests, creators"
-              className="w-full bg-card-box border border-border rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full bg-[#212121] border border-[#3F3F3F] rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-400"
             />
           </div>
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 bg-warning px-3 py-1.5 rounded-full">
+          <div className="flex items-center gap-2 bg-[#FEC4171A] px-3 py-1.5 rounded-full">
             <div className="w-4 h-4 bg-yellow-400 rounded-full"></div>
-            <span className="text-sm font-medium">Earn $CLS</span>
+            <span className="text-sm font-medium text-yellow-400">Earn $CLS</span>
           </div>
-          <button className="bg-primary hover:bg-primary/80 px-4 py-1.5 rounded-lg text-sm font-medium transition-colors">
+          <button className="bg-[#5D3FD1] hover:bg-[#5D3FD1]/80 px-4 py-1.5 rounded-lg text-sm font-medium transition-colors">
             Plant Seeds
           </button>
           <div className="text-sm text-gray-400">Dx45u...0987</div>
@@ -147,7 +147,7 @@ export default function Home() {
           <div className="flex items-center gap-4">
             <h2 className="text-xl font-semibold">Engage</h2>
             <div className="flex gap-2">
-              <button className="bg-success hover:bg-success/80 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+              <button className="bg-[#099A43] hover:bg-[#099A43]/80 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
                 Trending
               </button>
               <button className="bg-pink-500 hover:bg-pink-500/80 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
@@ -174,14 +174,14 @@ export default function Home() {
                     transition={{ delay: 0.2 + index * 0.1 }}
                     src={avatar}
                     alt={`Creator ${index + 1}`}
-                    className="w-8 h-8 rounded-full border-2 border-background"
+                    className="w-8 h-8 rounded-full border-2 border-[#161616]"
                   />
                 ))}
-                <div className="w-8 h-8 bg-card rounded-full border-2 border-background flex items-center justify-center text-xs">
+                <div className="w-8 h-8 bg-[#212121] rounded-full border-2 border-[#161616] flex items-center justify-center text-xs">
                   ...
                 </div>
               </div>
-              <button className="text-primary hover:text-primary/80 text-sm font-medium transition-colors">
+              <button className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors">
                 View all
               </button>
             </div>
@@ -198,10 +198,10 @@ export default function Home() {
           <h3 className="text-lg font-semibold">Engage</h3>
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-400">Show all (20)</span>
-            <button className="p-1 hover:bg-card rounded">
+            <button className="p-1 hover:bg-[#212121] rounded">
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <button className="p-1 hover:bg-card rounded">
+            <button className="p-1 hover:bg-[#212121] rounded">
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
@@ -215,7 +215,7 @@ export default function Home() {
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3 + index * 0.1 }}
               whileHover={{ y: -5 }}
-              className="bg-card rounded-xl overflow-hidden group cursor-pointer"
+              className="bg-[#212121] rounded-xl overflow-hidden group cursor-pointer"
             >
               <div className="relative h-48 overflow-hidden">
                 <img
@@ -245,7 +245,7 @@ export default function Home() {
                       <span>{card.shares}</span>
                     </div>
                   </div>
-                  <div className="bg-primary px-3 py-1 rounded-full text-sm font-medium">
+                  <div className="bg-[#5D3FD1] px-3 py-1 rounded-full text-sm font-medium">
                     {card.reward}
                   </div>
                 </div>
@@ -285,7 +285,7 @@ export default function Home() {
             className="bg-gradient-to-r from-pink-500 to-purple-600 rounded-xl p-6 relative overflow-hidden"
           >
             <div className="relative z-10">
-              <h3 className="text-xl font-bold mb-2">Earn $CL</h3>
+              <h3 className="text-xl font-bold mb-2">Earn SOL</h3>
               <p className="text-sm opacity-90 mb-4">
                 Burn CLS to earn SOL. (Coming Soon)
               </p>
@@ -311,10 +311,10 @@ export default function Home() {
           <h3 className="text-lg font-semibold">Trending Tasks</h3>
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-400">Show all (20)</span>
-            <button className="p-1 hover:bg-card rounded">
+            <button className="p-1 hover:bg-[#212121] rounded">
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <button className="p-1 hover:bg-card rounded">
+            <button className="p-1 hover:bg-[#212121] rounded">
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
@@ -328,7 +328,7 @@ export default function Home() {
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.9 + index * 0.1 }}
               whileHover={{ y: -5 }}
-              className="bg-card rounded-xl overflow-hidden group cursor-pointer"
+              className="bg-[#212121] rounded-xl overflow-hidden group cursor-pointer"
             >
               <div className="relative h-48 overflow-hidden">
                 <img
@@ -358,7 +358,7 @@ export default function Home() {
                       <span>{card.shares}</span>
                     </div>
                   </div>
-                  <div className="bg-primary px-3 py-1 rounded-full text-sm font-medium">
+                  <div className="bg-[#5D3FD1] px-3 py-1 rounded-full text-sm font-medium">
                     {card.reward}
                   </div>
                 </div>
