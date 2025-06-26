@@ -9,6 +9,11 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@amplitude/analytics-browser": "^2.17.11",
+    "@amplitude/plugin-session-replay-browser": "^1.19.1",
+    "@privy-io/react-auth": "^2.16.0",
+    "@solana/spl-token": "^0.4.13",
+    "@solana/web3.js": "^1.98.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.523.0",
