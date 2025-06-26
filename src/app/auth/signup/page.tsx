@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 
 export default function SignUp() {
   const [step, setStep] = useState(1);
@@ -36,7 +37,7 @@ export default function SignUp() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Background Pattern */}
+      {/* Animated Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <motion.div 
           animate={{ 
@@ -103,7 +104,7 @@ export default function SignUp() {
           </Link>
           
           <div className="flex items-center gap-4 text-sm">
-            <span className="text-gray-400">Already have an account?</span>
+            <span className="text-gray-400 hidden sm:block">Already have an account?</span>
             <Link 
               href="/auth/signin" 
               className="text-white border border-gray-600 hover:border-gray-500 px-4 py-2 rounded-lg transition-colors"
@@ -187,9 +188,10 @@ export default function SignUp() {
               >
                 <button
                   onClick={() => setStep(1)}
-                  className="text-gray-400 hover:text-white mb-4 text-sm transition-colors"
+                  className="flex items-center gap-2 text-gray-400 hover:text-white mb-4 text-sm transition-colors"
                 >
-                  ← Back
+                  <ArrowLeft className="w-4 h-4" />
+                  Back
                 </button>
                 
                 <h1 className="text-2xl font-bold text-white mb-2">Enter verification code</h1>

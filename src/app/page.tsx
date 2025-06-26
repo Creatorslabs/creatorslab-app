@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Search, ChevronLeft, ChevronRight, Heart, MessageCircle, Share, Eye } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Heart, MessageCircle, Share, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import WelcomeModal from "@/components/WelcomeModal";
 
@@ -101,18 +101,18 @@ export default function Home() {
       <motion.header 
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="flex items-center justify-between p-6 border-b border-[#3F3F3F]"
+        className="flex items-center justify-between p-4 lg:p-6 border-b border-[#3F3F3F]"
       >
-        <div className="flex items-center gap-8">
+        <div className="flex items-center gap-4 lg:gap-8">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">C</span>
             </div>
-            <span className="text-xl font-bold">creatorslab</span>
+            <span className="text-lg lg:text-xl font-bold">creatorslab</span>
           </Link>
         </div>
 
-        <div className="flex-1 max-w-md mx-8">
+        <div className="flex-1 max-w-md mx-4 lg:mx-8 hidden md:block">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
@@ -123,30 +123,30 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 bg-[#FEC4171A] px-3 py-1.5 rounded-full">
-            <div className="w-4 h-4 bg-yellow-400 rounded-full"></div>
-            <span className="text-sm font-medium text-yellow-400">Earn $CLS</span>
+        <div className="flex items-center gap-2 lg:gap-4">
+          <div className="flex items-center gap-2 bg-[#FEC4171A] px-2 lg:px-3 py-1.5 rounded-full">
+            <div className="w-3 h-3 lg:w-4 lg:h-4 bg-yellow-400 rounded-full"></div>
+            <span className="text-xs lg:text-sm font-medium text-yellow-400">Earn $CLS</span>
           </div>
-          <button className="bg-[#5D3FD1] hover:bg-[#5D3FD1]/80 px-4 py-1.5 rounded-lg text-sm font-medium transition-colors">
+          <button className="bg-[#5D3FD1] hover:bg-[#5D3FD1]/80 px-3 lg:px-4 py-1.5 rounded-lg text-xs lg:text-sm font-medium transition-colors">
             Plant Seeds
           </button>
-          <div className="text-sm text-gray-400">Dx45u...0987</div>
-          <div className="w-8 h-8 bg-gradient-to-r from-orange-400 to-pink-400 rounded-full"></div>
+          <div className="text-xs lg:text-sm text-gray-400 hidden lg:block">Dx45u...0987</div>
+          <div className="w-6 h-6 lg:w-8 lg:h-8 bg-gradient-to-r from-orange-400 to-pink-400 rounded-full"></div>
         </div>
       </motion.header>
 
-      <div className="p-6">
+      <div className="p-4 lg:p-6">
         {/* Engage Section */}
         <motion.div 
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.1 }}
-          className="flex items-center justify-between mb-6"
+          className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 gap-4"
         >
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col lg:flex-row lg:items-center gap-4">
             <h2 className="text-xl font-semibold">Engage</h2>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <button className="bg-[#099A43] hover:bg-[#099A43]/80 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
                 Trending
               </button>
@@ -174,10 +174,10 @@ export default function Home() {
                     transition={{ delay: 0.2 + index * 0.1 }}
                     src={avatar}
                     alt={`Creator ${index + 1}`}
-                    className="w-8 h-8 rounded-full border-2 border-[#161616]"
+                    className="w-6 h-6 lg:w-8 lg:h-8 rounded-full border-2 border-[#161616]"
                   />
                 ))}
-                <div className="w-8 h-8 bg-[#212121] rounded-full border-2 border-[#161616] flex items-center justify-center text-xs">
+                <div className="w-6 h-6 lg:w-8 lg:h-8 bg-[#212121] rounded-full border-2 border-[#161616] flex items-center justify-center text-xs">
                   ...
                 </div>
               </div>
@@ -188,7 +188,7 @@ export default function Home() {
           </div>
         </motion.div>
 
-        {/* Engage Cards */}
+        {/* Engage Cards Header */}
         <motion.div 
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -207,7 +207,8 @@ export default function Home() {
           </div>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {/* Engage Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {taskCards.map((card, index) => (
             <motion.div
               key={card.id}
@@ -255,7 +256,7 @@ export default function Home() {
         </div>
 
         {/* Purchase and Earn Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <motion.div
             initial={{ x: -20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
@@ -320,7 +321,7 @@ export default function Home() {
           </div>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {trendingTasks.map((card, index) => (
             <motion.div
               key={card.id}
@@ -372,10 +373,10 @@ export default function Home() {
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 1.2 }}
-          className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-xl p-8 relative overflow-hidden"
+          className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-xl p-6 lg:p-8 relative overflow-hidden"
         >
           <div className="relative z-10 max-w-2xl">
-            <h3 className="text-2xl font-bold mb-2">Earn, Engage and Expand with Creatorslab.</h3>
+            <h3 className="text-xl lg:text-2xl font-bold mb-2">Earn, Engage and Expand with Creatorslab.</h3>
             <p className="text-sm opacity-90 mb-6">
               Creating a long term relationship among builders and content creators, to a wider global web3 communities.
             </p>
