@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Providers from "@/components/Providers";
+import AppShell from "@/components/AppShell";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -14,10 +16,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body
-        className={`antialiased bg-background text-foreground min-h-screen`}
-      >
-        <Providers>{children}</Providers>
+      <body className="antialiased bg-background text-foreground min-h-screen">
+        <Providers>
+          <AppShell>
+            {children}
+          </AppShell>
+          <Toaster position="top-right" />
+        </Providers>
       </body>
     </html>
   );

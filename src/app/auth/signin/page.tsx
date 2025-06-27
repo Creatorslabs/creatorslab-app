@@ -23,9 +23,9 @@ export default function SignIn() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 flex">
+    <div className="min-h-screen bg-background flex">
       {/* Left Side - Login Form */}
-      <div className="flex-1 flex items-center justify-center p-8 relative z-10">
+      <div className="flex-1 flex items-center justify-center relative z-10">
         <div className="w-full max-w-md">
           {/* Header */}
           <motion.div
@@ -135,15 +135,15 @@ export default function SignIn() {
       </div>
 
       {/* Right Side - 3D Illustration */}
-      <div className="hidden lg:flex flex-1 items-center justify-center p-8 relative">
+      <div className="hidden lg:flex flex-1 h-screen">
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.8 }}
-          className="relative w-full h-full max-w-lg max-h-lg"
+          className="relative w-full h-full"
         >
           {/* 3D Scene Container */}
-          <div className="relative w-full h-full bg-gradient-to-br from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-3xl overflow-hidden">
+          <div className="relative w-full h-full bg-gradient-to-br from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-l-3xl overflow-hidden">
             {/* Animated geometric shapes */}
             <motion.div
               animate={{ 
