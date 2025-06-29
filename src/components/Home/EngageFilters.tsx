@@ -10,7 +10,7 @@ const filters = [
   { label: "Articles", value: "articles", bg: "bg-blue-500" },
 ];
 
-export default function EngageFilters() {
+function EngageFiltersComp() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const currentCategory = searchParams.get("category");
@@ -30,7 +30,8 @@ export default function EngageFilters() {
   return (
     <div className="flex flex-col gap-4 border border-[#3F3F3F] rounded-md p-4 w-full md:w-[370px]">
       <p className="flex justify-between text-sm">
-        Browse by categories <span className="text-[#5D3FD1] cursor-pointer">View all</span>
+        Browse by categories{" "}
+        <span className="text-[#5D3FD1] cursor-pointer">View all</span>
       </p>
 
       <div className="flex flex-row items-center justify-between gap-2">
@@ -53,3 +54,21 @@ export default function EngageFilters() {
     </div>
   );
 }
+
+import React, { Suspense } from "react";
+
+function EngageFilters() {
+  return (
+    <Suspense
+      fallback={
+        <div className="h-16 w-full bg-gray-800 animate-pulse rounded-md">
+          loading...
+        </div>
+      }
+    >
+      <EngageFiltersComp />
+    </Suspense>
+  );
+}
+
+export default EngageFilters;
