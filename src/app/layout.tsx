@@ -3,6 +3,7 @@ import "./globals.css";
 import Providers from "@/components/Providers";
 import AppShell from "@/components/AppShell";
 import { Toaster } from "sonner";
+import { ErrorBoundary } from "@/components/error-boundary";
 
 export const metadata: Metadata = {
   title: "Creatorslab",
@@ -19,10 +20,10 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <body className="antialiased bg-background text-foreground min-h-screen">
         <Providers>
-          <AppShell>
-            {children}
-          </AppShell>
-          <Toaster position="top-right" />
+          <ErrorBoundary>
+            <AppShell>{children}</AppShell>
+            <Toaster position="top-right" />
+          </ErrorBoundary>
         </Providers>
       </body>
     </html>

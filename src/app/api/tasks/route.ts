@@ -118,7 +118,7 @@ export async function GET(req: Request) {
       return count.toString();
     };
 
-    let resultTasks = allTasks.map((task) => ({
+    const resultTasks = allTasks.map((task) => ({
       id: (task._id as mongoose.Types.ObjectId).toString(),
       title: task.title,
       description: task.description,

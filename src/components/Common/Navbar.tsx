@@ -5,14 +5,14 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Search } from "lucide-react";
 import { usePrivy } from "@privy-io/react-auth";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import ImportWalletModal from "./ImportWalletModal";
 import Image from "next/image";
 import UserDropdown from "./UserDropdown";
 
-export default function Navbar() {
+function NavbarComp() {
   const pathname = usePathname();
   const router = useRouter();
   const { ready, authenticated, user: privyUser } = usePrivy();
@@ -166,3 +166,13 @@ export default function Navbar() {
     </motion.header>
   );
 }
+
+function Navbar() {
+  return (
+    <Suspense fallback={<Skeleton className="h-16 w-full" />}>
+      <NavbarComp />
+    </Suspense>
+  );
+}
+
+export default Navbar;

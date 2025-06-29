@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import EngagementCard from "@/components/Common/EngagementCard";
 import { useSearchParams, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 
 interface TaskCard {
@@ -36,7 +36,7 @@ const platforms = [
   "youtube",
 ];
 
-export default function TasksPage() {
+function TasksPage() {
   const [tasks, setTasks] = useState<TaskCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [fetchingMore, setFetchingMore] = useState(false);
@@ -216,5 +216,13 @@ export default function TasksPage() {
         </>
       )}
     </div>
+  );
+}
+
+export default function page() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <TasksPage />
+    </Suspense>
   );
 }
