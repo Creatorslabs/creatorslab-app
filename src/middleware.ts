@@ -5,37 +5,31 @@ export function middleware(req: NextRequest) {
   const token = req.cookies.get("privy-token")?.value;
   const path = req.nextUrl.pathname;
 
-  // Allow static files
-  const publicFile = /\.(.*)$/.test(path);
-  const isNextStatic = path.startsWith("/_next/");
-  const isFont = path.startsWith("/fonts");
-  const isImage = path.startsWith("/images");
+  const isAuthenticated = !!token;
+
+  const isPublicAsset =
+    path.startsWith("/_next") ||
+    path.startsWith("/fonts") ||
+    path.startsWith("/images") ||
+    path.endsWith(".ico");
+
+  const isHomePage = path === "/";
   const isAuthPage = path.startsWith("/auth");
   const isAPIRoute = path.startsWith("/api");
-  const isForbiden = path.startsWith("/403");
 
-  if (
-    publicFile ||
-    isNextStatic ||
-    isFont ||
-    isImage ||
-    isAPIRoute ||
-    isForbiden
-  ) {
+  if (isPublicAsset || isAPIRoute) {
     return NextResponse.next();
   }
 
-  const isAuthenticated = !!token;
-
-  if (isAuthPage) {
-    if (isAuthenticated) {
-      return NextResponse.redirect(new URL("/dashboard", req.url));
+  if (!isAuthenticated) {
+    if (isHomePage || isAuthPage) {
+      return NextResponse.next();
     }
-    return null;
+    return NextResponse.redirect(new URL("/auth/signin", req.url));
   }
 
-  if (!isAuthenticated) {
-    return NextResponse.redirect(new URL("/auth/signin", req.url));
+  if (isAuthenticated && isAuthPage) {
+    return NextResponse.redirect(new URL("/", req.url));
   }
 
   return NextResponse.next();
@@ -43,11 +37,6 @@ export function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    // Match everything except:
-    // - _next/*
-    // - favicon
-    // - auth pages
-    // - API routes
-    "/((?!_next/static|_next/image|favicon.ico|auth|auth/.*|api|api/.*|$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|api|api/.*).*)"
   ],
 };

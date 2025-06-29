@@ -78,7 +78,7 @@ export default function Home() {
           transition={{ delay: 0.2 }}
           className="flex items-center justify-between mb-6"
         >
-          <h3 className="text-lg font-semibold">Engage</h3>
+          <h3 className="text-lg font-semibold">New Tasks</h3>
           <div className="flex items-center gap-2">
             <Link href="/tasks" className="text-sm text-gray-400">Show all (20)</Link>
             <button className="p-1 hover:bg-[#212121] rounded">
@@ -91,7 +91,7 @@ export default function Home() {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {taskCards.map((card, index) => (
+          {taskCards.slice(0,3).map((card, index) => (
             <EngagementCard index={index} card={card} key={card.id} />
           ))}
         </div>
@@ -107,7 +107,7 @@ export default function Home() {
         >
           <h3 className="text-lg font-semibold">Trending Tasks</h3>
           <div className="flex items-center gap-2">
-            <Link href="/tasks" className="text-sm text-gray-400">
+            <Link href="/tasks?sort=trending" className="text-sm text-gray-400">
               Show all (20)
             </Link>
             <button className="p-1 hover:bg-[#212121] rounded">
@@ -120,7 +120,7 @@ export default function Home() {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {trendingTasks.map((card, index) => (
+          {trendingTasks.slice(0,3).map((card, index) => (
             <EngagementCard index={index} card={card} key={card.id} />
           ))}
         </div>

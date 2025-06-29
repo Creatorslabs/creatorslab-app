@@ -17,14 +17,20 @@ export default function EngageFilters() {
 
   const handleFilterClick = (value: string) => {
     const newParams = new URLSearchParams(searchParams);
+
+    if (value === "trending") {
+      router.push("/tasks?sort=trending");
+      return;
+    }
+
     newParams.set("category", value);
-    router.push(`?${newParams.toString()}`);
+    router.push(`/tasks?${newParams.toString()}`);
   };
 
   return (
     <div className="flex flex-col gap-4 border border-[#3F3F3F] rounded-md p-4 w-full md:w-[370px]">
       <p className="flex justify-between text-sm">
-        Engage <span className="text-[#5D3FD1] cursor-pointer">View all</span>
+        Browse by categories <span className="text-[#5D3FD1] cursor-pointer">View all</span>
       </p>
 
       <div className="flex flex-row items-center justify-between gap-2">
@@ -35,7 +41,9 @@ export default function EngageFilters() {
             className={cn(
               "text-xs rounded-md px-3 py-2 font-semibold text-white flex-1 transition-colors",
               bg,
-              currentCategory === value ? "opacity-100" : "opacity-80 hover:opacity-100"
+              currentCategory === value
+                ? "opacity-100"
+                : "opacity-80 hover:opacity-100"
             )}
           >
             {label}
