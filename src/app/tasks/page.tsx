@@ -44,45 +44,51 @@ export default function TasksPage() {
   const [hasMore, setHasMore] = useState(true);
   const [isDesktop, setIsDesktop] = useState(false);
 
+  const observerRef = useRef<HTMLDivElement | null>(null);
+
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const sort = searchParams.get("sort") || "newest";
+  const platform = searchParams.get("platform") || "all";
+  const search = searchParams.get("search") || "";
+
+  // Set desktop state
   useEffect(() => {
     if (typeof window !== "undefined") {
       setIsDesktop(window.innerWidth >= 768);
     }
   }, []);
 
-  const observerRef = useRef<HTMLDivElement | null>(null);
-
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const sort = searchParams.get("sort") || "newest";
-  const platform = searchParams.get("platform") || "all";
-
-  const updateParam = (key: string, value: string) => {
-    const params = new URLSearchParams(Array.from(searchParams.entries()));
-    if (value) {
-      params.set(key, value);
-    } else {
-      params.delete(key);
-    }
-    params.set("page", "1");
+  // Reset tasks on filter/search change
+  useEffect(() => {
     setPage(1);
-    router.push(`/tasks?${params.toString()}`);
-  };
+    setTasks([]);
+    setLoading(true);
+    fetchTasks(1, true);
+  }, [sort, platform, search]);
 
-  const clearFilters = () => {
-    router.push("/tasks");
-    setPage(1);
-  };
+  // Fetch more when page changes (excluding first page)
+  useEffect(() => {
+    if (page === 1) return;
+    setFetchingMore(true);
+    fetchTasks(page);
+  }, [page]);
 
-  const fetchTasks = async (reset = false) => {
+  const fetchTasks = async (targetPage: number, reset = false) => {
     try {
-      const res = await fetch(
-        `/api/tasks?sort=${sort}&platform=${platform}&page=${page}`
-      );
+      const params = new URLSearchParams({
+        sort,
+        platform,
+        page: targetPage.toString(),
+      });
+      if (search) params.set("search", search);
+
+      const res = await fetch(`/api/tasks?${params.toString()}`);
       const json = await res.json();
       const newTasks = json?.data || [];
-      setHasMore(newTasks.length > 0);
 
+      setHasMore(newTasks.length > 0);
       if (reset) {
         setTasks(newTasks);
       } else {
@@ -96,28 +102,33 @@ export default function TasksPage() {
     }
   };
 
-  useEffect(() => {
-    setLoading(true);
-    fetchTasks(true);
-  }, [sort, platform]);
-
-  useEffect(() => {
-    if (page > 1) {
-      setFetchingMore(true);
-      fetchTasks();
-    }
-  }, [page]);
-
+  // Intersection Observer (load more)
   useEffect(() => {
     if (!observerRef.current || !hasMore || loading || !isDesktop) return;
+
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) {
-        setPage((p) => p + 1);
+        setPage((prev) => prev + 1);
       }
     });
+
     observer.observe(observerRef.current);
     return () => observer.disconnect();
   }, [observerRef.current, hasMore, loading, isDesktop]);
+
+  const updateParam = (key: string, value: string) => {
+    const params = new URLSearchParams(Array.from(searchParams.entries()));
+    if (value) {
+      params.set(key, value);
+    } else {
+      params.delete(key);
+    }
+    router.push(`/tasks?${params.toString()}`);
+  };
+
+  const clearFilters = () => {
+    router.push("/tasks");
+  };
 
   return (
     <div className="min-h-screen bg-background px-4 lg:px-8 py-6 text-white">
@@ -125,7 +136,7 @@ export default function TasksPage() {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="sticky top-4 z-10 bg-background/80 backdrop-blur-md border border-muted rounded-xl p-4 mb-6 flex flex-wrap gap-4 items-center justify-between"
+        className="sticky top-20 md:top-24 z-20 bg-card-box backdrop-blur-md border border-border rounded-xl p-4 mb-6 flex flex-wrap gap-4 items-center justify-between"
       >
         <div className="flex flex-wrap gap-4 w-full md:w-auto">
           <Select
@@ -185,7 +196,7 @@ export default function TasksPage() {
 
           <div className="w-full flex justify-center items-center mt-6">
             {fetchingMore ? (
-              <div className="animate-spin w-6 h-6 border-2 border-t-transparent border-white rounded-full" />
+              <div className="animate-spin w-6 h-6 border-2 border-t-transparent border-border rounded-full" />
             ) : (
               hasMore &&
               !isDesktop && (

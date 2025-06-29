@@ -7,7 +7,7 @@ export interface IUser extends Document {
   username?: string;
   email?: string;
   privyId: {
-    type: String;
+    type: string;
     unique: true;
     required: true;
   };

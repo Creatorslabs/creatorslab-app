@@ -2,6 +2,7 @@ import connectDB from "@/lib/connectDB";
 import { Participation } from "@/lib/models/Participation";
 import { Task } from "@/lib/models/Task";
 import { NextResponse } from "next/server";
+import mongoose from "mongoose";
 
 export async function GET(req: Request) {
   try {
@@ -13,17 +14,91 @@ export async function GET(req: Request) {
     const sort = searchParams.get("sort") || "newest";
     const platform = searchParams.get("platform");
     const type = searchParams.get("type");
-
-    const query: any = { status: "active" };
-
-    if (platform && platform !== "all") query.platform = platform;
-
-    if (type) query.type = type;
+    const rawSearch = searchParams.get("search")?.trim();
 
     const skip = (page - 1) * limit;
 
-    const allTasks = await Task.find(query).populate("creator", "image").lean();
+    const match: any = { status: "active" };
+    if (platform && platform !== "all") match.platform = platform;
+    if (type) match.type = type;
 
+    const pipeline: any[] = [];
+
+    // Fuzzy search with Atlas Search
+    if (rawSearch && rawSearch.length > 0) {
+      pipeline.push({
+        $search: {
+          index: "creatorlab_task",
+          compound: {
+            should: [
+              {
+                autocomplete: {
+                  query: rawSearch,
+                  path: "title",
+                  fuzzy: { maxEdits: 2 },
+                },
+              },
+              {
+                autocomplete: {
+                  query: rawSearch,
+                  path: "description",
+                  fuzzy: { maxEdits: 2 },
+                },
+              },
+            ],
+          },
+        },
+      });
+    }
+
+    // Add filters
+    pipeline.push({ $match: match });
+
+    // Optional: add score for relevance sorting
+    if (rawSearch) {
+      pipeline.push({
+        $addFields: {
+          score: { $meta: "searchScore" },
+        },
+      });
+    }
+
+    // Join creator data
+    pipeline.push({
+      $lookup: {
+        from: "users", // must match actual Mongo collection name
+        localField: "creator",
+        foreignField: "_id",
+        as: "creator",
+      },
+    });
+
+    pipeline.push({
+      $unwind: {
+        path: "$creator",
+        preserveNullAndEmptyArrays: true,
+      },
+    });
+
+    // Sorting
+    const sortField =
+      sort === "oldest" ? { createdAt: 1 } :
+      sort === "trending" ? {} : // handle trending later
+      rawSearch ? { score: -1, createdAt: -1 } :
+      { createdAt: -1 };
+
+    if (Object.keys(sortField).length > 0) {
+      pipeline.push({ $sort: sortField });
+    }
+
+    // Paginate
+    pipeline.push({ $skip: skip });
+    pipeline.push({ $limit: limit });
+
+    // Run aggregation
+    const allTasks = await Task.aggregate(pipeline);
+
+    // Participation stats
     const participations = await Participation.find({
       taskId: { $in: allTasks.map((t) => t._id) },
     }).lean();
@@ -43,8 +118,8 @@ export async function GET(req: Request) {
       return count.toString();
     };
 
-    let sortedTasks = allTasks.map((task) => ({
-      id: (task._id as string).toString(),
+    let resultTasks = allTasks.map((task) => ({
+      id: (task._id as mongoose.Types.ObjectId).toString(),
       title: task.title,
       description: task.description,
       image: task.image,
@@ -59,31 +134,22 @@ export async function GET(req: Request) {
         participationCountMap[(task._id as string).toString()] || 0,
     }));
 
-    if (sort === "oldest") {
-      sortedTasks.sort(
-        (a, b) => +new Date(a.createdAt) - +new Date(b.createdAt)
-      );
-    } else if (sort === "trending") {
-      sortedTasks.sort(
+    // Optional: Trending sort by participation count
+    if (sort === "trending") {
+      resultTasks.sort(
         (a, b) => (b.participationCount ?? 0) - (a.participationCount ?? 0)
-      );
-    } else {
-      sortedTasks.sort(
-        (a, b) => +new Date(b.createdAt) - +new Date(a.createdAt)
       );
     }
 
-    const paginated = sortedTasks.slice(skip, skip + limit);
-
     return NextResponse.json({
       success: true,
-      data: paginated,
+      data: resultTasks,
       pagination: {
         page,
         limit,
-        total: sortedTasks.length,
-        pages: Math.ceil(sortedTasks.length / limit),
-        hasNext: page < Math.ceil(sortedTasks.length / limit),
+        total: resultTasks.length,
+        pages: Math.ceil(resultTasks.length / limit),
+        hasNext: resultTasks.length === limit,
         hasPrev: page > 1,
       },
     });

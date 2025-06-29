@@ -1,31 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Search } from "lucide-react";
-import { useLogout, usePrivy } from "@privy-io/react-auth";
+import { usePrivy } from "@privy-io/react-auth";
 import { useEffect, useState } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import ImportWalletModal from "./ImportWalletModal";
+import Image from "next/image";
+import UserDropdown from "./UserDropdown";
 
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { ready, authenticated, user: privyUser } = usePrivy();
-  const { logout } = useLogout({
-    onSuccess: () => router.push("/auth/signin"),
-  });
 
   const [user, setUser] = useState<{
     name: string;
@@ -34,6 +24,28 @@ export default function Navbar() {
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [showImportWallet, setShowImportWallet] = useState(false);
+
+  const searchParams = useSearchParams();
+  const [search, setSearch] = useState(searchParams.get("search") || "");
+
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      const newParams = new URLSearchParams(window.location.search);
+      if (search) {
+        newParams.set("search", search);
+      } else {
+        newParams.delete("search");
+      }
+      router.replace(`${pathname}?${newParams.toString()}`);
+    }, 400);
+
+    return () => clearTimeout(delayDebounce);
+  }, [search, pathname, router]);
+
+  useEffect(() => {
+    const currentSearch = searchParams.get("search") || "";
+    setSearch(currentSearch);
+  }, [searchParams]);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -73,9 +85,12 @@ export default function Navbar() {
     >
       {/* Logo */}
       <Link href="/" className="flex items-center gap-2">
-        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-lg flex items-center justify-center">
-          <span className="text-white font-bold text-sm">C</span>
-        </div>
+        <Image
+          src="/images/logo.png"
+          width={25}
+          height={25}
+          alt="Creatorlab logo"
+        />
         <span className="text-lg lg:text-xl font-bold text-white">
           creatorslab
         </span>
@@ -87,6 +102,8 @@ export default function Navbar() {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <input
             type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             placeholder="Search projects, quests, creators"
             className="w-full bg-[#212121] border border-[#3F3F3F] rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-400"
           />
@@ -141,30 +158,7 @@ export default function Navbar() {
             {loading ? (
               <Skeleton className="w-6 h-6 lg:w-8 lg:h-8 rounded-full" />
             ) : (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Avatar className="w-6 h-6 lg:w-8 lg:h-8 cursor-pointer">
-                    <AvatarImage src={user?.avatar} alt={user?.name} />
-                    <AvatarFallback>
-                      {user?.name?.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56">
-                  <DropdownMenuLabel className="text-xs">
-                    <div className="font-medium">{user?.name}</div>
-                    <div className="text-muted-foreground text-xs truncate">
-                      {user?.email}
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/profile">Profile</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <UserDropdown user={user} />
             )}
           </>
         )}
