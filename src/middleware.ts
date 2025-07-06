@@ -40,7 +40,7 @@ export function middleware(req: NextRequest) {
   if (isAuthenticated && isAuthPage)
     return NextResponse.redirect(new URL("/", req.url));
 
-  if (!isAuthenticated && !maybeAuthenticated && (!isAuthPage || !isHomePage))
+  if (!isAuthenticated && !maybeAuthenticated && !isAuthPage && !isHomePage)
     return NextResponse.redirect(new URL("/auth/signin", req.url));
 
   return NextResponse.next();
