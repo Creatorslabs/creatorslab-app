@@ -3,11 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import {
-  ArrowLeft,
-  Copy,
-  CheckCircle,
-} from "lucide-react";
+import { ArrowLeft, Copy, CheckCircle } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useLoader } from "@/hooks/useLoader";
@@ -118,6 +114,8 @@ export default function TaskViewPage() {
 
     fetchTask();
   }, [params.taskId]);
+
+  const vicvo = () => {};
 
   const handleConnectAccount = (platform: string) => {
     setConnectedAccounts((prev) => ({
@@ -231,7 +229,7 @@ export default function TaskViewPage() {
                   </span>
                 </div>
 
-                <FollowButton creatorId={task.creator.id}/>
+                <FollowButton creatorId={task.creator.id} />
               </div>
             </motion.div>
 
