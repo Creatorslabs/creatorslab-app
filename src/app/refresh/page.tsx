@@ -1,15 +1,18 @@
 "use client";
 
+import { useLoader } from "@/hooks/useLoader";
 import { getAccessToken } from "@privy-io/react-auth";
-import { Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect } from "react";
 
 function page() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { showLoader, LoaderModal } = useLoader();
 
   useEffect(() => {
+    showLoader({ message: "Refreshing session..." });
+
     const refreshSession = async () => {
       const token = await getAccessToken();
       const redirectUri = searchParams.get("redirect_uri") || "/";
@@ -20,14 +23,11 @@ function page() {
         router.replace("/login");
       }
     };
+
+    refreshSession();
   }, [router, searchParams]);
 
-  return (
-    <div className="flex justify-center items-center min-h-screen w-full text-center">
-      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-      <p>Refreshing session...</p>
-    </div>
-  );
+  return <LoaderModal />;
 }
 
 export default page;
