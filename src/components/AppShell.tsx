@@ -14,7 +14,7 @@ export default function AppShell({ children }: AppShellProps) {
   return (
     <>
       {!isAuthPage && <Navbar />}
-      <div className={isAuthPage ? "" : "lg:px-8 py-6 relative"}>
+      <div className={isAuthPage ? "" : "lg:px-8 relative"}>
         {children}
       </div>
     </>

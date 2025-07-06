@@ -22,8 +22,8 @@ export default function RootLayout({
         <Providers>
           <ErrorBoundary>
             <AppShell>{children}</AppShell>
-            <Toaster position="top-right" />
           </ErrorBoundary>
+          <Toaster position="top-center" />
         </Providers>
       </body>
     </html>

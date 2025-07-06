@@ -31,25 +31,23 @@ const variantConfig: Record<
 > = {
   default: {
     icon: <Info className="h-5 w-5 text-blue-500" />,
-    className: "bg-white dark:bg-zinc-900 text-black dark:text-foreground",
+    className: "bg-card-box text-foreground",
   },
   success: {
     icon: <CheckCircle className="h-5 w-5 text-green-600" />,
-    className:
-      "bg-green-50 dark:bg-green-900 text-green-900 dark:text-green-100",
+    className: "bg-green-900 text-green-100",
   },
   info: {
     icon: <Info className="h-5 w-5 text-blue-500" />,
-    className: "bg-blue-50 dark:bg-blue-900 text-blue-900 dark:text-blue-100",
+    className: "bg-blue-900 text-blue-100",
   },
   warning: {
     icon: <AlertTriangle className="h-5 w-5 text-yellow-500" />,
-    className:
-      "bg-yellow-50 dark:bg-yellow-900 text-yellow-900 dark:text-yellow-100",
+    className: "bg-yellow-900 text-yellow-100",
   },
   error: {
     icon: <XCircle className="h-5 w-5 text-red-500" />,
-    className: "bg-red-50 dark:bg-red-900 text-red-900 dark:text-red-100",
+    className: "bg-red-900 text-red-100",
   },
   destructive: {
     icon: <Trash2 className="h-5 w-5 text-foreground" />,
@@ -65,14 +63,17 @@ export function toast({
 }: ToastOptions) {
   const { icon, className } = variantConfig[variant];
 
-  return sonnerToast.custom(() => (
+  return sonnerToast.custom((t) => (
     <div
-      className={`flex items-start gap-3 rounded-lg shadow-lg ${className}
-        p-3 sm:p-4 md:p-5 lg:p-6
-        max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg
-        w-full`}
+      key={t}
+      role="alert"
+      className={`
+        flex items-start gap-3 rounded-lg shadow-lg border border-border
+        p-4 w-full max-w-sm sm:max-w-md md:max-w-lg
+        ${className}
+      `}
     >
-      <div className="pt-1">{icon}</div>
+      <div className="pt-1 shrink-0">{icon}</div>
       <div className="flex-1">
         <p className="font-semibold text-sm sm:text-base md:text-lg">{title}</p>
         {description && (

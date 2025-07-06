@@ -3,8 +3,9 @@ import { Schema, model, models, Document } from "mongoose";
 export interface ITask extends Document {
   creator: string;
   title: string;
-  type: string[]; // multiple engagement types
-  platform: string; // single social platform
+  type: string[];
+  platform: string;
+  category: "social" | "content" | "referral";
   image: string;
   description: string;
   target: string;
@@ -32,6 +33,11 @@ const TaskSchema = new Schema<ITask>(
     target: { type: String, required: true },
     rewardPoints: { type: Number, required: true },
     maxParticipants: { type: Number, required: true },
+    category: {
+      type: String,
+      enum: ["social", "content", "referral"],
+      required: true,
+    },
     status: {
       type: String,
       enum: ["active", "completed", "inactive"],

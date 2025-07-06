@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import ImportWalletModal from "./ImportWalletModal";
 import Image from "next/image";
 import UserDropdown from "./UserDropdown";
+import { MultiStepTaskModal } from "../creator/task-modal/MultiStepTaskModal";
 
 function NavbarComp() {
   const pathname = usePathname();
@@ -21,12 +22,20 @@ function NavbarComp() {
     name: string;
     email: string;
     avatar?: string;
+    role: string;
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [showImportWallet, setShowImportWallet] = useState(false);
 
   const searchParams = useSearchParams();
   const [search, setSearch] = useState(searchParams.get("search") || "");
+
+  const [isOpen, setIsOpen] = useState(false);
+
+  const closeModal = () => {
+    setIsOpen(false);
+  };
+
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
@@ -58,6 +67,7 @@ function NavbarComp() {
               name: data.data.username || "User",
               email: data.data.email || "no-email@example.com",
               avatar: data.data.image,
+              role: data.data.role,
             });
           } else {
             console.warn("User fetch error:", data);
@@ -91,7 +101,7 @@ function NavbarComp() {
           height={25}
           alt="Creatorlab logo"
         />
-        <span className="text-lg lg:text-xl font-bold text-white">
+        <span className="hidden md:block text-lg lg:text-xl font-bold text-white">
           creatorslab
         </span>
       </Link>
@@ -122,15 +132,24 @@ function NavbarComp() {
           </Button>
         ) : (
           <>
-            <Button className="text-xs lg:text-sm text-foreground px-2 bg-gradient-to-r from-primary to-secondary hover:from-primary/80 hover:to-secondary/80">
-              Plant Seeds
-            </Button>
+            {user?.role === "creator" && (
+              <>
+                <Button className="text-xs lg:text-sm text-foreground px-2 bg-gradient-to-r from-primary to-secondary hover:from-primary/80 hover:to-secondary/80" onClick={() => setIsOpen(true)}>
+                  Plant Seeds
+                </Button>
+
+                <MultiStepTaskModal
+                  isOpen={isOpen}
+                  onClose={closeModal}
+                />
+              </>
+            )}
 
             {!privyUser?.wallet?.address ? (
               <>
                 <Button
                   variant="ghost"
-                  className="text-xs lg:text-sm text-gray-400 px-2"
+                  className="text-xs lg:text-sm text-gray-400 px-2 hover:bg-card"
                   onClick={() => setShowImportWallet(true)}
                 >
                   Import Wallet

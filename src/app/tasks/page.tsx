@@ -12,6 +12,7 @@ import EngagementCard from "@/components/Common/EngagementCard";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
+import FilterControls from "@/components/taskPage/FilterControls";
 
 interface TaskCard {
   id: string;
@@ -53,14 +54,12 @@ function TasksPage() {
   const platform = searchParams.get("platform") || "all";
   const search = searchParams.get("search") || "";
 
-  // Set desktop state
   useEffect(() => {
     if (typeof window !== "undefined") {
       setIsDesktop(window.innerWidth >= 768);
     }
   }, []);
 
-  // Reset tasks on filter/search change
   useEffect(() => {
     setPage(1);
     setTasks([]);
@@ -68,7 +67,6 @@ function TasksPage() {
     fetchTasks(1, true);
   }, [sort, platform, search]);
 
-  // Fetch more when page changes (excluding first page)
   useEffect(() => {
     if (page === 1) return;
     setFetchingMore(true);
@@ -102,7 +100,6 @@ function TasksPage() {
     }
   };
 
-  // Intersection Observer (load more)
   useEffect(() => {
     if (!observerRef.current || !hasMore || loading || !isDesktop) return;
 
@@ -132,50 +129,15 @@ function TasksPage() {
 
   return (
     <div className="min-h-screen bg-background px-4 lg:px-8 py-6 text-white">
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="sticky top-20 md:top-24 z-20 bg-card-box backdrop-blur-md border border-border rounded-xl p-4 mb-6 flex flex-wrap gap-4 items-center justify-between"
-      >
-        <div className="flex flex-wrap gap-4 w-full md:w-auto">
-          <Select
-            value={sort}
-            onValueChange={(val: string) => updateParam("sort", val)}
-          >
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              {sortOptions.map((option) => (
-                <SelectItem key={option} value={option}>
-                  {option.charAt(0).toUpperCase() + option.slice(1)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select
-            value={platform}
-            onValueChange={(val: string) => updateParam("platform", val)}
-          >
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Filter by platform" />
-            </SelectTrigger>
-            <SelectContent>
-              {platforms.map((p) => (
-                <SelectItem key={p} value={p}>
-                  {p.charAt(0).toUpperCase() + p.slice(1)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <Button variant="ghost" onClick={clearFilters}>
-          Clear Filters
-        </Button>
-      </motion.div>
+      {/* Filters */}
+      <FilterControls
+        platform={platform}
+        sort={sort}
+        sortOptions={sortOptions}
+        platforms={platforms}
+        updateParam={updateParam}
+        clearFilters={clearFilters}
+      />
 
       {loading ? (
         <p className="text-gray-400">Loading tasks...</p>

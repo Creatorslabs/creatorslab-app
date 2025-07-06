@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { NextRequest } from "next/server";
 
 export function middleware(req: NextRequest) {
-  const token = req.cookies.get("privy-token")?.value;
+  const token = req.cookies.get("privy-token");
+  const cookieSession = req.cookies.get("privy-session");
   const path = req.nextUrl.pathname;
-
-  const isAuthenticated = !!token;
 
   const isPublicAsset =
     path.startsWith("/_next") ||
@@ -21,22 +20,32 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  if (!isAuthenticated) {
-    if (isHomePage || isAuthPage) {
-      return NextResponse.next();
-    }
-    return NextResponse.redirect(new URL("/auth/signin", req.url));
+  if (req.nextUrl.searchParams.get("privy_oauth_code"))
+    return NextResponse.next();
+
+  if (path.startsWith("/refresh")) return NextResponse.next();
+
+  const isAuthenticated = Boolean(token);
+  const maybeAuthenticated = Boolean(cookieSession);
+
+  if (!isAuthenticated && maybeAuthenticated) {
+    const url = new URL("/refresh", req.url);
+    url.searchParams.set("redirect_uri", path);
+    return NextResponse.redirect(url);
   }
 
-  if (isAuthenticated && isAuthPage) {
+  if (!isAuthenticated && (isAuthPage || isHomePage))
+    return NextResponse.next();
+
+  if (isAuthenticated && isAuthPage)
     return NextResponse.redirect(new URL("/", req.url));
-  }
+
+  if (!isAuthenticated && !maybeAuthenticated && (!isAuthPage || !isHomePage))
+    return NextResponse.redirect(new URL("/auth/signin", req.url));
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|api|api/.*).*)"
-  ],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|api|api/.*).*)"],
 };

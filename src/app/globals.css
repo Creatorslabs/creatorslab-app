@@ -2,11 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/Inter-VariableFont_opsz,wght.ttf") format("truetype");
+  font-weight: 100 900; /* Supports all weights */
+  font-style: normal;
+}
 
+@font-face {
+  font-family: "Syne";
+  src: url("/fonts/Syne-VariableFont_wght.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+}
 
 @layer base {
   :root {
-
     --background: 0 0% 100%;
 
     --foreground: 224 71.4% 4.1%;
@@ -55,10 +66,9 @@
 
     --chart-5: 27 87% 67%;
 
-    --radius: 0.5rem
+    --radius: 0.5rem;
   }
   .dark {
-
     --background: 224 71.4% 4.1%;
 
     --foreground: 210 20% 98%;
@@ -105,11 +115,13 @@
 
     --chart-4: 280 65% 60%;
 
-    --chart-5: 340 75% 55%
+    --chart-5: 340 75% 55%;
   }
 }
 
-
+body {
+  @apply font-inter antialiased text-base leading-6 text-foreground;
+}
 
 @layer base {
   * {
@@ -118,4 +130,16 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Hide number input arrows (Chrome, Safari, Edge) */
+.input-no-spinner::-webkit-outer-spin-button,
+.input-no-spinner::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+.input-no-spinner[type="number"] {
+  -moz-appearance: textfield;
 }

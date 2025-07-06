@@ -80,7 +80,9 @@ export default function Home() {
         >
           <h3 className="text-lg font-semibold">New Tasks</h3>
           <div className="flex items-center gap-2">
-            <Link href="/tasks" className="text-sm text-gray-400">Show all (20)</Link>
+            <Link href="/tasks" className="text-sm text-gray-400">
+              Show all ({taskCards.length})
+            </Link>
             <button className="p-1 hover:bg-[#212121] rounded">
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -91,7 +93,7 @@ export default function Home() {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {taskCards.slice(0,3).map((card, index) => (
+          {taskCards.slice(0, 6).map((card, index) => (
             <EngagementCard index={index} card={card} key={card.id} />
           ))}
         </div>
@@ -108,7 +110,7 @@ export default function Home() {
           <h3 className="text-lg font-semibold">Trending Tasks</h3>
           <div className="flex items-center gap-2">
             <Link href="/tasks?sort=trending" className="text-sm text-gray-400">
-              Show all (20)
+              Show all ({trendingTasks.length})
             </Link>
             <button className="p-1 hover:bg-[#212121] rounded">
               <ChevronLeft className="w-4 h-4" />
@@ -120,7 +122,7 @@ export default function Home() {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {trendingTasks.slice(0,3).map((card, index) => (
+          {trendingTasks.slice(0, 6).map((card, index) => (
             <EngagementCard index={index} card={card} key={card.id} />
           ))}
         </div>
