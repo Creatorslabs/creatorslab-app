@@ -22,6 +22,7 @@ export const SimpleIcon = ({
   const slug = `si${mapped.charAt(0).toUpperCase()}${mapped.slice(1)}`;
 
   const icon: icons.SimpleIcon | undefined = (icons as any)[slug];
+  
 
   if (!icon) {
     console.warn(`Icon not found for platform: ${platform}`);

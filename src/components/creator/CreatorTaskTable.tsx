@@ -11,6 +11,7 @@ interface Task {
   id: string;
   platform: string;
   taskDetail: string;
+  category: string;
   rewardPoints: string;
   textStatus: "Ongoing" | "Finished";
 }

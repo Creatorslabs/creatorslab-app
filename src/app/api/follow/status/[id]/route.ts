@@ -54,6 +54,7 @@ export async function GET(
     return NextResponse.json({
       success: true,
       isFollowing: !!followExists,
+      isSelf: creatorId === localUser._id.toString(),
     });
   } catch (error) {
     console.error("GET /api/follow/status/[id] error:", error);

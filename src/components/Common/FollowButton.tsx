@@ -3,14 +3,19 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 type FollowButtonProps = {
   creatorId: string; // ID of the user to follow
   onFollowClick?: () => void;
 };
 
-export default function FollowButton({ creatorId, onFollowClick }: FollowButtonProps) {
+export default function FollowButton({
+  creatorId,
+  onFollowClick,
+}: FollowButtonProps) {
   const [isFollowing, setIsFollowing] = useState<boolean | null>(null);
+  const [isSelf, setIsSelf] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const getFollowStatus = async () => {
@@ -21,6 +26,7 @@ export default function FollowButton({ creatorId, onFollowClick }: FollowButtonP
       const json = await res.json();
       if (json.success) {
         setIsFollowing(json.isFollowing);
+        setIsSelf(json.isSelf);
       }
     } catch (err) {
       console.error("Error fetching follow status:", err);
@@ -33,19 +39,30 @@ export default function FollowButton({ creatorId, onFollowClick }: FollowButtonP
     if (!creatorId) return;
     try {
       setLoading(true);
-      const res = await fetch(`/api/follow/${isFollowing ? "unfollow" : "follow"}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ creatorId }),
-      });
+      const res = await fetch(
+        `/api/follow/${isFollowing ? "unfollow" : "follow"}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ creatorId }),
+        }
+      );
 
       const json = await res.json();
+
+      console.log(json);
+      
       if (json.success) {
         setIsFollowing(!isFollowing);
         if (onFollowClick) onFollowClick();
       }
     } catch (err) {
       console.error("Follow toggle failed:", err);
+      toast({
+        title: "Failed to follow",
+        description: (err as Error).message,
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -58,7 +75,7 @@ export default function FollowButton({ creatorId, onFollowClick }: FollowButtonP
   return (
     <Button
       onClick={toggleFollow}
-      disabled={loading || isFollowing === null}
+      disabled={loading || isFollowing === null || isSelf}
       className="bg-primary hover:bg-primary/80 text-white px-6"
     >
       {loading ? (

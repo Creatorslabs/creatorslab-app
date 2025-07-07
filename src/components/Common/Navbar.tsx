@@ -12,6 +12,7 @@ import ImportWalletModal from "./ImportWalletModal";
 import Image from "next/image";
 import UserDropdown from "./UserDropdown";
 import { MultiStepTaskModal } from "../creator/task-modal/MultiStepTaskModal";
+import WalletSidebar from "./WalletSidebar";
 
 function NavbarComp() {
   const pathname = usePathname();
@@ -35,7 +36,6 @@ function NavbarComp() {
   const closeModal = () => {
     setIsOpen(false);
   };
-
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
@@ -134,45 +134,27 @@ function NavbarComp() {
           <>
             {user?.role === "creator" && (
               <>
-                <Button className="text-xs lg:text-sm text-foreground px-2 bg-gradient-to-r from-primary to-secondary hover:from-primary/80 hover:to-secondary/80" onClick={() => setIsOpen(true)}>
+                <Button
+                  className="text-xs lg:text-sm text-foreground px-2 bg-gradient-to-r from-primary to-secondary hover:from-primary/80 hover:to-secondary/80"
+                  onClick={() => setIsOpen(true)}
+                >
                   Plant Seeds
                 </Button>
 
-                <MultiStepTaskModal
-                  isOpen={isOpen}
-                  onClose={closeModal}
-                />
+                <MultiStepTaskModal isOpen={isOpen} onClose={closeModal} />
               </>
             )}
 
-            {!privyUser?.wallet?.address ? (
-              <>
-                <Button
-                  variant="ghost"
-                  className="text-xs lg:text-sm text-gray-400 px-2 hover:bg-card"
-                  onClick={() => setShowImportWallet(true)}
-                >
-                  Import Wallet
-                </Button>
-
-                <ImportWalletModal
-                  isOpen={showImportWallet}
-                  onClose={() => setShowImportWallet(false)}
-                />
-              </>
-            ) : (
-              <Button
-                variant="ghost"
-                className="text-xs lg:text-sm text-gray-400 px-2"
-                onClick={() => {
-                  const openEvent = new CustomEvent("open-wallet-sidebar");
-                  window.dispatchEvent(openEvent);
-                }}
-              >
-                {privyUser.wallet.address.slice(0, 6)}...
-                {privyUser.wallet.address.slice(-4)}
-              </Button>
-            )}
+            <WalletSidebar
+              privyUser={privyUser}
+              balances={{
+                compiled: "3000",
+                usdc: "40",
+                sol: "3.2",
+                cls: "23874",
+              }}
+              onCreateWallet={() => setShowImportWallet(true)}
+            />
 
             {loading ? (
               <Skeleton className="w-6 h-6 lg:w-8 lg:h-8 rounded-full" />

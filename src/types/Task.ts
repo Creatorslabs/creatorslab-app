@@ -30,6 +30,7 @@ export interface ITask {
   image: string;
   description: string;
   target: string;
+  category: string;
   rewardPoints: number;
   maxParticipants: number;
   status: "active" | "completed" | "inactive";

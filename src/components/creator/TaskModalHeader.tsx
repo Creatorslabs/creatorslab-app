@@ -8,8 +8,21 @@ interface Props {
   onClose: () => void;
 }
 
+const renderCategory = (category: string) => {
+  switch (category) {
+    case "social":
+      return "Social Media";
+    case "content":
+      return "Content Creation";
+    case "referral":
+      return "Referral Task";
+    default:
+      return "Unknown";
+  }
+};
+
 export default function TaskModalHeader({ task, onClose }: Props) {
-  const { image, title, platform, type, rewardPoints, status } = task;
+  const { image, title, platform, type, rewardPoints, category, status } = task;
   return (
     <div className="relative h-52 sm:h-64 bg-gradient-to-r from-purple-600 via-blue-600 to-pink-600 overflow-hidden">
       <Image
@@ -48,6 +61,9 @@ export default function TaskModalHeader({ task, onClose }: Props) {
           </span>
           <span className="bg-primary px-3 py-1 rounded-full text-white text-sm">
             {rewardPoints} $CLS
+          </span>
+          <span className="bg-card px-3 py-1 rounded-full text-white text-sm">
+            {renderCategory(category)}
           </span>
         </div>
       </div>
