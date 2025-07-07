@@ -1,50 +1,171 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, Twitter, MessageSquare, Mail } from "lucide-react";
+import {
+  ArrowRight,
+  Twitter,
+  MessageSquare,
+  Mail,
+  Wallet2,
+  ArrowLeft,
+} from "lucide-react";
+import {
+  useLogin,
+  useLoginWithEmail,
+  useLoginWithOAuth,
+  usePrivy,
+} from "@privy-io/react-auth";
+import { toast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
+import { SimpleIcon } from "@/components/Common/SimpleIcon";
+import Image from "next/image";
+import Illustration from "@/components/Common/3D-Illustration";
 
 export default function SignIn() {
+  const [loginType, setLoginType] = useState<"email" | "wallet">("wallet");
+  const [step, setStep] = useState(1);
+  const [email, setEmail] = useState("");
+  const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+  const { ready, authenticated } = usePrivy();
+  const { initOAuth } = useLoginWithOAuth();
+
+  const { login } = useLogin({
+    onComplete: async (data) => {
+      toast({
+        title: "Login successful",
+        description: "You are now logged in!",
+        variant: "success",
+      });
+      router.push("/");
+    },
+    onError: (error) => {
+      console.error("Login error:", error);
+      toast({
+        title: error || "Login failed",
+        variant: "destructive",
+      });
+    },
+  });
 
   const handleWalletConnect = async () => {
     setIsLoading(true);
-    // Simulate wallet connection
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsLoading(false);
+    try {
+      await login();
+    } catch (error) {
+      toast({
+        title: (error as Error).message || "Wallet login failed",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleSocialLogin = async (provider: string) => {
+  const { sendCode, loginWithCode } = useLoginWithEmail({
+    onComplete: async (data) => {
+      toast({
+        title: "Login successful",
+        description: "You are now logged in!",
+        variant: "success",
+      });
+      router.push("/");
+    },
+    onError: (error) => {
+      console.error("Login error:", error);
+      toast({
+        title: error || "Login failed",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const disableLogin = !ready || (ready && authenticated);
+
+  const handleEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+
     setIsLoading(true);
-    // Simulate social login
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setIsLoading(false);
+    try {
+      await sendCode({ email, disableSignup: true });
+      setStep(2);
+    } catch (error) {
+      console.error("Failed to send code:", error);
+      toast({
+        title: (error as Error).message || "Failed to send verification code",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleOtpSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!otp) return;
+
+    setIsLoading(true);
+    try {
+      await loginWithCode({ code: otp });
+      router.push("/");
+    } catch (error) {
+      console.error("Failed to login:", error);
+      toast({
+        title: (error as Error).message || "Login failed",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSocialLogin = async (provider: "twitter" | "discord") => {
+    setIsLoading(true);
+    try {
+      await initOAuth({ provider });
+      router.push("/");
+    } catch (error) {
+      toast({
+        title: (error as Error).message || "Login failed",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-background flex">
-      {/* Left Side - Login Form */}
       <div className="flex-1 flex items-center justify-center relative z-10">
         <div className="w-full max-w-md">
-          {/* Header */}
           <motion.div
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="flex items-center justify-between mb-12"
+            className="flex flex-col w-full max-w-2xl mx-auto mb-4 gap-4"
           >
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">C</span>
-              </div>
-              <span className="text-xl font-bold text-white">creatorslab</span>
-            </Link>
-            
-            <div className="flex items-center gap-4 text-sm">
-              <span className="text-gray-400 hidden sm:block">New to CreatorsLab?</span>
-              <Link 
-                href="/auth/signup" 
-                className="text-white border border-gray-600 hover:border-gray-500 px-4 py-2 rounded-lg transition-colors"
+            <div className="flex justify-center">
+              <Link href="/" className="flex items-center gap-2">
+                <Image
+                  src="/images/logo.png"
+                  width={25}
+                  height={25}
+                  alt="Creatorlab logo"
+                />
+                <span className="text-xl font-bold text-white">
+                  creatorslab
+                </span>
+              </Link>
+            </div>
+
+            <div className="flex justify-between items-center w-full text-sm">
+              <span className="text-gray-400">New to CreatorsLab?</span>
+              <Link
+                href="/auth/signup"
+                className="text-white border border-gray-600 hover:border-gray-500 px-4 py-2 rounded-lg transition-colors whitespace-nowrap"
               >
                 Create an account
               </Link>
@@ -59,28 +180,158 @@ export default function SignIn() {
             className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-2xl p-8"
           >
             <div className="mb-8">
-              <h1 className="text-2xl font-bold text-white mb-2">Log in to CreatorsLab</h1>
+              <h1 className="text-2xl font-bold text-white mb-2">
+                Log in to CreatorsLab
+              </h1>
               <p className="text-gray-400">Welcome back!</p>
             </div>
 
-            {/* Wallet Login */}
-            <div className="mb-8">
-              <h3 className="text-white font-medium mb-4">Log in with wallet</h3>
-              <motion.button
-                onClick={handleWalletConnect}
-                disabled={isLoading}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="w-full bg-gray-700/50 hover:bg-gray-600/50 border border-gray-600 rounded-lg px-4 py-3 text-white font-medium transition-colors flex items-center justify-between group disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <span>Connect your wallet</span>
-                {isLoading ? (
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+            {loginType === "email" && (
+              <AnimatePresence mode="wait">
+                {step === 1 ? (
+                  <motion.div
+                    key="step1"
+                    initial={{ x: 20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    exit={{ x: -20, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <form onSubmit={handleEmailSubmit}>
+                      <div className="mb-6">
+                        <label
+                          htmlFor="email"
+                          className="block text-sm font-medium text-white mb-2"
+                        >
+                          Email address
+                        </label>
+                        <input
+                          type="email"
+                          id="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder="address@email.com"
+                          className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                          required
+                        />
+                      </div>
+
+                      <motion.button
+                        type="submit"
+                        disabled={isLoading || !email}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="w-full bg-gray-600 hover:bg-gray-500 disabled:bg-gray-700 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-colors mb-4"
+                      >
+                        {isLoading ? (
+                          <div className="flex items-center justify-center gap-2">
+                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                            Sending...
+                          </div>
+                        ) : (
+                          "Continue with email"
+                        )}
+                      </motion.button>
+                    </form>
+                  </motion.div>
                 ) : (
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  <motion.div
+                    key="step2"
+                    initial={{ x: 20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    exit={{ x: -20, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <button
+                      onClick={() => setStep(1)}
+                      className="flex items-center gap-2 text-gray-400 hover:text-white mb-4 text-sm transition-colors"
+                      disabled={isLoading || disableLogin}
+                    >
+                      <ArrowLeft className="w-4 h-4" />
+                      Back
+                    </button>
+                    <div className="flex flex-col space-y-2">
+                      <p className="text-gray-400">
+                        We&apos;ve sent a 6-digit code to{" "}
+                        <span className="text-white">{email}</span>
+                      </p>
+                      <div className="flex gap-2 items-center">
+                        <p className="text-sm text-gray-400 mb-2">
+                          Didn&apos;t receive the code?
+                        </p>
+                        <button className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors">
+                          Resend code
+                        </button>
+                      </div>
+                    </div>
+
+                    <form onSubmit={handleOtpSubmit}>
+                      <div className="mb-6">
+                        <label
+                          htmlFor="otp"
+                          className="block text-sm font-medium text-white mb-2"
+                        >
+                          Verification code
+                        </label>
+                        <input
+                          type="text"
+                          id="otp"
+                          value={otp}
+                          onChange={(e) =>
+                            setOtp(
+                              e.target.value.replace(/\D/g, "").slice(0, 6)
+                            )
+                          }
+                          placeholder="000000"
+                          className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-center text-2xl tracking-widest"
+                          maxLength={6}
+                          required
+                        />
+                      </div>
+
+                      <motion.button
+                        type="submit"
+                        disabled={isLoading || otp.length !== 6 || disableLogin}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="w-full bg-gray-600 hover:bg-gray-500 disabled:bg-gray-700 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-colors mb-4"
+                      >
+                        {isLoading ? (
+                          <div className="flex items-center justify-center gap-2">
+                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                            Verifying...
+                          </div>
+                        ) : (
+                          "Verify and continue"
+                        )}
+                      </motion.button>
+                    </form>
+                  </motion.div>
                 )}
-              </motion.button>
-            </div>
+              </AnimatePresence>
+            )}
+
+            {/* Wallet Login */}
+            {loginType === "wallet" && (
+              <div className="mb-8">
+                <h3 className="text-white font-medium mb-4">
+                  Log in with wallet
+                </h3>
+                <motion.button
+                  onClick={handleWalletConnect}
+                  disabled={isLoading}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="w-full bg-gray-700/50 hover:bg-gray-600/50 border border-gray-600 rounded-lg px-4 py-3 text-white font-medium transition-colors flex items-center justify-between group disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <span>Connect your wallet</span>
+                  {isLoading ? (
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  ) : (
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  )}
+                </motion.button>
+              </div>
+            )}
 
             {/* Divider */}
             <div className="relative mb-8">
@@ -94,154 +345,65 @@ export default function SignIn() {
 
             {/* Social Login */}
             <div>
-              <h3 className="text-white font-medium mb-4">Log in with Social account</h3>
+              <h3 className="text-white font-medium mb-4">
+                Log in with Social account
+              </h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <motion.button
-                  onClick={() => handleSocialLogin('twitter')}
+                  onClick={() => handleSocialLogin("twitter")}
                   disabled={isLoading}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="bg-primary hover:bg-primary/70 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <Twitter className="w-4 h-4" />
+                  <SimpleIcon platform="twitter" className="w-4 h-4" />
                   <span className="hidden sm:inline">Twitter</span>
                 </motion.button>
 
                 <motion.button
-                  onClick={() => handleSocialLogin('discord')}
+                  onClick={() => handleSocialLogin("discord")}
                   disabled={isLoading}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="bg-secondary hover:bg-secondary/70 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <MessageSquare className="w-4 h-4" />
+                  <SimpleIcon platform="discord" className="w-4 h-4" />
                   <span className="hidden sm:inline">Discord</span>
                 </motion.button>
 
-                <motion.button
-                  onClick={() => handleSocialLogin('email')}
-                  disabled={isLoading}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <Mail className="w-4 h-4" />
-                  <span className="hidden sm:inline">Email</span>
-                </motion.button>
+                {loginType === "email" && (
+                  <motion.button
+                    onClick={() => setLoginType("wallet")}
+                    disabled={isLoading}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Wallet2 className="w-4 h-4" />
+                    <span className="hidden sm:inline">Wallet</span>
+                  </motion.button>
+                )}
+
+                {loginType === "wallet" && (
+                  <motion.button
+                    onClick={() => setLoginType("email")}
+                    disabled={isLoading}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="bg-primary hover:bg-primary/70 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Mail className="w-4 h-4" />
+                    <span className="hidden sm:inline">Email</span>
+                  </motion.button>
+                )}
               </div>
             </div>
           </motion.div>
         </div>
       </div>
 
-      {/* Right Side - 3D Illustration */}
-      <div className="hidden lg:flex flex-1 h-screen">
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.3, duration: 0.8 }}
-          className="relative w-full h-full"
-        >
-          {/* 3D Scene Container */}
-          <div className="relative w-full h-full bg-gradient-to-br from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-l-3xl overflow-hidden">
-            {/* Animated geometric shapes */}
-            <motion.div
-              animate={{ 
-                rotate: [0, 360],
-                scale: [1, 1.1, 1]
-              }}
-              transition={{ 
-                duration: 20,
-                repeat: Infinity,
-                ease: "linear"
-              }}
-              className="absolute top-1/4 left-1/4 w-16 h-16 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-lg opacity-80"
-            />
-            
-            <motion.div
-              animate={{ 
-                rotate: [360, 0],
-                y: [0, -20, 0]
-              }}
-              transition={{ 
-                duration: 15,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-              className="absolute top-1/3 right-1/4 w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full opacity-70"
-            />
-            
-            <motion.div
-              animate={{ 
-                rotate: [0, -180, 0],
-                x: [0, 10, 0]
-              }}
-              transition={{ 
-                duration: 18,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-              className="absolute bottom-1/3 left-1/3 w-20 h-8 bg-gradient-to-r from-green-400 to-cyan-500 rounded-full opacity-60"
-            />
-            
-            <motion.div
-              animate={{ 
-                scale: [1, 1.2, 1],
-                rotate: [0, 90, 180, 270, 360]
-              }}
-              transition={{ 
-                duration: 25,
-                repeat: Infinity,
-                ease: "linear"
-              }}
-              className="absolute bottom-1/4 right-1/3 w-14 h-14 bg-gradient-to-r from-yellow-400 to-orange-500 transform rotate-45 opacity-75"
-            />
-
-            {/* Central focal point */}
-            <motion.div
-              animate={{ 
-                scale: [1, 1.05, 1],
-                rotate: [0, 5, -5, 0]
-              }}
-              transition={{ 
-                duration: 8,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-2xl flex items-center justify-center"
-            >
-              <div className="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center">
-                <div className="w-8 h-8 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">C</span>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Floating particles */}
-            {[...Array(8)].map((_, i) => (
-              <motion.div
-                key={i}
-                animate={{ 
-                  y: [0, -100, 0],
-                  opacity: [0, 1, 0],
-                  scale: [0, 1, 0]
-                }}
-                transition={{ 
-                  duration: 4 + i,
-                  repeat: Infinity,
-                  delay: i * 0.5,
-                  ease: "easeInOut"
-                }}
-                className={`absolute w-2 h-2 bg-white rounded-full`}
-                style={{
-                  left: `${20 + (i * 10)}%`,
-                  bottom: '10%'
-                }}
-              />
-            ))}
-          </div>
-        </motion.div>
-      </div>
+      {/* Right Side - 3D-Illustration */}
+      <Illustration />
     </div>
   );
 }
