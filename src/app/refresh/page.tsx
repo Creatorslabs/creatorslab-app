@@ -5,7 +5,7 @@ import { getAccessToken } from "@privy-io/react-auth";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect } from "react";
 
-function page() {
+function Page() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { showLoader, LoaderModal } = useLoader();
@@ -30,4 +30,4 @@ function page() {
   return <LoaderModal />;
 }
 
-export default page;
+export default Page;

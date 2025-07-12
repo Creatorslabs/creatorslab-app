@@ -12,6 +12,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import {
+  useConnectWallet,
   useLogin,
   useLoginWithEmail,
   useLoginWithOAuth,
@@ -51,10 +52,28 @@ export default function SignIn() {
     },
   });
 
-  const handleWalletConnect = async () => {
+  const { connectWallet } = useConnectWallet({
+    onSuccess: ({ wallet }) => {
+      console.log(wallet.address);
+      // router.push(redirectTo);
+    },
+    onError: (error) => {
+      console.error("Login error:", error);
+      toast({
+        title: error || "Login failed",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleWalletConnect = () => {
     setIsLoading(true);
     try {
-      await login();
+      login({
+        loginMethods: ["wallet"],
+        walletChainType: "solana-only",
+        disableSignup: true,
+      });
     } catch (error) {
       toast({
         title: (error as Error).message || "Wallet login failed",

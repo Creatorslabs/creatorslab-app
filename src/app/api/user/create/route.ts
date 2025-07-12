@@ -8,7 +8,7 @@ export async function POST(req: Request) {
     await connectDB();
     const body = await req.json();
 
-    const { privyId, email } = body;
+    const { privyId, email, role } = body;
 
     if (!privyId) {
       return NextResponse.json({ error: "Missing Privy ID" }, { status: 400 });
@@ -23,7 +23,7 @@ export async function POST(req: Request) {
       privyId,
       email: email || null,
       username: email?.split("@")[0] || `user_${Math.floor(Math.random() * 10000)}`,
-      role: "user",
+      role,
       status: "Active",
       referralCode: generateReferralCode(),
       balance: 3,

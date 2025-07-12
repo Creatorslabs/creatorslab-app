@@ -7,12 +7,14 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { useLoginWithEmail, usePrivy } from "@privy-io/react-auth";
 import { toast } from "@/hooks/use-toast";
+import Image from "next/image";
 
 export default function SignUp() {
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [role, setRole] = useState<"user" | "creator">("user")
   const router = useRouter();
   const { ready, authenticated } = usePrivy();
 
@@ -26,6 +28,7 @@ export default function SignUp() {
             body: JSON.stringify({
               privyId: data.user?.id,
               email: data.user?.email?.address,
+              role,
             }),
           });
         } catch (err) {
@@ -148,9 +151,12 @@ export default function SignUp() {
           className="flex items-center justify-between mb-8"
         >
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">C</span>
-            </div>
+            <Image
+              src="/images/logo.png"
+              width={25}
+              height={25}
+              alt="Creatorlab logo"
+            />
             <span className="text-xl font-bold text-white">creatorslab</span>
           </Link>
 
@@ -174,7 +180,7 @@ export default function SignUp() {
           className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-2xl p-8"
         >
           <AnimatePresence mode="wait">
-            {step === 1 ? (
+            {step === 1 && (
               <motion.div
                 key="step1"
                 initial={{ x: 20, opacity: 0 }}
@@ -188,43 +194,40 @@ export default function SignUp() {
                 <p className="text-gray-400 mb-8">
                   Join the global community of content creators and earn.
                 </p>
-
-                <form onSubmit={handleEmailSubmit}>
-                  <div className="mb-6">
-                    <label
-                      htmlFor="email"
-                      className="block text-sm font-medium text-white mb-2"
-                    >
-                      Email address
-                    </label>
-                    <input
-                      type="email"
-                      id="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="address@email.com"
-                      className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                      required
-                    />
-                  </div>
-
-                  <motion.button
-                    type="submit"
-                    disabled={isLoading || !email}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="w-full bg-gray-600 hover:bg-gray-500 disabled:bg-gray-700 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                <div className="mb-6">
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-medium text-white mb-2"
                   >
-                    {isLoading ? (
-                      <div className="flex items-center justify-center gap-2">
-                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                        Sending...
-                      </div>
-                    ) : (
-                      "Continue with email"
-                    )}
-                  </motion.button>
-                </form>
+                    Email address
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="address@email.com"
+                    className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    required
+                  />
+                </div>
+
+                <motion.button
+                  onClick={() => setStep(2)}
+                  disabled={isLoading || !email}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="w-full bg-gray-600 hover:bg-gray-500 disabled:bg-gray-700 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                >
+                  {isLoading ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      Sending...
+                    </div>
+                  ) : (
+                    "Continue with email"
+                  )}
+                </motion.button>
 
                 <p className="text-xs text-gray-400 mt-6 text-center">
                   By continuing, you agree to our{" "}
@@ -243,7 +246,9 @@ export default function SignUp() {
                   </Link>
                 </p>
               </motion.div>
-            ) : (
+            )}
+
+            {step === 2 && (
               <motion.div
                 key="step2"
                 initial={{ x: 20, opacity: 0 }}
@@ -253,6 +258,34 @@ export default function SignUp() {
               >
                 <button
                   onClick={() => setStep(1)}
+                  className="flex items-center gap-2 text-gray-400 hover:text-white mb-4 text-sm transition-colors"
+                  disabled={isLoading || disableLogin}
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Back
+                </button>
+
+                <h1 className="text-2xl font-bold text-white mb-2">
+                  Choose your role
+                </h1>
+
+                <div className="flex justify-around flex-no-wrap py-8">
+                <div className="p-8 rounded-md border-2 border-card bg-white/50 hover:scale-1"><p>User</p></div>
+                <div className="p-8 rounded-md border-2 border-card bg-white/50 hover:scale-1"><p>Creator</p></div>
+                </div>
+              </motion.div>
+            )}
+
+            {step === 3 && (
+              <motion.div
+                key="step3"
+                initial={{ x: 20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: -20, opacity: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <button
+                  onClick={() => setStep(2)}
                   className="flex items-center gap-2 text-gray-400 hover:text-white mb-4 text-sm transition-colors"
                   disabled={isLoading || disableLogin}
                 >
