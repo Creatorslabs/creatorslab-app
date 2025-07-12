@@ -13,8 +13,9 @@ export default function SignUp() {
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [role, setRole] = useState<"user" | "creator">("user")
+  const [role, setRole] = useState<"user" | "creator" | null>(null);
   const router = useRouter();
   const { ready, authenticated } = usePrivy();
 
@@ -53,14 +54,44 @@ export default function SignUp() {
 
   const disableLogin = !ready || (ready && authenticated);
 
-  const handleEmailSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const checkUser = async () => {
+    setIsLoading(true);
+
+    try {
+      const res = await fetch("/api/user/exist", {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Error vetting user.");
+      }
+
+      const { exist } = await res.json();
+
+      if (exist) {
+        setStep(2);
+      } else {
+        setError("User already exist, go to login!");
+      }
+    } catch (error) {
+      console.error("Failed to send code:", error);
+      toast({
+        title: (error as Error).message || "Failed to send verification code",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleEmailSubmit = async () => {
     if (!email) return;
 
     setIsLoading(true);
     try {
       await sendCode({ email });
-      setStep(2);
+      setStep(3);
     } catch (error) {
       console.error("Failed to send code:", error);
       toast({
@@ -210,10 +241,11 @@ export default function SignUp() {
                     className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     required
                   />
+                  {error && <p className="text-red-500">{error}</p>}
                 </div>
 
                 <motion.button
-                  onClick={() => setStep(2)}
+                  onClick={checkUser}
                   disabled={isLoading || !email}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -265,14 +297,49 @@ export default function SignUp() {
                   Back
                 </button>
 
-                <h1 className="text-2xl font-bold text-white mb-2">
+                <h1 className="text-2xl font-bold text-white mb-6">
                   Choose your role
                 </h1>
 
-                <div className="flex justify-around flex-no-wrap py-8">
-                <div className="p-8 rounded-md border-2 border-card bg-white/50 hover:scale-1"><p>User</p></div>
-                <div className="p-8 rounded-md border-2 border-card bg-white/50 hover:scale-1"><p>Creator</p></div>
+                <div className="flex justify-around gap-4 flex-wrap py-6">
+                  {["User", "Creator"].map((roleOption) => (
+                    <motion.div
+                      key={roleOption}
+                      onClick={() => {
+                        setRole(roleOption.toLowerCase() as "user" | "creator");
+                      }}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className={`p-8 rounded-md border-2 cursor-pointer transition-all duration-200 
+                        ${
+                          role === roleOption.toLowerCase()
+                            ? "border-white bg-white/80 text-black"
+                            : "border-card bg-white/50 text-gray-700 hover:bg-white/70"
+                        }`}
+                    >
+                      <p className="font-medium text-lg">{roleOption}</p>
+                    </motion.div>
+                  ))}
                 </div>
+
+                {role && (
+                  <motion.button
+                    onClick={handleEmailSubmit}
+                    disabled={isLoading || !email || !role}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="w-full bg-gray-600 hover:bg-gray-500 disabled:bg-gray-700 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                  >
+                    {isLoading ? (
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        Sending email...
+                      </div>
+                    ) : (
+                      "Continue"
+                    )}
+                  </motion.button>
+                )}
               </motion.div>
             )}
 

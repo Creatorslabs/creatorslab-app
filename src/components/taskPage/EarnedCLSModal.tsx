@@ -58,7 +58,7 @@ export default function EarnedCLSModal({
               onClick={onClose}
               className="w-full bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white font-medium py-3"
             >
-              Let's Go!
+              Let&apos;s Go!
             </Button>
           </motion.div>
         </motion.div>
