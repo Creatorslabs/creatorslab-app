@@ -1,27 +1,16 @@
 "use client";
 import {
-  Copy,
-  ExternalLink,
   Eye,
   EyeOff,
-  RefreshCw,
-  Shield,
   TrendingUp,
-  Wallet,
 } from "lucide-react";
-import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export default function WalletOverviewTab({
-  walletAddress,
-  shortAddress,
   balances,
   isBalanceVisible,
   setIsBalanceVisible,
-  isRefreshing,
-  onRefresh,
 }: {
   walletAddress: string;
   shortAddress: string;

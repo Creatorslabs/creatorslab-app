@@ -93,7 +93,6 @@ function NavbarComp() {
       animate={{ y: 0, opacity: 1 }}
       className="sticky top-0 z-50 bg-[#1C1C1C] flex items-center justify-between p-4 lg:p-6 border-b border-[#3F3F3F]"
     >
-      {/* Logo */}
       <Link href="/" className="flex items-center gap-2">
         <Image
           src="/images/logo.png"
@@ -106,7 +105,6 @@ function NavbarComp() {
         </span>
       </Link>
 
-      {/* Search Bar */}
       <div className="flex-1 max-w-md mx-4 lg:mx-8 hidden md:block">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
