@@ -13,6 +13,7 @@ import Image from "next/image";
 import UserDropdown from "./UserDropdown";
 import { MultiStepTaskModal } from "../creator/task-modal/MultiStepTaskModal";
 import WalletSidebar from "./WalletSidebar";
+import { useUserBalances } from "@/hooks/useUserBalances";
 
 function NavbarComp() {
   const pathname = usePathname();
@@ -27,6 +28,7 @@ function NavbarComp() {
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [showImportWallet, setShowImportWallet] = useState(false);
+  const { balances, isLoading, error } = useUserBalances();
 
   const searchParams = useSearchParams();
   const [search, setSearch] = useState(searchParams.get("search") || "");
@@ -145,12 +147,7 @@ function NavbarComp() {
 
             <WalletSidebar
               privyUser={privyUser}
-              balances={{
-                compiled: "3000",
-                usdc: "40",
-                sol: "3.2",
-                cls: "23874",
-              }}
+              balances={balances}
               onCreateWallet={() => setShowImportWallet(true)}
             />
 

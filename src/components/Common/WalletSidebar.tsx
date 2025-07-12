@@ -4,15 +4,6 @@ import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import ImportWalletModal from "./ImportWalletModal";
-import {
-  ArrowDownLeft,
-  ArrowUpRight,
-  Shield,
-  TrendingUp,
-  Wallet,
-  Zap,
-} from "lucide-react";
-import { toast } from "@/hooks/use-toast";
 import WalletDrawerContent from "../drawer/WalletDrawerContent";
 
 export default function WalletSidebar({
