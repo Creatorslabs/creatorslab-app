@@ -13,6 +13,7 @@ import UserDropdown from "./UserDropdown";
 import { MultiStepTaskModal } from "../creator/task-modal/MultiStepTaskModal";
 import WalletSidebar from "./WalletSidebar";
 import { useUserBalances } from "@/hooks/useUserBalances";
+import { toast } from "@/hooks/use-toast";
 
 function NavbarComp() {
   const pathname = usePathname();
@@ -86,6 +87,34 @@ function NavbarComp() {
     fetchUser();
   }, [ready, authenticated]);
 
+  const onCreateWallet = async () => {
+    try {
+      const res = await fetch("/api/user/create-wallet", {
+        method: "POST",
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || "Failed to create wallet");
+      }
+
+      const data = await res.json();
+
+      toast({
+        title: "Wallet created",
+        description: `Wallet address: ${data.wallet.address.slice(0, 8)}...`,
+        variant: "success",
+      });
+
+      return data.wallet;
+    } catch (error) {
+      toast({
+        title: (error as Error).message || "Failed to create wallet",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (pathname.startsWith("/auth")) return null;
 
   return (
@@ -147,7 +176,7 @@ function NavbarComp() {
             <WalletSidebar
               privyUser={privyUser}
               balances={balances}
-              onCreateWallet={() => setShowImportWallet(true)}
+              onCreateWallet={onCreateWallet}
             />
 
             {loading ? (

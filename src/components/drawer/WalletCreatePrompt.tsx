@@ -1,13 +1,25 @@
 "use client";
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Wallet2 } from "lucide-react";
+import { Wallet2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function WalletCreatePrompt({
   onCreateWallet,
 }: {
-  onCreateWallet: () => void;
+  onCreateWallet: () => Promise<void> | void;
 }) {
+  const [loading, setLoading] = useState(false);
+
+  const handleCreateWallet = async () => {
+    try {
+      setLoading(true);
+      await onCreateWallet();
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <motion.div
       key="create-wallet"
@@ -20,8 +32,19 @@ export default function WalletCreatePrompt({
       <p className="text-white text-sm">
         No wallet found. You can create one to start using the platform.
       </p>
-      <Button onClick={onCreateWallet} className="w-full">
-        Create Wallet
+      <Button
+        onClick={handleCreateWallet}
+        className="w-full"
+        disabled={loading}
+      >
+        {loading ? (
+          <>
+            <Loader2 className="animate-spin w-4 h-4 mr-2" />
+            Creating...
+          </>
+        ) : (
+          "Create Wallet"
+        )}
       </Button>
     </motion.div>
   );
