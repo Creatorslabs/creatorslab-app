@@ -18,6 +18,7 @@ import WalletActionFooter from "./WalletActionFooter";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
+import { useUserBalances } from "@/hooks/useUserBalances";
 
 export default function WalletDrawerContent({
   privyUser,
@@ -28,6 +29,7 @@ export default function WalletDrawerContent({
   balances: { compiled: string; sol: string; usdc: string; cls: string };
   onCreateWallet: () => void;
 }) {
+  const { refreshBalances } = useUserBalances();
   const walletAddress: string = privyUser?.wallet?.address || "";
   const shortAddress = walletAddress
     ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
@@ -40,9 +42,14 @@ export default function WalletDrawerContent({
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleRefresh = async () => {
-    setIsRefreshing(true);
-    await new Promise((r) => setTimeout(r, 1000));
-    setIsRefreshing(false);
+    try {
+      setIsRefreshing(true);
+      await refreshBalances();
+    } catch (err) {
+      console.error("Failed to refresh balances:", err);
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   const tabs = [

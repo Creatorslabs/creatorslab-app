@@ -42,8 +42,14 @@ export default function WalletSettingsTab() {
   };
 
   useEffect(() => {
-    if (autoRefresh) refreshBalances();
-  }, [autoRefresh]);
+    if (!autoRefresh) return;
+
+    const interval = setInterval(() => {
+      refreshBalances();
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [autoRefresh, refreshBalances]);
 
   return (
     <motion.div
@@ -114,12 +120,14 @@ export default function WalletSettingsTab() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setNetwork("mainnet")}
+              onClick={() => setNetwork("mainnet-beta")}
               className={`text-xs ${
-                network === "mainnet" ? "text-primary font-bold" : "text-white"
+                network === "mainnet-beta"
+                  ? "text-primary font-bold"
+                  : "text-white"
               }`}
             >
-              Switch to Mainnet
+              Switch to Mainnet-beta
             </Button>
           </div>
         </div>

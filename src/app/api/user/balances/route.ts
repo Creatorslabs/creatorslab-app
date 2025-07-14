@@ -1,21 +1,32 @@
 import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { privy } from "@/lib/privyClient";
 import connectDB from "@/lib/connectDB";
 import { IUser, User } from "@/lib/models/User";
 import { PublicKey } from "@solana/web3.js";
 import { getAssociatedTokenAddress, getAccount } from "@solana/spl-token";
-import { useSolanaConnection } from "@/hooks/useSolanaConnection";
+import { getConnection } from "@/lib/solana/getConnection";
 
 const USDC_MINT = new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"); // Mainnet USDC
 const USDC_MINT_DEV = new PublicKey(
   "BQ1UuSqKXnTHJMgtrtxXJgqzoWszSKBNk3CZyJwGeMec"
-); // Devnet USDC (commented)
+);
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     await connectDB();
-    const { connection, network } = useSolanaConnection("devnet");
+
+    const networkParam = req.nextUrl.searchParams.get("network");
+
+    // Validate and fallback
+    const network =
+      networkParam === "devnet" ||
+      networkParam === "mainnet-beta" ||
+      networkParam === "testnet"
+        ? networkParam
+        : "mainnet-beta";
+
+    const connection = getConnection(network);
 
     const cookieStore = await cookies();
     const idToken = cookieStore.get("privy-id-token")?.value;
@@ -49,6 +60,7 @@ export async function GET() {
     };
 
     const walletAddress = privyUser.wallet?.address;
+    const usdcMint = network === "devnet" ? USDC_MINT_DEV : USDC_MINT;
     if (walletAddress) {
       // Mainnet connection
       // const connection = new Connection("https://api.mainnet-beta.solana.com");
@@ -64,7 +76,7 @@ export async function GET() {
       try {
         // Fetch USDC SPL token balance
         const usdcTokenAccount = await getAssociatedTokenAddress(
-          network === "devnet" ? USDC_MINT_DEV : USDC_MINT,
+          usdcMint,
           publicKey
         );
         const accountInfo = await getAccount(connection, usdcTokenAccount);
