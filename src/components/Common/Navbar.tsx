@@ -8,7 +8,6 @@ import { usePrivy } from "@privy-io/react-auth";
 import { Suspense, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import ImportWalletModal from "./ImportWalletModal";
 import Image from "next/image";
 import UserDropdown from "./UserDropdown";
 import { MultiStepTaskModal } from "../creator/task-modal/MultiStepTaskModal";
@@ -28,7 +27,7 @@ function NavbarComp() {
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [showImportWallet, setShowImportWallet] = useState(false);
-  const { balances, isLoading, error } = useUserBalances();
+  const { balances } = useUserBalances();
 
   const searchParams = useSearchParams();
   const [search, setSearch] = useState(searchParams.get("search") || "");
