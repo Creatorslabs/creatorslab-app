@@ -3,9 +3,9 @@
 import { useLoader } from "@/hooks/useLoader";
 import { getAccessToken } from "@privy-io/react-auth";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useEffect } from "react";
+import React, { useEffect, Suspense } from "react";
 
-function Page() {
+function RefreshPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { showLoader, LoaderModal } = useLoader();
@@ -30,4 +30,12 @@ function Page() {
   return <LoaderModal />;
 }
 
-export default Page;
+function page() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <RefreshPage />
+    </Suspense>
+  );
+}
+
+export default page;
