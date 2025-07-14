@@ -29,14 +29,16 @@ export async function GET() {
       );
     }
 
-    const localUser = await User.findOne({ privyId: privyUser.id }).lean<IUser>();
+    const localUser = await User.findOne({
+      privyId: privyUser.id,
+    }).lean<IUser>();
 
     if (!localUser) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
     const balances = {
-      compiled: "3000",
+      compiled: "0",
       sol: "0",
       usdc: "0",
       cls: localUser.balance?.toString() || "0",
@@ -68,6 +70,13 @@ export async function GET() {
         balances.usdc = "0";
       }
     }
+
+    const compiled =
+      parseFloat(balances.cls) * 0.02 +
+      parseFloat(balances.usdc) +
+      parseFloat(balances.sol) * 0.005915;
+
+    balances.compiled = String(compiled);
 
     return NextResponse.json({ success: true, balances });
   } catch (error) {
