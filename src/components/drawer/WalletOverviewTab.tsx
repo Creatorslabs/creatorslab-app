@@ -101,7 +101,7 @@ export default function WalletOverviewTab({
                 </div>
                 <div className="text-xs text-gray-400">
                   {isBalanceVisible
-                    ? `$${(parseFloat(token.balance) * 1.2).toFixed(2)}`
+                    ? `$${token.name === "cls" ? parseFloat(token.balance) / 0.02 :(parseFloat(token.balance) * 1.2).toFixed(2)}`
                     : "****"}
                 </div>
               </div>
