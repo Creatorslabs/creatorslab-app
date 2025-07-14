@@ -29,11 +29,14 @@ interface Task {
   status?: string;
 }
 
-export async function GET(_: Request, context: { params: { taskId: string } }) {
+export async function GET(
+  req: Request,
+  context: { params: Promise<{ taskId: string }> }
+) {
   try {
     await connectDB();
 
-    const { taskId } = context.params;
+    const { taskId } = await context.params;
 
     const cookieStore = await cookies();
     const idToken = cookieStore.get("privy-id-token")?.value;
