@@ -1,9 +1,5 @@
 "use client";
-import {
-  Eye,
-  EyeOff,
-  TrendingUp,
-} from "lucide-react";
+import { Eye, EyeOff, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -101,7 +97,11 @@ export default function WalletOverviewTab({
                 </div>
                 <div className="text-xs text-gray-400">
                   {isBalanceVisible
-                    ? `$${token.name === "cls" ? parseFloat(token.balance) / 0.02 :(parseFloat(token.balance) * 1.2).toFixed(2)}`
+                    ? `$${
+                        token.name === "CreatorsLab"
+                          ? parseFloat(token.balance) / 0.02
+                          : (parseFloat(token.balance) * 1.2).toFixed(2)
+                      }`
                     : "****"}
                 </div>
               </div>

@@ -1,9 +1,50 @@
 "use client";
+import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { usePrivy } from "@privy-io/react-auth";
+import { useSolanaConnection } from "@/hooks/useSolanaConnection";
+import PrivateKeyModal from "./PrivateKeyModal";
+import { useUserBalances } from "@/hooks/useUserBalances";
 
 export default function WalletSettingsTab() {
+  const { user, ready, authenticated, exportWallet } = usePrivy();
+  const { network, setNetwork } = useSolanaConnection("devnet");
+  const { refreshBalances } = useUserBalances();
+
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [exporting, setExporting] = useState(false);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [exportedKey, setExportedKey] = useState("");
+
+  const isAuthenticated = ready && authenticated;
+  const hasEmbeddedWallet = !!user?.linkedAccounts?.find(
+    (account: any) =>
+      account.type === "wallet" &&
+      account.walletClient === "privy" &&
+      account.chainType === "solana"
+  );
+
+  const handleExport = async () => {
+    if (!isAuthenticated || !hasEmbeddedWallet) return;
+    try {
+      setExporting(true);
+      const privateKey = await exportWallet();
+      setExportedKey(privateKey);
+      setIsModalOpen(true);
+    } catch (error) {
+      console.error("Export failed:", error);
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  useEffect(() => {
+    if (autoRefresh) refreshBalances();
+  }, [autoRefresh]);
+
   return (
     <motion.div
       key="settings"
@@ -29,9 +70,11 @@ export default function WalletSettingsTab() {
             <Button
               variant="outline"
               size="sm"
+              onClick={handleExport}
+              disabled={!isAuthenticated || !hasEmbeddedWallet || exporting}
               className="border-border text-white hover:bg-card"
             >
-              Export
+              {exporting ? "Exporting..." : "Export"}
             </Button>
           </div>
         </div>
@@ -42,14 +85,42 @@ export default function WalletSettingsTab() {
               <div className="font-medium text-white text-sm">
                 Network Settings
               </div>
-              <div className="text-xs text-gray-400">Mainnet • Solana</div>
+              <div className="text-xs text-gray-400">
+                {network === "mainnet" ? "Mainnet • Solana" : "Devnet • Solana"}
+              </div>
             </div>
             <Badge
               variant="secondary"
-              className="bg-green-500/20 text-green-400 border-green-500/30"
+              className={`${
+                ready
+                  ? "bg-green-500/20 text-green-400 border-green-500/30"
+                  : "bg-red-500/20 text-red-400 border-red-500/30"
+              }`}
             >
-              Connected
+              {ready ? "Connected" : "Disconnected"}
             </Badge>
+          </div>
+          <div className="flex gap-2 mt-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setNetwork("devnet")}
+              className={`text-xs ${
+                network === "devnet" ? "text-primary font-bold" : "text-white"
+              }`}
+            >
+              Switch to Devnet
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setNetwork("mainnet")}
+              className={`text-xs ${
+                network === "mainnet" ? "text-primary font-bold" : "text-white"
+              }`}
+            >
+              Switch to Mainnet
+            </Button>
           </div>
         </div>
 
@@ -61,16 +132,27 @@ export default function WalletSettingsTab() {
                 Update balances automatically
               </div>
             </div>
-            <div className="w-10 h-6 bg-primary rounded-full relative">
-              <div className="w-4 h-4 bg-white rounded-full absolute top-1 right-1 transition-transform" />
-            </div>
+            <button
+              onClick={() => setAutoRefresh((prev) => !prev)}
+              className={`w-10 h-6 rounded-full relative transition-colors ${
+                autoRefresh ? "bg-primary" : "bg-gray-600"
+              }`}
+            >
+              <div
+                className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-transform ${
+                  autoRefresh ? "right-1" : "left-1"
+                }`}
+              />
+            </button>
           </div>
         </div>
       </div>
 
-      <div className="text-center text-xs text-gray-400 pt-4">
-        Powered by Privy • Secured by Solana
-      </div>
+      <PrivateKeyModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        privateKey={exportedKey}
+      />
     </motion.div>
   );
 }

@@ -3,15 +3,19 @@ import { NextResponse } from "next/server";
 import { privy } from "@/lib/privyClient";
 import connectDB from "@/lib/connectDB";
 import { IUser, User } from "@/lib/models/User";
-import { Connection, PublicKey } from "@solana/web3.js";
+import { PublicKey } from "@solana/web3.js";
 import { getAssociatedTokenAddress, getAccount } from "@solana/spl-token";
+import { useSolanaConnection } from "@/hooks/useSolanaConnection";
 
 const USDC_MINT = new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"); // Mainnet USDC
-// const USDC_MINT = new PublicKey("BQ1UuSqKXnTHJMgtrtxXJgqzoWszSKBNk3CZyJwGeMec"); // Devnet USDC (commented)
+const USDC_MINT_DEV = new PublicKey(
+  "BQ1UuSqKXnTHJMgtrtxXJgqzoWszSKBNk3CZyJwGeMec"
+); // Devnet USDC (commented)
 
 export async function GET() {
   try {
     await connectDB();
+    const { connection, network } = useSolanaConnection("devnet");
 
     const cookieStore = await cookies();
     const idToken = cookieStore.get("privy-id-token")?.value;
@@ -47,7 +51,7 @@ export async function GET() {
     const walletAddress = privyUser.wallet?.address;
     if (walletAddress) {
       // Mainnet connection
-      const connection = new Connection("https://api.mainnet-beta.solana.com");
+      // const connection = new Connection("https://api.mainnet-beta.solana.com");
 
       // const connection = new Connection("https://api.devnet.solana.com"); // Devnet alternative
 
@@ -60,7 +64,7 @@ export async function GET() {
       try {
         // Fetch USDC SPL token balance
         const usdcTokenAccount = await getAssociatedTokenAddress(
-          USDC_MINT,
+          network === "devnet" ? USDC_MINT_DEV : USDC_MINT,
           publicKey
         );
         const accountInfo = await getAccount(connection, usdcTokenAccount);

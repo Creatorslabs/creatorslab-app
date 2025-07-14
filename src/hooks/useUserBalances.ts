@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 type Balances = {
   compiled: string;
@@ -19,35 +19,40 @@ export function useUserBalances() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchBalances = async () => {
-      setIsLoading(true);
-      try {
-        const res = await fetch("/api/user/balances");
+  const fetchBalances = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetch("/api/user/balances");
 
-        if (!res.ok) {
-          throw new Error(`Failed to fetch balances (${res.status})`);
-        }
-
-        const data = await res.json();
-        setBalances({
-          compiled: data.balances?.compiled || "0",
-          sol: data.balances?.sol || "0",
-          usdc: data.balances?.usdc || "0",
-          cls: data.balances?.cls || "0",
-        });
-        setError(null);
-      } catch (err) {
-        console.error("Error fetching balances:", err);
-        setError((err as Error).message);
-        setBalances(defaultBalances); // Reset to zero balances
-      } finally {
-        setIsLoading(false);
+      if (!res.ok) {
+        throw new Error(`Failed to fetch balances (${res.status})`);
       }
-    };
 
-    fetchBalances();
+      const data = await res.json();
+      setBalances({
+        compiled: data.balances?.compiled || "0",
+        sol: data.balances?.sol || "0",
+        usdc: data.balances?.usdc || "0",
+        cls: data.balances?.cls || "0",
+      });
+      setError(null);
+    } catch (err) {
+      console.error("Error fetching balances:", err);
+      setError((err as Error).message);
+      setBalances(defaultBalances); // Reset to zero balances
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
-  return { balances, isLoading, error };
+  useEffect(() => {
+    fetchBalances();
+  }, [fetchBalances]);
+
+  return {
+    balances,
+    isLoading,
+    error,
+    refreshBalances: fetchBalances,
+  };
 }
