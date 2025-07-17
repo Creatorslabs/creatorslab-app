@@ -99,8 +99,8 @@ export default function WalletOverviewTab({
                   {isBalanceVisible
                     ? `$${
                         token.name === "CreatorsLab"
-                          ? parseFloat(token.balance) / 0.02
-                          : (parseFloat(token.balance) * 1.2).toFixed(2)
+                          ? parseFloat(token.balance) * 0.02
+                          : (parseFloat(token.balance) * 0.02).toFixed(2)
                       }`
                     : "****"}
                 </div>

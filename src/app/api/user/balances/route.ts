@@ -94,6 +94,10 @@ export async function GET(req: NextRequest) {
 
     balances.compiled = String(compiled);
 
+    console.log("compiled:", compiled);
+    console.log("balances:", balances);
+    
+
     return NextResponse.json({ success: true, balances });
   } catch (error) {
     console.error("GET /api/user/balances error:", error);

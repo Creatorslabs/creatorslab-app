@@ -24,7 +24,7 @@ export function useUserBalances() {
   const fetchBalances = useCallback(async () => {
     setIsLoading(true);
     try {
-      const res = await fetch(`/api/user/balances${network}`);
+      const res = await fetch(`/api/user/balances?network=${network}`);
 
       if (!res.ok) {
         throw new Error(`Failed to fetch balances (${res.status})`);

@@ -2,8 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { privy } from "@/lib/privyClient";
 
+const HELIUS_API_KEY = process.env.HELIUS_API_KEY;
+const HELIUS_ENDPOINT = `https://api.helius.xyz/v0/addresses`;
+const HELIUS_ENDPOINT_DEV = `https://api-devnet.helius.xyz/v0/addresses`;
+
 export async function POST(req: NextRequest) {
   try {
+    const networkParam = req.nextUrl.searchParams.get("network");
+
+    const network =
+      networkParam === "devnet" ||
+      networkParam === "mainnet-beta" ||
+      networkParam === "testnet"
+        ? networkParam
+        : "mainnet";
+
     const cookieStore = await cookies();
     const idToken = cookieStore.get("privy-id-token")?.value;
 
@@ -13,41 +26,47 @@ export async function POST(req: NextRequest) {
 
     const privyUser = await privy.getUser({ idToken });
 
-    if (!privyUser?.id || !privyUser.wallet?.id) {
+    if (!privyUser?.wallet?.address) {
       return NextResponse.json(
         { message: "Invalid Privy user" },
         { status: 401 }
       );
     }
 
-    const walletId = privyUser.wallet.id;
+    const walletAddress = privyUser.wallet.address;
 
-    const { cursor, limit = 10 } = await req.json();
+    const { cursor } = await req.json();
+    const limit = 10; // force limit to 10
 
-    const result = await privy.walletApi.getTransactions({
-      walletId,
-      chain: "sol",
-      asset: ["sol", "usdc"],
-      cursor,
-      limit,
-    });
+    const ENDPOINT =
+      network === "devnet" ? HELIUS_ENDPOINT_DEV : HELIUS_ENDPOINT;
 
-    const formatted = result.transactions.map((t: any) => ({
-      id: t.privy_transaction_id,
-      type: t.details.type === "transfer_received" ? "earn" : "spend",
-      amount: t.details.display_values[t.details.asset] || t.details.raw_value,
-      currency: t.details.asset.toUpperCase(),
-      timestamp: new Date(t.created_at),
-      description: `${t.details.type.replace(/_/g, " ")}: ${t.details.asset}`,
+    const url = `${ENDPOINT}/${walletAddress}/transactions?api-key=${HELIUS_API_KEY}&limit=${limit}${
+      cursor ? `&before=${cursor}` : ""
+    }`;
+
+    const heliusRes = await fetch(url);
+    if (!heliusRes.ok) throw new Error("Failed to fetch transactions");
+
+    const txs = await heliusRes.json();
+
+    const formatted = txs.slice(0, 10).map((tx: any) => ({
+      id: tx.signature,
+      type: tx.type || "unknown",
+      amount: tx.nativeTransfers?.[0]?.amount || "0",
+      currency: "SOL",
+      timestamp: new Date(tx.timestamp * 1000),
+      description: tx.description || tx.type,
     }));
 
     return NextResponse.json({
       transactions: formatted,
       pagination: {
-        hasNextPage: !!result.next_cursor,
+        hasNextPage: txs.length === limit,
         hasPreviousPage: !!cursor,
-        nextCursor: result.next_cursor ?? null,
-        currentCursor: cursor ?? null,
+        nextCursor:
+          txs.length === limit ? txs[txs.length - 1]?.signature : null,
+        currentCursor: cursor || null,
       },
     });
   } catch (err) {

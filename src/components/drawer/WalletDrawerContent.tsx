@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { useUserBalances } from "@/hooks/useUserBalances";
+import { WalletDisplay } from "./WalletDisplay";
 
 export default function WalletDrawerContent({
   privyUser,
@@ -58,11 +59,6 @@ export default function WalletDrawerContent({
     { id: "settings", label: "Settings", icon: Shield },
   ];
 
-  const copyAddress = () => {
-    if (!walletAddress) return;
-    navigator.clipboard.writeText(walletAddress);
-  };
-
   return (
     <AnimatePresence mode="wait">
       {!privyUser?.wallet?.address ? (
@@ -98,43 +94,11 @@ export default function WalletDrawerContent({
             </div>
           </div>
 
-          {/* Wallet Address */}
-          <div className="px-6 space-y-6">
-            <div className="bg-background rounded-xl p-4 border border-border">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-gray-400">Wallet Address</span>
-                <Badge
-                  variant="secondary"
-                  className="bg-green-500/20 text-green-400 border-green-500/30"
-                >
-                  <Shield className="w-3 h-3 mr-1" />
-                  Secured
-                </Badge>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="font-mono text-sm text-white">
-                  {shortAddress}
-                </span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={copyAddress}
-                  className="h-8 w-8 text-gray-400 hover:text-white"
-                >
-                  <Copy className="w-3 h-3" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-gray-400 hover:text-white"
-                >
-                  <ExternalLink className="w-3 h-3" />
-                </Button>
-              </div>
-            </div>
-          </div>
+          <WalletDisplay
+            shortAddress={shortAddress}
+            fullAddress={walletAddress}
+          />
 
-          {/* Tab Buttons */}
           <div className="px-6">
             <div className="flex bg-background rounded-lg p-1">
               {tabs.map((tab) => (
@@ -155,7 +119,6 @@ export default function WalletDrawerContent({
             </div>
           </div>
 
-          {/* Tab Content */}
           <div className="flex-1 overflow-y-auto pb-6">
             <AnimatePresence mode="wait">
               {activeTab === "overview" && (
@@ -176,7 +139,6 @@ export default function WalletDrawerContent({
             </AnimatePresence>
           </div>
 
-          {/* Sticky Footer */}
           <WalletActionFooter />
         </motion.div>
       )}
