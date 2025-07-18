@@ -7,10 +7,11 @@ import { PublicKey } from "@solana/web3.js";
 import { getAssociatedTokenAddress, getAccount } from "@solana/spl-token";
 import { getConnection } from "@/lib/solana/getConnection";
 
-const USDC_MINT = new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"); // Mainnet USDC
+const USDC_MINT = new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
 const USDC_MINT_DEV = new PublicKey(
-  "BQ1UuSqKXnTHJMgtrtxXJgqzoWszSKBNk3CZyJwGeMec"
+  "Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr"
 );
+const solPriceInUSD = 157.34;
 
 export async function GET(req: NextRequest) {
   try {
@@ -62,27 +63,19 @@ export async function GET(req: NextRequest) {
     const walletAddress = privyUser.wallet?.address;
     const usdcMint = network === "devnet" ? USDC_MINT_DEV : USDC_MINT;
     if (walletAddress) {
-      // Mainnet connection
-      // const connection = new Connection("https://api.mainnet-beta.solana.com");
-
-      // const connection = new Connection("https://api.devnet.solana.com"); // Devnet alternative
-
       const publicKey = new PublicKey(walletAddress);
 
-      // Fetch SOL balance
       const solLamports = await connection.getBalance(publicKey);
-      balances.sol = (solLamports / 1e9).toFixed(3); // Convert lamports to SOL
+      balances.sol = (solLamports / 1e9).toFixed(3);
 
       try {
-        // Fetch USDC SPL token balance
         const usdcTokenAccount = await getAssociatedTokenAddress(
           usdcMint,
           publicKey
         );
         const accountInfo = await getAccount(connection, usdcTokenAccount);
-        balances.usdc = (Number(accountInfo.amount) / 1e6).toFixed(2); // USDC has 6 decimals
+        balances.usdc = (Number(accountInfo.amount) / 1e6).toFixed(2);
       } catch (err) {
-        // Token account may not exist
         balances.usdc = "0";
       }
     }
@@ -90,13 +83,9 @@ export async function GET(req: NextRequest) {
     const compiled =
       parseFloat(balances.cls) * 0.02 +
       parseFloat(balances.usdc) +
-      parseFloat(balances.sol) * 0.005915;
+      parseFloat(balances.sol) * solPriceInUSD;
 
     balances.compiled = String(compiled);
-
-    console.log("compiled:", compiled);
-    console.log("balances:", balances);
-    
 
     return NextResponse.json({ success: true, balances });
   } catch (error) {

@@ -27,7 +27,6 @@ function NavbarComp() {
     role: string;
   } | null>(null);
   const [loading, setLoading] = useState(true);
-  const [showImportWallet, setShowImportWallet] = useState(false);
   const { balances } = useUserBalances();
 
   const searchParams = useSearchParams();

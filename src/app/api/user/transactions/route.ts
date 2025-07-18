@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { privy } from "@/lib/privyClient";
+import { format } from "date-fns";
 
-const HELIUS_API_KEY = process.env.HELIUS_API_KEY;
-const HELIUS_ENDPOINT = `https://api.helius.xyz/v0/addresses`;
-const HELIUS_ENDPOINT_DEV = `https://api-devnet.helius.xyz/v0/addresses`;
+const HELIUS_API_KEY = process.env.HELIUS_API_KEY!;
+const HELIUS_MAINNET = `https://api.helius.xyz/v0/addresses`;
+const HELIUS_DEVNET = `https://api-devnet.helius.xyz/v0/addresses`;
 
-export async function POST(req: NextRequest) {
+export async function GET(req: NextRequest) {
   try {
     const networkParam = req.nextUrl.searchParams.get("network");
-
     const network =
       networkParam === "devnet" ||
       networkParam === "mainnet-beta" ||
@@ -25,52 +25,69 @@ export async function POST(req: NextRequest) {
     }
 
     const privyUser = await privy.getUser({ idToken });
+    const walletAddress = privyUser?.wallet?.address;
 
-    if (!privyUser?.wallet?.address) {
+    if (!walletAddress) {
       return NextResponse.json(
         { message: "Invalid Privy user" },
         { status: 401 }
       );
     }
 
-    const walletAddress = privyUser.wallet.address;
+    const ENDPOINT = network === "devnet" ? HELIUS_DEVNET : HELIUS_MAINNET;
+    const limit = 10;
 
-    const { cursor } = await req.json();
-    const limit = 10; // force limit to 10
+    const url = `${ENDPOINT}/${walletAddress}/transactions?api-key=${HELIUS_API_KEY}&limit=${limit}`;
 
-    const ENDPOINT =
-      network === "devnet" ? HELIUS_ENDPOINT_DEV : HELIUS_ENDPOINT;
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error("Failed to fetch transactions");
+    }
 
-    const url = `${ENDPOINT}/${walletAddress}/transactions?api-key=${HELIUS_API_KEY}&limit=${limit}${
-      cursor ? `&before=${cursor}` : ""
-    }`;
+    const txs = await response.json();
 
-    const heliusRes = await fetch(url);
-    if (!heliusRes.ok) throw new Error("Failed to fetch transactions");
+    const formatted = txs.map((tx: any) => {
+      let type = tx.type || "unknown";
+      let sender = "";
+      let receiver = "";
+      let currency = "SOL";
+      let amount = tx.nativeTransfers?.[0]?.amount || "0";
 
-    const txs = await heliusRes.json();
+      if (type === "TRANSFER" && tx.description) {
+        const matches = tx.description.match(
+          /(\w{32,}) transferred ([\d.]+) (\w+) to (\w{32,})/
+        );
+        if (matches) {
+          sender = matches[1];
+          amount = matches[2];
+          currency = matches[3];
+          receiver = matches[4];
 
-    const formatted = txs.slice(0, 10).map((tx: any) => ({
-      id: tx.signature,
-      type: tx.type || "unknown",
-      amount: tx.nativeTransfers?.[0]?.amount || "0",
-      currency: "SOL",
-      timestamp: new Date(tx.timestamp * 1000),
-      description: tx.description || tx.type,
-    }));
+          if (sender === walletAddress) {
+            type = "send";
+          } else if (receiver === walletAddress) {
+            type = "receive";
+          }
+        }
+      }
 
-    return NextResponse.json({
-      transactions: formatted,
-      pagination: {
-        hasNextPage: txs.length === limit,
-        hasPreviousPage: !!cursor,
-        nextCursor:
-          txs.length === limit ? txs[txs.length - 1]?.signature : null,
-        currentCursor: cursor || null,
-      },
+      return {
+        id: tx.signature,
+        type,
+        amount,
+        currency:
+          currency === "Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr"
+            ? "USDC"
+            : currency.toUpperCase(),
+        timestamp: format(new Date(tx.timestamp * 1000), "yyyy-MM-dd HH:mm:ss"),
+        sender,
+        receiver,
+      };
     });
+
+    return NextResponse.json({ transactions: formatted });
   } catch (err) {
-    console.error("[TX_API]", err);
+    console.error("[TX_API_GET]", err);
     return NextResponse.json(
       { message: "Internal Server Error" },
       { status: 500 }

@@ -1,8 +1,8 @@
-import { NextResponse } from "react";
+import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { onCreateWallet } from "@/lib/privy/onCreateWallet";
+import { privy } from "@/lib/privyClient";
 
-export async function POST() {
+export async function POST(req: NextRequest) {
   const cookieStore = await cookies();
   const idToken = cookieStore.get("privy-id-token")?.value;
 
@@ -11,12 +11,32 @@ export async function POST() {
   }
 
   try {
-    const result = await onCreateWallet(idToken);
-    return Response.json(result);
-  } catch (err) {
+    const user = await privy.getUser({ idToken });
+
+    if (!user) {
+      return NextResponse.json({ message: "User not found" }, { status: 404 });
+    }
+
+    if (user.wallet?.address) {
+      return NextResponse.json({
+        message: "User already has a wallet",
+        wallet: user.wallet,
+      });
+    }
+
+    const createdWallet = await privy.walletApi.createWallet({
+      ownerId: user.id,
+      chainType: "solana",
+    });
+
+    return NextResponse.json({
+      message: "Wallet created successfully",
+      wallet: createdWallet,
+    });
+  } catch (err: any) {
     console.error("Wallet creation failed:", err);
-    return Response.json(
-      { message: "Wallet creation failed" },
+    return NextResponse.json(
+      { message: err.message || "Wallet creation failed" },
       { status: 500 }
     );
   }

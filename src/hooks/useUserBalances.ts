@@ -1,5 +1,5 @@
+import { useSolanaConnection } from "@/components/context/SolanaConnectionContext";
 import { useEffect, useState, useCallback } from "react";
-import { useSolanaConnection } from "./useSolanaConnection";
 
 type Balances = {
   compiled: string;
@@ -22,21 +22,23 @@ export function useUserBalances() {
   const { network } = useSolanaConnection();
 
   const fetchBalances = useCallback(async () => {
+    if (!network) return;
+
     setIsLoading(true);
     try {
       const res = await fetch(`/api/user/balances?network=${network}`);
 
-      if (!res.ok) {
-        throw new Error(`Failed to fetch balances (${res.status})`);
-      }
+      if (!res.ok) throw new Error(`Failed to fetch balances (${res.status})`);
 
       const data = await res.json();
+
       setBalances({
         compiled: data.balances?.compiled || "0",
         sol: data.balances?.sol || "0",
         usdc: data.balances?.usdc || "0",
         cls: data.balances?.cls || "0",
       });
+
       setError(null);
     } catch (err) {
       console.error("Error fetching balances:", err);
@@ -45,7 +47,7 @@ export function useUserBalances() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [network]);
 
   useEffect(() => {
     fetchBalances();

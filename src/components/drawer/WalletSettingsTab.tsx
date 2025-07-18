@@ -1,21 +1,21 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { usePrivy } from "@privy-io/react-auth";
-import { useSolanaConnection } from "@/hooks/useSolanaConnection";
 import PrivateKeyModal from "./PrivateKeyModal";
 import { useUserBalances } from "@/hooks/useUserBalances";
+import { useSolanaConnection } from "../context/SolanaConnectionContext";
 
 export default function WalletSettingsTab() {
   const { user, ready, authenticated, exportWallet } = usePrivy();
-  const { network, setNetwork } = useSolanaConnection("devnet");
+  const { network, setNetwork } = useSolanaConnection();
   const { refreshBalances } = useUserBalances();
 
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [exporting, setExporting] = useState(false);
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [exportedKey, setExportedKey] = useState("");
 
@@ -32,7 +32,7 @@ export default function WalletSettingsTab() {
     try {
       setExporting(true);
       const privateKey = await exportWallet();
-      setExportedKey(privateKey);
+      setExportedKey(privateKey!);
       setIsModalOpen(true);
     } catch (error) {
       console.error("Export failed:", error);
@@ -92,7 +92,9 @@ export default function WalletSettingsTab() {
                 Network Settings
               </div>
               <div className="text-xs text-gray-400">
-                {network === "mainnet" ? "Mainnet • Solana" : "Devnet • Solana"}
+                {network === "mainnet-beta"
+                  ? "Mainnet • Solana"
+                  : "Devnet • Solana"}
               </div>
             </div>
             <Badge

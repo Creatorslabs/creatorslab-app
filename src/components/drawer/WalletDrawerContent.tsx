@@ -133,7 +133,9 @@ export default function WalletDrawerContent({
                 />
               )}
 
-              {activeTab === "transactions" && <WalletTransactionsTab />}
+              {activeTab === "transactions" && (
+                <WalletTransactionsTab walletAddress={walletAddress} />
+              )}
 
               {activeTab === "settings" && <WalletSettingsTab />}
             </AnimatePresence>
