@@ -63,7 +63,7 @@ export async function GET() {
       avatar: dbUser.image || "https://i.pravatar.cc/100",
       verified: isVerified,
       email: dbUser.email || "",
-      inviteLink: `${process.env.NODE_ENV}/auth/signup/${dbUser.referralCode}`,
+      inviteLink: `${process.env.NEXTAUTH_URL}/auth/signup/${dbUser.referralCode}`,
       balance: dbUser.balance?.toFixed(4) || "0.0000",
       pendingClaims,
     };

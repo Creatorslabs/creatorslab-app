@@ -19,20 +19,9 @@ export default function TopCreators() {
   useEffect(() => {
     const fetchCreators = async () => {
       try {
-        const res = await fetch("/api/creators");
+        const res = await fetch("/api/creator/top-seven");
         const data = await res.json();
-
-        if (Array.isArray(data) && data.length > 0) {
-          // Assume the API returns objects with `avatar` and `followers`
-          const sorted = data
-            .sort((a, b) => b.followers - a.followers)
-            .slice(0, 7)
-            .map((creator) => creator.avatar);
-
-          setTopCreators(sorted);
-        } else {
-          setTopCreators(fallbackCreators);
-        }
+        setTopCreators(data.creators);
       } catch (error) {
         console.error("Failed to fetch top creators:", error);
         setTopCreators(fallbackCreators);

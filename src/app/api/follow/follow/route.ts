@@ -61,9 +61,9 @@ export async function POST(req: Request) {
       );
     }
 
-    if (authUser.role !== "creator") {
+    if (authUser.role === "creator") {
       return NextResponse.json(
-        { message: "Only screators can follow creators" },
+        { message: "A creator cannot follow other creators" },
         { status: 403 }
       );
     }

@@ -17,7 +17,6 @@ import WalletSettingsTab from "./WalletSettingsTab";
 import WalletActionFooter from "./WalletActionFooter";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
-import { Badge } from "../ui/badge";
 import { useUserBalances } from "@/hooks/useUserBalances";
 import { WalletDisplay } from "./WalletDisplay";
 

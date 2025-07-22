@@ -64,19 +64,27 @@ export async function GET(
 
     const creatorId = task.creator._id;
 
-    const [participants, userParticipation, otherTasksRaw] = await Promise.all([
+    const [participants, userParticipation] = await Promise.all([
       Participation.countDocuments({ taskId }),
       Participation.findOne({
         taskId,
         userId: user._id,
       }).lean<IParticipation>(),
-      Task.find({
-        creator: creatorId,
-        _id: { $ne: task._id },
-      })
-        .select("_id title rewardPoints platform")
-        .limit(8),
     ]);
+
+    const participatedTaskIds = await Participation.find({
+      userId: user._id,
+    }).distinct("taskId");
+
+    const otherTasksRaw = await Task.find({
+      creator: creatorId,
+      _id: {
+        $ne: task._id,
+        $nin: participatedTaskIds,
+      },
+    })
+      .select("_id title rewardPoints platform")
+      .limit(8);
 
     const status = userParticipation?.status || null;
 
@@ -92,6 +100,47 @@ export async function GET(
       reward: t.rewardPoints,
       platform: t.platform,
     }));
+
+    // Compute eligibility
+    let canParticipate = true;
+    let reason = "";
+
+    const now = new Date();
+
+    const hasTwitter = privyUser.linkedAccounts?.some(
+      (acc: any) => acc.type === "oauth" && acc.provider === "twitter"
+    );
+
+    const hasDiscord = privyUser.linkedAccounts?.some(
+      (acc: any) => acc.type === "oauth" && acc.provider === "discord"
+    );
+
+    if (String(user._id) === String(creatorId)) {
+      canParticipate = false;
+      reason = "You cannot participate in your own task.";
+    } else if (!hasTwitter && !hasDiscord) {
+      canParticipate = false;
+      reason =
+        "You must link your Twitter or Discord account on Privy to participate.";
+    } else if (!hasTwitter) {
+      canParticipate = false;
+      reason = "You must link your Twitter account on Privy to participate.";
+    } else if (!hasDiscord) {
+      canParticipate = false;
+      reason = "You must link your Discord account on Privy to participate.";
+    } else if (task.expiration && new Date(task.expiration) < now) {
+      canParticipate = false;
+      reason = "This task has expired.";
+    } else if (
+      typeof task.maxParticipants === "number" &&
+      participants >= task.maxParticipants
+    ) {
+      canParticipate = false;
+      reason = "Maximum number of participants reached.";
+    } else if (userParticipation) {
+      canParticipate = false;
+      reason = "You have already participated in this task.";
+    }
 
     const response = {
       id: task._id.toString(),
@@ -114,6 +163,8 @@ export async function GET(
       proof: userParticipation?.proof || null,
       otherTasks,
       requirements,
+      canParticipate,
+      reason: canParticipate ? null : reason,
     };
 
     return NextResponse.json({ success: true, data: response });

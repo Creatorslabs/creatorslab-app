@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { ArrowLeft, Copy, CheckCircle, ExternalLink } from "lucide-react";
@@ -13,7 +13,7 @@ import EarnedCLSModal from "@/components/taskPage/EarnedCLSModal";
 import WarningModal from "@/components/taskPage/WarningModal";
 import SuccessModal from "@/components/taskPage/SuccessModal";
 import FollowButton from "@/components/Common/FollowButton";
-import { usePrivy } from "@privy-io/react-auth";
+import { useLinkAccount, usePrivy } from "@privy-io/react-auth";
 import { SimpleIcon } from "@/components/Common/SimpleIcon";
 import Link from "next/link";
 import { ProofSubmissionSection } from "@/components/Common/ProofSubmissionSection";
@@ -38,6 +38,8 @@ interface Task {
   otherTasks: any[];
   status: "pending" | "completed" | null;
   requirements: string[];
+  canParticipate: boolean;
+  reason: string | null;
 }
 
 export default function TaskViewPage() {
@@ -58,52 +60,109 @@ export default function TaskViewPage() {
     twitter: false,
     telegram: false,
   });
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    const fetchTask = async () => {
-      showLoader({ message: "Loading task details..." });
-
-      try {
-        const res = await fetch(`/api/tasks/${params.taskId}/details`);
-
-        if (!res.ok) throw new Error("Failed to fetch task.");
-
-        const { data } = await res.json();
-
-        setTask(data);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-        hideLoader();
-      }
-    };
-
     fetchTask();
   }, [params.taskId]);
 
-  const handleConnectAccount = (platform: string) => {
-    setConnectedAccounts((prev) => ({
-      ...prev,
-      [platform]: true,
-    }));
+  const fetchTask = async () => {
+    showLoader({ message: "Loading task details..." });
 
-    toast({
-      title: "Account Connected",
-      description: `Your ${platform} account has been connected successfully!`,
-      variant: "success",
-    });
+    try {
+      const res = await fetch(`/api/tasks/${params.taskId}/details`);
+
+      if (!res.ok) throw new Error("Failed to fetch task.");
+
+      const { data } = await res.json();
+      setTask(data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+      hideLoader();
+    }
   };
 
-  const handleTaskComplete = (taskId: string) => {
-    // Check if mandatory tasks are completed
-    if (taskId === "1" && !connectedAccounts.twitter) {
-      setShowWarningModal(true);
+  const handleConnectAccount = (platform: string, nextPath?: string) => {
+    const supportedPlatforms = ["twitter", "discord", "email"];
+    const next = nextPath || window.location.pathname;
+
+    if (!supportedPlatforms.includes(platform)) {
+      toast({
+        title: "Unsupported platform",
+        description: `Cannot link ${platform}`,
+        variant: "warning",
+      });
       return;
     }
 
-    setEarnedAmount("0.5");
-    setShowEarnedModal(true);
+    localStorage.setItem("link_platform", platform);
+    localStorage.setItem("link_next", next);
+
+    router.push("/connect");
+  };
+
+  const handleTaskComplete = async () => {
+    showLoader({ message: "Completing task..." });
+
+    if (!connectedAccounts.twitter) {
+      setShowWarningModal(true);
+      hideLoader();
+      return;
+    }
+
+    if (task?.status !== null) {
+      toast({
+        title: "Task Already Completed",
+        description: "You have already completed this task.",
+        variant: "warning",
+      });
+      hideLoader();
+      return;
+    }
+
+    if (!proofLink) {
+      toast({
+        title: "Proof Required",
+        description: "Please provide a proof link to complete the task.",
+        variant: "warning",
+      });
+      hideLoader();
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/tasks/participate", {
+        method: "POST",
+        body: JSON.stringify({
+          taskId: task?.id,
+          userId: privyUser?.id,
+          proof: proofLink,
+        }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        toast({
+          title: "Error",
+          description: errorData.error || "Failed to complete task.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setEarnedAmount(task?.reward || "0");
+
+      await fetchTask();
+
+      setShowEarnedModal(true);
+      setShowSuccessModal(true);
+    } catch (error) {
+      console.error("Error completing task:", error);
+    } finally {
+      hideLoader();
+    }
   };
 
   const copyToClipboard = (text: string) => {
@@ -126,7 +185,6 @@ export default function TaskViewPage() {
   return (
     <div className="min-h-screen bg-background text-white">
       <div className="max-w-7xl mx-auto px-4 py-6">
-        {/* Header */}
         <motion.div
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -203,7 +261,6 @@ export default function TaskViewPage() {
               </div>
             </motion.div>
 
-            {/* Task Details */}
             <motion.div
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -291,11 +348,13 @@ export default function TaskViewPage() {
                   <div>
                     <p className="text-white text-sm mb-2">Connect your X</p>
                     <Button
-                      onClick={() => handleConnectAccount("twitter")}
+                      onClick={() =>
+                        handleConnectAccount("twitter", `/tasks/${task.id}`)
+                      }
                       disabled={!!privyUser?.twitter}
                       className="w-full bg-white hover:bg-secondary py-6 text-background border border-border"
                     >
-                      <span className="mr-2">𝕏</span>
+                      <SimpleIcon platform="x" color="#000" />
                       {privyUser?.twitter ? "Connected" : "Connect Twitter"}
                     </Button>
                   </div>
@@ -307,29 +366,43 @@ export default function TaskViewPage() {
                       Connect your Discord
                     </p>
                     <Button
-                      onClick={() => handleConnectAccount("discord")}
+                      onClick={() =>
+                        handleConnectAccount("discord", `/tasks/${task.id}`)
+                      }
                       disabled={!!privyUser?.discord}
                       className="w-full bg-blue-700 py-6 hover:bg-blue-800 text-white"
                     >
-                      <span className="mr-2">📱</span>
+                      <SimpleIcon platform="discord" />
                       {privyUser?.discord ? "Connected" : "Connect Discord"}
                     </Button>
                   </div>
                 )}
 
                 <ProofSubmissionSection
-                  status={task.status} // "pending" | "completed" | null
-                  taskId={task.id}
+                  status={task.status}
                   proofLink={proofLink}
                   setProofLink={setProofLink}
+                  canParticipate={task.canParticipate}
+                  reason={task.reason}
                 />
               </div>
 
               <Button
-                onClick={() => setShowSuccessModal(true)}
+                onClick={handleTaskComplete}
                 className="w-full mt-6 py-6 bg-primary hover:bg-primary/80 text-white"
+                disabled={
+                  !task.canParticipate ||
+                  task.status === "completed" ||
+                  submitting
+                }
               >
-                Complete
+                {submitting
+                  ? "Submitting..."
+                  : task.status === "completed"
+                  ? "Task Completed"
+                  : task.status === "pending"
+                  ? "Waiting for review"
+                  : "Submit Proof"}
               </Button>
             </motion.div>
           </div>

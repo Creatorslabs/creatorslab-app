@@ -4,15 +4,16 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Upload, X, CheckCircle, Clock } from "lucide-react";
+import { Upload, X, CheckCircle, Clock, AlertTriangle } from "lucide-react";
 import { put } from "@vercel/blob";
 import Image from "next/image";
 
 type Props = {
   status: "pending" | "completed" | null;
-  taskId: string;
   proofLink: string;
   setProofLink: (link: string) => void;
+  canParticipate: boolean;
+  reason: string | null;
 };
 
 async function deleteImageFromBlob(formData: { image?: string }) {
@@ -39,15 +40,16 @@ async function deleteImageFromBlob(formData: { image?: string }) {
 
 export function ProofSubmissionSection({
   status,
-  taskId,
   proofLink,
   setProofLink,
+  canParticipate,
+  reason,
 }: Props) {
   const [uploading, setUploading] = useState(false);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file || !canParticipate) return;
 
     try {
       setUploading(true);
@@ -64,7 +66,7 @@ export function ProofSubmissionSection({
   };
 
   const handleRemoveImage = async () => {
-    if (!proofLink) return;
+    if (!proofLink || !canParticipate) return;
     await deleteImageFromBlob({ image: proofLink });
     setProofLink("");
   };
@@ -103,6 +105,13 @@ export function ProofSubmissionSection({
         </span>
       </div>
 
+      {!canParticipate && reason && (
+        <div className="flex items-start gap-2 p-3 rounded-md bg-yellow-900/30 text-yellow-300 border border-yellow-800 text-sm">
+          <AlertTriangle className="w-4 h-4 mt-0.5" />
+          <span>{reason}</span>
+        </div>
+      )}
+
       <div className="space-y-2">
         <label className="text-white text-sm font-medium">
           Paste proof link
@@ -112,6 +121,7 @@ export function ProofSubmissionSection({
           value={proofLink}
           onChange={(e) => setProofLink(e.target.value)}
           className="border border-border"
+          disabled={!canParticipate}
         />
       </div>
 
@@ -134,12 +144,14 @@ export function ProofSubmissionSection({
                 `${src}?w=${width}&q=${quality || 75}`
               }
             />
-            <button
-              onClick={handleRemoveImage}
-              className="absolute top-2 right-2 bg-black/60 rounded-full p-1 hover:bg-black/80 transition"
-            >
-              <X className="w-4 h-4 text-white" />
-            </button>
+            {canParticipate && (
+              <button
+                onClick={handleRemoveImage}
+                className="absolute top-2 right-2 bg-black/60 rounded-full p-1 hover:bg-black/80 transition"
+              >
+                <X className="w-4 h-4 text-white" />
+              </button>
+            )}
           </div>
         ) : (
           <label className="flex items-center gap-2 text-sm cursor-pointer text-blue-400 hover:text-blue-300">
@@ -150,6 +162,7 @@ export function ProofSubmissionSection({
               accept="image/*"
               onChange={handleImageUpload}
               className="hidden"
+              disabled={!canParticipate}
             />
           </label>
         )}

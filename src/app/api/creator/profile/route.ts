@@ -41,7 +41,7 @@ export async function GET() {
       dbUser.verification?.twitter &&
       dbUser.verification?.email;
 
-    const inviteLink = `${process.env.NODE_ENV}/auth/signup/${dbUser.username}`;
+    const inviteLink = `${process.env.NEXTAUTH_URL}/auth/signup/${dbUser.username}`;
     const tasks = await Task.find({ creator: dbUser._id })
       .populate({
         path: "creator",

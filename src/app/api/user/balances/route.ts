@@ -85,7 +85,7 @@ export async function GET(req: NextRequest) {
       parseFloat(balances.usdc) +
       parseFloat(balances.sol) * solPriceInUSD;
 
-    balances.compiled = String(compiled);
+    balances.compiled = String(compiled.toFixed(3));
 
     return NextResponse.json({ success: true, balances });
   } catch (error) {

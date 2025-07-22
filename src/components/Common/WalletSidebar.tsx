@@ -34,30 +34,19 @@ export default function WalletSidebar({
     <>
       <Drawer open={isOpen} onOpenChange={setIsOpen} direction="right">
         <DrawerTrigger asChild>
-          {!privyUser?.wallet?.address ? (
-            <>
-              <Button
-                variant="ghost"
-                className="text-xs lg:text-sm text-gray-400 px-2 hover:bg-card"
-                onClick={() => setShowImportWallet(true)}
-              >
-                Import Wallet
-              </Button>
-              <ImportWalletModal
-                isOpen={showImportWallet}
-                onClose={() => setShowImportWallet(false)}
-              />
-            </>
-          ) : (
-            <Button
-              variant="ghost"
-              className="text-xs lg:text-sm text-gray-400 px-2"
-              onClick={() => setShowWalletModal(true)}
-            >
-              {privyUser.wallet.address.slice(0, 6)}...
-              {privyUser.wallet.address.slice(-4)}
-            </Button>
-          )}
+          <Button
+            variant="ghost"
+            className="text-xs lg:text-sm text-gray-400 px-2 hover:bg-card"
+          >
+            {!privyUser?.wallet?.address ? (
+              <>No Wallet</>
+            ) : (
+              <>
+                {privyUser.wallet.address.slice(0, 6)}...
+                {privyUser.wallet.address.slice(-4)}
+              </>
+            )}
+          </Button>
         </DrawerTrigger>
 
         <DrawerContent className="bg-card-box w-full max-w-sm h-screen ml-auto flex flex-col !rounded-none !pt-0 !mt-0 [&>div:first-child]:hidden">
