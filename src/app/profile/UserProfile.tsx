@@ -4,7 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { useLinkAccount, useLogout, usePrivy } from "@privy-io/react-auth";
+import {
+  useLinkAccount,
+  useLogout,
+  usePrivy,
+} from "@privy-io/react-auth";
 
 import { useLoader } from "@/hooks/useLoader";
 
@@ -143,13 +147,6 @@ const UserProfile = () => {
     }
   };
 
-  const handleCopyInviteLink = () => {
-    if (user?.inviteLink) {
-      navigator.clipboard.writeText(user.inviteLink);
-      toast({ title: "Invite link copied!", variant: "success" });
-    }
-  };
-
   const handleClaimReward = (claimId: string) => {
     toast({ title: "Reward claimed!", variant: "success" });
     setUser((prev) =>
@@ -209,7 +206,7 @@ const UserProfile = () => {
               transition={{ delay: 0.1 }}
             >
               <div className="flex flex-col md:flex-row items-center md:items-start justify-between flex-wrap gap-4">
-                <div className="flex items-center gap-6 flex-col md:items-start items-center">
+                <div className="flex gap-6 flex-col md:items-start items-center">
                   <AvatarUploader
                     currentAvatar={user.avatar}
                     username={user.username}

@@ -133,7 +133,7 @@ function TasksPage() {
       />
 
       {loading ? (
-        <p className="text-gray-400">Loading tasks...</p>
+        <p className="text-gray-400 text-center">Loading tasks...</p>
       ) : tasks.length === 0 ? (
         <p className="text-gray-400">No tasks found.</p>
       ) : (

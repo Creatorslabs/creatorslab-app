@@ -5,7 +5,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowLeft,
   BadgeCheck,
-  Camera,
   CirclePlus,
   Copy,
   Eye,

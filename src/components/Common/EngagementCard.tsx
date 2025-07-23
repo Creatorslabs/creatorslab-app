@@ -34,7 +34,7 @@ export default function EngagementCard({ index, card }: EngagementCardProps) {
       whileHover={{ y: -5 }}
       className="bg-background rounded-2xl overflow-hidden border border-border shadow-md cursor-pointer"
     >
-      <Link href={`tasks/${card.id}`}>
+      <Link href={`/tasks/${card.id}`}>
         <div className="relative px-4 pt-4">
           <div className="relative h-[132px] lg:h-[177.02px] rounded-[8px] overflow-hidden mx-auto">
             <Image

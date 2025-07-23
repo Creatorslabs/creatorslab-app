@@ -8,13 +8,15 @@ import FollowCreatorModal from "../taskPage/FollowCreatorModal";
 import UnfollowCreatorModal from "../taskPage/UnfollowCreatorModal";
 
 type FollowButtonProps = {
-  creatorId: string; // ID of the user to follow
+  creatorId: string;
   onFollowClick?: () => void;
+  isLiquidGlass?: boolean;
 };
 
 export default function FollowButton({
   creatorId,
   onFollowClick,
+  isLiquidGlass = false,
 }: FollowButtonProps) {
   const [isFollowing, setIsFollowing] = useState<boolean | null>(null);
   const [isSelf, setIsSelf] = useState(false);
@@ -94,12 +96,19 @@ export default function FollowButton({
     }
   };
 
+  const baseClasses = "px-6 text-white transition";
+  const defaultClasses = "bg-primary hover:bg-primary/80";
+  const liquidGlassClasses =
+    "bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20";
+
   return (
     <>
       <Button
         onClick={handleButtonClick}
         disabled={loading || isFollowing === null || isSelf}
-        className="bg-primary hover:bg-primary/80 text-white px-6"
+        className={`${baseClasses} ${
+          isLiquidGlass ? liquidGlassClasses : defaultClasses
+        }`}
       >
         {loading ? (
           <Loader2 className="w-4 h-4 animate-spin" />
@@ -109,6 +118,7 @@ export default function FollowButton({
           "Follow"
         )}
       </Button>
+
       <FollowCreatorModal
         isOpen={showFollowModal}
         onClose={() => setShowFollowModal(false)}

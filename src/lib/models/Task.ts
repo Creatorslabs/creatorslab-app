@@ -1,7 +1,8 @@
+import { Mongoose } from "mongoose";
 import { Schema, model, models, Document } from "mongoose";
 
 export interface ITask extends Document {
-  creator: string;
+  creator: Schema.Types.ObjectId;
   title: string;
   type: string[];
   platform: string;
@@ -19,7 +20,11 @@ export interface ITask extends Document {
 
 const TaskSchema = new Schema<ITask>(
   {
-    creator: { type: String, ref: "User", required: true },
+    creator: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     title: { type: String, required: true },
     type: { type: [String], required: true },
     platform: {

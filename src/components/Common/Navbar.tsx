@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Search } from "lucide-react";
-import { usePrivy } from "@privy-io/react-auth";
+import { useConnectOrCreateWallet, usePrivy } from "@privy-io/react-auth";
 import { Suspense, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -33,6 +33,35 @@ function NavbarComp() {
   const [search, setSearch] = useState(searchParams.get("search") || "");
 
   const [isOpen, setIsOpen] = useState(false);
+
+  const { connectOrCreateWallet } = useConnectOrCreateWallet({
+    onSuccess: ({ wallet }) => {
+      console.log("Wallet created or connected:", wallet);
+
+      toast({
+        title: "Wallet Linked",
+        description: `Wallet ${wallet.address.slice(
+          0,
+          6
+        )}... linked successfully.`,
+      });
+
+      fetch("/api/save-wallet", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wallet: wallet.address }),
+      });
+    },
+
+    onError: (error) => {
+      console.error("Wallet linking failed:", error);
+      toast({
+        title: "Wallet Error",
+        description: error || "Failed to link wallet.",
+        variant: "destructive",
+      });
+    },
+  });
 
   const closeModal = () => {
     setIsOpen(false);
@@ -85,34 +114,6 @@ function NavbarComp() {
 
     fetchUser();
   }, [ready, authenticated]);
-
-  const onCreateWallet = async () => {
-    try {
-      const res = await fetch("/api/user/create-wallet", {
-        method: "POST",
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message || "Failed to create wallet");
-      }
-
-      const data = await res.json();
-
-      toast({
-        title: "Wallet created",
-        description: `Wallet address: ${data.wallet.address.slice(0, 8)}...`,
-        variant: "success",
-      });
-
-      return data.wallet;
-    } catch (error) {
-      toast({
-        title: (error as Error).message || "Failed to create wallet",
-        variant: "destructive",
-      });
-    }
-  };
 
   if (pathname.startsWith("/auth")) return null;
 
@@ -175,7 +176,7 @@ function NavbarComp() {
             <WalletSidebar
               privyUser={privyUser}
               balances={balances}
-              onCreateWallet={onCreateWallet}
+              onCreateWallet={connectOrCreateWallet}
             />
 
             {loading ? (
