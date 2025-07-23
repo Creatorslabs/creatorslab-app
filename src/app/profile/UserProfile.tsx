@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
@@ -28,6 +28,7 @@ import { Button } from "@/components/ui/button";
 import AvatarUploader from "@/components/Common/AvatarUploader";
 import { updateAvatar } from "@/lib/helpers/update-avatar";
 import EditableUsername from "@/components/Common/EditableUsername";
+import InviteLinkButton from "@/components/Common/InviteLink";
 
 interface PendingClaim {
   id: string;
@@ -86,15 +87,18 @@ const UserProfile = () => {
     }
   };
 
+  const hasFetchedRef = useRef(false);
+
   useEffect(() => {
+    if (hasFetchedRef.current) return;
+    hasFetchedRef.current = true;
+
     const fetchUserProfile = async () => {
       showLoader({ message: "Loading your profile..." });
 
       try {
         const res = await fetch("/api/user/profile");
-
         if (!res.ok) throw new Error("Failed to fetch profile");
-
         const { data } = await res.json();
         setUser(data);
         toast({ title: "Profile loaded successfully!", variant: "success" });
@@ -185,7 +189,7 @@ const UserProfile = () => {
               >
                 <ArrowLeft className="w-5 h-5" />
               </Button>
-              <EditableUsername initialName={user.username} userId={user.id} />
+              <p>User Profile</p>
             </div>
             <Button
               className="bg-card-box hover:bg-card text-foreground font-medium border border-border rounded-md px-4 py-2"
@@ -214,10 +218,11 @@ const UserProfile = () => {
                       refreshUser();
                     }}
                   />
-                  <div className="flex flex-col items-center md:items-start text-center md:text-left">
-                    <h2 className="text-3xl font-bold text-white mb-3 font-syne">
-                      {user.name}
-                    </h2>
+                  <div className="flex flex-col items-center md:items-start text-center md:text-left space-y-2">
+                    <EditableUsername
+                      initialName={user.username}
+                      userId={user.id}
+                    />
                     <div className="flex items-center gap-2 bg-card px-3 py-1 rounded-md">
                       {user.verified ? (
                         <>
@@ -238,13 +243,7 @@ const UserProfile = () => {
                   </div>
                 </div>
 
-                <button
-                  onClick={handleCopyInviteLink}
-                  className="bg-background h-fit py-2 px-4 rounded-lg flex gap-2 items-center"
-                >
-                  Invite Link
-                  <Copy className="w-4 h-4" />
-                </button>
+                <InviteLinkButton inviteLink={user.inviteLink} />
               </div>
 
               <hr className="border-border my-8" />
@@ -368,22 +367,6 @@ const UserProfile = () => {
               </div>
             </motion.div>
           </div>
-
-          {/* Logout */}
-          <motion.div
-            className="w-full flex py-4 px-2"
-            initial={{ y: 10, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.3 }}
-          >
-            <button
-              onClick={() => logout()}
-              className="p-4 bg-gradient-to-b from-[#5D3FD1] to-[#03ABFF] text-white rounded-md w-full md:w-[40%]"
-            >
-              <LogOut className="inline-block w-4 h-4 mr-2" />
-              Log out
-            </button>
-          </motion.div>
         </div>
       </motion.div>
     </div>

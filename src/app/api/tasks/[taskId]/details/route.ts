@@ -118,16 +118,6 @@ export async function GET(
     if (String(user._id) === String(creatorId)) {
       canParticipate = false;
       reason = "You cannot participate in your own task.";
-    } else if (!hasTwitter && !hasDiscord) {
-      canParticipate = false;
-      reason =
-        "You must link your Twitter or Discord account on Privy to participate.";
-    } else if (!hasTwitter) {
-      canParticipate = false;
-      reason = "You must link your Twitter account on Privy to participate.";
-    } else if (!hasDiscord) {
-      canParticipate = false;
-      reason = "You must link your Discord account on Privy to participate.";
     } else if (task.expiration && new Date(task.expiration) < now) {
       canParticipate = false;
       reason = "This task has expired.";
@@ -140,6 +130,17 @@ export async function GET(
     } else if (userParticipation) {
       canParticipate = false;
       reason = "You have already participated in this task.";
+    } else if (!hasTwitter || !hasDiscord) {
+      canParticipate = false;
+
+      if (!hasTwitter && hasDiscord) {
+        reason = "You must link your Twitter account to participate.";
+      } else if (!hasDiscord && hasTwitter) {
+        reason = "You must link your Discord account to participate.";
+      } else {
+        reason =
+          "You must link your Twitter and Discord account to participate.";
+      }
     }
 
     const response = {

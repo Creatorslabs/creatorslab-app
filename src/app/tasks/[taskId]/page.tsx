@@ -240,22 +240,27 @@ export default function TaskViewPage() {
               </div>
 
               <div className="flex items-center justify-between mt-4">
-                <div className="flex items-center gap-3">
-                  <Image
-                    src={task.creator.image}
-                    alt={task.creator.username}
-                    width={40}
-                    height={40}
-                    className="rounded-full aspect-square"
-                    quality={75}
-                    loader={({ src, width, quality }) =>
-                      `${src}?w=${width}&q=${quality || 75}`
-                    }
-                  />
-                  <span className="text-white font-medium">
-                    {task.creator.username}
-                  </span>
-                </div>
+                <Link
+                  href={`/creator/view/${task.creator.username}?back=${window.location.pathname}`}
+                  passHref
+                >
+                  <div className="flex items-center gap-3 cursor-pointer hover:opacity-90">
+                    <Image
+                      src={task.creator.image}
+                      alt={task.creator.username}
+                      width={40}
+                      height={40}
+                      className="rounded-full aspect-square"
+                      quality={75}
+                      loader={({ src, width, quality }) =>
+                        `${src}?w=${width}&q=${quality || 75}`
+                      }
+                    />
+                    <span className="text-white font-medium">
+                      {task.creator.username}
+                    </span>
+                  </div>
+                </Link>
 
                 <FollowButton creatorId={task.creator.id} />
               </div>
@@ -269,7 +274,7 @@ export default function TaskViewPage() {
             >
               <div className="flex items-center gap-4 mb-6">
                 <div className="bg-purple-600/20 text-purple-400 px-3 py-1 rounded-lg text-sm">
-                  Ending in {task.timeRemaining}
+                  {task.timeRemaining}
                 </div>
                 <div className="bg-blue-600/20 text-blue-400 px-3 py-1 rounded-lg text-sm flex items-center gap-1">
                   <span>💰</span>

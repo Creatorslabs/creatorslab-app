@@ -10,13 +10,13 @@ export const formatDate = (date?: Date): string => {
 };
 
 export const getTimeRemaining = (expiration?: Date): string => {
-  if (!expiration) return "No expiration";
+  if (!expiration) return "No expiration Date";
 
   const now = new Date();
   const exp = new Date(expiration);
   const diff = exp.getTime() - now.getTime();
 
-  if (diff <= 0) return "Expired";
+  if (diff <= 0) return "Task Expired";
 
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
   const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -24,5 +24,5 @@ export const getTimeRemaining = (expiration?: Date): string => {
 
   if (days > 0) return `${days}d ${hours}h ${minutes}m`;
   if (hours > 0) return `${hours}h ${minutes}m`;
-  return `${minutes}m`;
+  return `Ending in ${minutes}m`;
 };

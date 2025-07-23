@@ -110,7 +110,7 @@ export default function EditableUsername({
           </button>
         </div>
       ) : (
-        <h1 className="text-xl font-semibold flex items-center gap-2">
+        <h1 className="text-2xl font-semibold flex items-center gap-2 font-syne">
           {username}
           <button
             onClick={() => setEditing(true)}

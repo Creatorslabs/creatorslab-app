@@ -65,10 +65,22 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "Not following" }, { status: 404 });
     }
 
-    await Follow.deleteOne({
-      followerId: authUser._id,
-      followingId: creatorId,
-    });
+    if ((authUser.balance || 0) < 5) {
+      return NextResponse.json(
+        { message: "Insufficient balance to unfollow (requires 5 CLS)" },
+        { status: 403 }
+      );
+    }
+
+    await Promise.all([
+      Follow.deleteOne({
+        followerId: authUser._id,
+        followingId: creatorId,
+      }),
+      User.findByIdAndUpdate(authUser._id, {
+        $inc: { balance: -5 },
+      }),
+    ]);
 
     return NextResponse.json({ success: true, message: "Unfollowed" });
   } catch (error) {

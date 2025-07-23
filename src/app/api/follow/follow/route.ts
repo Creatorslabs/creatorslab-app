@@ -80,6 +80,10 @@ export async function POST(req: Request) {
       followingId: creatorId,
     });
 
+    await User.findByIdAndUpdate(authUser._id, {
+      $inc: { balance: 0.4 },
+    });
+
     return NextResponse.json({ success: true, message: "Followed" });
   } catch (error) {
     console.error("POST /api/follow/follow error:", error);

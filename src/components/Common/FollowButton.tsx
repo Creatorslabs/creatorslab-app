@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import FollowCreatorModal from "../taskPage/FollowCreatorModal";
+import UnfollowCreatorModal from "../taskPage/UnfollowCreatorModal";
 
 type FollowButtonProps = {
   creatorId: string; // ID of the user to follow
@@ -17,6 +19,8 @@ export default function FollowButton({
   const [isFollowing, setIsFollowing] = useState<boolean | null>(null);
   const [isSelf, setIsSelf] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showFollowModal, setShowFollowModal] = useState(false);
+  const [showUnfollowModal, setShowUnfollowModal] = useState(false);
 
   const getFollowStatus = async () => {
     if (!creatorId) return;
@@ -37,8 +41,10 @@ export default function FollowButton({
 
   const toggleFollow = async () => {
     if (!creatorId) return;
+
     try {
       setLoading(true);
+
       const res = await fetch(
         `/api/follow/${isFollowing ? "unfollow" : "follow"}`,
         {
@@ -50,8 +56,15 @@ export default function FollowButton({
 
       const json = await res.json();
 
-      console.log(json);
-      
+      if (!res.ok) {
+        toast({
+          title: "Follow Failed",
+          description: json.message || "An unknown error occurred.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       if (json.success) {
         setIsFollowing(!isFollowing);
         if (onFollowClick) onFollowClick();
@@ -59,8 +72,9 @@ export default function FollowButton({
     } catch (err) {
       console.error("Follow toggle failed:", err);
       toast({
-        title: "Failed to follow",
-        description: (err as Error).message,
+        title: "Network Error",
+        description:
+          (err as Error).message || "Could not toggle follow status.",
         variant: "destructive",
       });
     } finally {
@@ -72,19 +86,41 @@ export default function FollowButton({
     getFollowStatus();
   }, [creatorId]);
 
+  const handleButtonClick = () => {
+    if (isFollowing) {
+      setShowUnfollowModal(true);
+    } else {
+      setShowFollowModal(true);
+    }
+  };
+
   return (
-    <Button
-      onClick={toggleFollow}
-      disabled={loading || isFollowing === null || isSelf}
-      className="bg-primary hover:bg-primary/80 text-white px-6"
-    >
-      {loading ? (
-        <Loader2 className="w-4 h-4 animate-spin" />
-      ) : isFollowing ? (
-        "Unfollow"
-      ) : (
-        "Follow"
-      )}
-    </Button>
+    <>
+      <Button
+        onClick={handleButtonClick}
+        disabled={loading || isFollowing === null || isSelf}
+        className="bg-primary hover:bg-primary/80 text-white px-6"
+      >
+        {loading ? (
+          <Loader2 className="w-4 h-4 animate-spin" />
+        ) : isFollowing ? (
+          "Unfollow"
+        ) : (
+          "Follow"
+        )}
+      </Button>
+      <FollowCreatorModal
+        isOpen={showFollowModal}
+        onClose={() => setShowFollowModal(false)}
+        handleFollow={toggleFollow}
+      />
+
+      <UnfollowCreatorModal
+        isOpen={showUnfollowModal}
+        onClose={() => setShowUnfollowModal(false)}
+        userId={creatorId}
+        handleUnfollow={toggleFollow}
+      />
+    </>
   );
 }

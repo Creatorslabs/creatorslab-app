@@ -4,49 +4,29 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "../ui/button";
-import { toast } from "@/hooks/use-toast";
 
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   userId: string;
+  handleUnfollow: () => Promise<void>;
 }
 
 export default function UnfollowCreatorModal({
   isOpen,
   onClose,
-  userId,
+  handleUnfollow,
 }: ModalProps) {
   const [isUnfollowing, setIsUnfollowing] = useState(false);
 
-  const handleUnfollow = async () => {
-    setIsUnfollowing(true);
+  const onUnfollowClick = async () => {
+    if (!handleUnfollow) return;
     try {
-      const res = await fetch("/api/follow/unfollow", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId }),
-      });
-
-      const json = await res.json();
-
-      if (json.success) {
-        toast({
-          title: "Unfollowed",
-          description: "You have unfollowed this creator and lost 5 CLS.",
-          variant: "destructive",
-        });
-        onClose();
-      } else {
-        throw new Error(json.message || "Failed to unfollow.");
-      }
-    } catch (err) {
-      console.error(err);
-      toast({
-        title: "Error",
-        description: "Something went wrong while trying to unfollow.",
-        variant: "destructive",
-      });
+      setIsUnfollowing(true);
+      await handleUnfollow();
+      onClose();
+    } catch (error) {
+      console.error("Unfollow failed:", error);
     } finally {
       setIsUnfollowing(false);
     }
@@ -93,7 +73,7 @@ export default function UnfollowCreatorModal({
               </div>
 
               <Button
-                onClick={handleUnfollow}
+                onClick={onUnfollowClick}
                 disabled={isUnfollowing}
                 className="w-full bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white font-medium py-3 mb-4"
               >

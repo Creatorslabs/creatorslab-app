@@ -2,27 +2,31 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "../ui/button";
-import { toast } from "@/hooks/use-toast";
 
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
+  handleFollow?: () => Promise<void>;
 }
 
-export default function FollowCreatorModal({ isOpen, onClose }: ModalProps) {
+export default function FollowCreatorModal({
+  isOpen,
+  onClose,
+  handleFollow,
+}: ModalProps) {
   const [isFollowing, setIsFollowing] = useState(false);
 
-  const handleFollow = async () => {
-    setIsFollowing(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setIsFollowing(false);
-    onClose();
-    toast({
-      title: "Success!",
-      description: "You are now following this creator and earned 0.4 CLS!",
-      variant: "success",
-    });
+  const onFollowClick = async () => {
+    if (!handleFollow) return;
+    try {
+      setIsFollowing(true);
+      await handleFollow();
+      onClose();
+    } catch (error) {
+      console.error("Follow failed:", error);
+    } finally {
+      setIsFollowing(false);
+    }
   };
 
   return (
@@ -66,7 +70,7 @@ export default function FollowCreatorModal({ isOpen, onClose }: ModalProps) {
               </div>
 
               <Button
-                onClick={handleFollow}
+                onClick={onFollowClick}
                 disabled={isFollowing}
                 className="w-full bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white font-medium py-3 mb-4"
               >
