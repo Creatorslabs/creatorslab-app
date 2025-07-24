@@ -22,8 +22,6 @@ export default function WalletOverviewTab({
   const solPriceInUSD = 157.34;
 
   const tokenList = useMemo(() => {
-    const getRandomTrend = () => (Math.random() * 10 - 5).toFixed(2); // random trend between -5% to +5%
-
     return [
       {
         symbol: "SOL",
@@ -31,7 +29,6 @@ export default function WalletOverviewTab({
         balance: balances.sol,
         price: (parseFloat(balances.sol) * solPriceInUSD).toFixed(2),
         iconUrl: "/icons/solana.png",
-        trend: getRandomTrend(),
       },
       {
         symbol: "USDC",
@@ -39,7 +36,6 @@ export default function WalletOverviewTab({
         balance: balances.usdc,
         price: parseFloat(balances.usdc).toFixed(2),
         iconUrl: "/icons/usdc.png",
-        trend: getRandomTrend(),
       },
       {
         symbol: "CLS",
@@ -47,7 +43,6 @@ export default function WalletOverviewTab({
         balance: balances.cls,
         price: (parseFloat(balances.cls) * 0.02).toFixed(2),
         iconUrl: "/icons/cls.png",
-        trend: getRandomTrend(),
       },
     ];
   }, [balances]);
@@ -83,11 +78,6 @@ export default function WalletOverviewTab({
             {isBalanceVisible ? `$${balances.compiled}` : "****"}
           </motion.div>
         </AnimatePresence>
-
-        <div className="flex items-center gap-1 text-sm text-green-400">
-          <TrendingUp className="w-3 h-3" />
-          +12.5% (24h)
-        </div>
       </div>
 
       <div className="space-y-3">
@@ -143,11 +133,6 @@ export default function WalletOverviewTab({
                   </motion.div>
                 </AnimatePresence>
               </div>
-            </div>
-            <div className="flex items-center gap-1 text-xs text-green-400 mt-1">
-              <TrendingUp className="w-3 h-3" />
-              {parseFloat(token.trend) > 0 ? "+" : ""}
-              {token.trend}% (24h)
             </div>
           </div>
         ))}

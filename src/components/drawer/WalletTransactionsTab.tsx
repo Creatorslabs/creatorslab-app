@@ -7,12 +7,16 @@ import {
   ArrowDownLeft,
   ExternalLink,
   TrendingUp,
+  BadgeDollarSign,
+  Tag,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useSolanaConnection } from "../context/SolanaConnectionContext";
 import { formatDistanceToNow } from "date-fns";
+import Link from "next/link";
 
 type Transaction = {
   id: string;
@@ -22,14 +26,36 @@ type Transaction = {
   timestamp: string;
   sender: string;
   receiver: string;
+  interface: string;
 };
+
+function formatTransactionType(type: string) {
+  return type.replace(/_/g, " ").replace(/\bnft\b/gi, "NFT");
+}
 
 const getIcon = (type: string) => {
   const lower = type.toLowerCase();
-  if (lower === "send")
+
+  if (lower === "send") {
     return <ArrowUpRight className="text-red-400 w-4 h-4" />;
-  if (lower === "receive")
+  }
+
+  if (lower === "receive") {
     return <ArrowDownLeft className="text-green-400 w-4 h-4" />;
+  }
+
+  if (lower === "nft_sale") {
+    return <BadgeDollarSign className="text-yellow-400 w-4 h-4" />;
+  }
+
+  if (lower === "nft_listing") {
+    return <Tag className="text-sky-400 w-4 h-4" />;
+  }
+
+  if (lower === "compressed_nft_mint") {
+    return <Sparkles className="text-purple-400 w-4 h-4" />;
+  }
+
   return <TrendingUp className="text-blue-400 w-4 h-4" />;
 };
 
@@ -42,6 +68,17 @@ const getSolscanUrl = (network: string, address: string) => {
       ? "?cluster=testnet"
       : "";
   return `${base}${address}${suffix}`;
+};
+
+export const getSolscanTxUrl = (network: string, signature: string) => {
+  const base = "https://solscan.io/tx/";
+  const suffix =
+    network === "devnet"
+      ? "?cluster=devnet"
+      : network === "testnet"
+      ? "?cluster=testnet"
+      : "";
+  return `${base}${signature}${suffix}`;
 };
 
 const shortenAddress = (address: string) =>
@@ -76,10 +113,25 @@ export default function WalletTransactionsTab({
   }, [network]);
 
   return (
-    <div className="space-y-4 px-6 h-[calc(100vh-120px)] overflow-y-auto">
-      <h3 className="text-sm font-medium text-gray-400">Recent Activity</h3>
+    <div className="space-y-4 px-6 h-full justify-between">
+      <div className="flex items-center justify-between">
+        <h2 className="text-white text-lg font-semibold">
+          Recent Transactions
+        </h2>
 
-      <div className="space-y-3">
+        {!loading && transactions.length > 0 && (
+          <Link
+            href={getSolscanUrl(network, walletAddress)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-primary hover:underline"
+          >
+            View All
+          </Link>
+        )}
+      </div>
+
+      <div className="space-y-3 h-[calc(100vh-460px)] overflow-y-auto">
         {loading &&
           Array.from({ length: 4 }, (_, i) => (
             <Skeleton
@@ -97,15 +149,28 @@ export default function WalletTransactionsTab({
         {!loading &&
           transactions.map((tx, i) => {
             const type = tx.type.toLowerCase();
-            const directionLabel =
-              type === "receive"
-                ? `From: ${shortenAddress(tx.sender)}`
-                : type === "send"
-                ? `To: ${shortenAddress(tx.receiver)}`
-                : `From: ${shortenAddress(tx.sender)}`;
 
             const isSend = type === "send";
             const isReceive = type === "receive";
+            const isSale = type === "nft_sale";
+            const isListing = type === "nft_listing";
+            const isMint = type === "compressed_nft_mint";
+
+            const directionLabel = isReceive
+              ? `From: ${shortenAddress(tx.sender)}`
+              : isSend
+              ? `To: ${shortenAddress(tx.receiver)}`
+              : isSale
+              ? `Sold to: ${shortenAddress(tx.receiver)}`
+              : isListing
+              ? `Listed by: ${shortenAddress(tx.sender)}`
+              : isMint
+              ? `Minted by: ${shortenAddress(tx.sender)}`
+              : tx.sender
+              ? `From: ${shortenAddress(tx.sender)}`
+              : "Unknown Source";
+
+            const amountPrefix = isSend ? "-" : "+";
 
             return (
               <motion.div
@@ -122,7 +187,7 @@ export default function WalletTransactionsTab({
                     </div>
                     <div>
                       <div className="font-medium text-white text-sm capitalize">
-                        {type}
+                        {formatTransactionType(type)}
                       </div>
                       <div className="text-xs text-gray-400">
                         {formatDistanceToNow(new Date(tx.timestamp))} ago
@@ -140,8 +205,10 @@ export default function WalletTransactionsTab({
                           : "text-gray-300"
                       )}
                     >
-                      {isSend ? "-" : "+"}
-                      {tx.amount} {tx.currency}
+                      {isSend || isReceive
+                        ? `${amountPrefix}${tx.amount}`
+                        : tx.amount}{" "}
+                      {tx.currency}
                     </div>
                   </div>
                 </div>
@@ -149,25 +216,23 @@ export default function WalletTransactionsTab({
                 <div className="text-xs text-muted-foreground pt-2 pl-11 break-all">
                   {directionLabel}
                 </div>
+
+                {tx.interface === "sol" && (
+                  <div className="pt-2 pl-11">
+                    <Link
+                      href={getSolscanTxUrl(network, tx.id)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-blue-400 hover:underline"
+                    >
+                      View on Solscan ↗
+                    </Link>
+                  </div>
+                )}
               </motion.div>
             );
           })}
       </div>
-
-      {!loading && transactions.length > 0 && (
-        <div className="flex justify-center pt-4">
-          <a
-            href={getSolscanUrl(network, walletAddress)}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Button variant="ghost" className="text-sm text-primary">
-              View More on Solscan
-              <ExternalLink className="w-4 h-4 ml-1" />
-            </Button>
-          </a>
-        </div>
-      )}
     </div>
   );
 }

@@ -52,20 +52,6 @@ export default function SignIn() {
     },
   });
 
-  const { connectWallet } = useConnectWallet({
-    onSuccess: ({ wallet }) => {
-      console.log(wallet.address);
-      // router.push(redirectTo);
-    },
-    onError: (error) => {
-      console.error("Login error:", error);
-      toast({
-        title: error || "Login failed",
-        variant: "destructive",
-      });
-    },
-  });
-
   const handleWalletConnect = () => {
     setIsLoading(true);
     try {
@@ -109,6 +95,22 @@ export default function SignIn() {
     if (!email) return;
 
     setIsLoading(true);
+
+    const res = await fetch("/api/user/exist", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
+
+    if (!res.ok) {
+      throw new Error("Error vetting user.");
+    }
+
+    const { exist } = await res.json();
+
+    if (!exist) {
+      throw new Error("User does not exist, please signup first!");
+    }
+
     try {
       await sendCode({ email, disableSignup: true });
       setStep(2);

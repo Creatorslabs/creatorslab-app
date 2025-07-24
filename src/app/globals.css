@@ -119,6 +119,10 @@
   }
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   @apply font-inter antialiased text-base leading-6 text-foreground;
 }
@@ -132,7 +136,6 @@ body {
   }
 }
 
-/* Hide number input arrows (Chrome, Safari, Edge) */
 .input-no-spinner::-webkit-outer-spin-button,
 .input-no-spinner::-webkit-inner-spin-button {
   -webkit-appearance: none;
@@ -142,4 +145,24 @@ body {
 /* Firefox */
 .input-no-spinner[type="number"] {
   -moz-appearance: textfield;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(180, 180, 180, 0.4);
+  border-radius: 10px;
+  border: none;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(180, 180, 180, 0.4) transparent;
 }

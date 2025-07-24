@@ -4,6 +4,7 @@ import { privy } from "@/lib/privyClient";
 import connectDB from "@/lib/connectDB";
 import { IUser, User } from "@/lib/models/User";
 import { Follow } from "@/lib/models/Follow";
+import { logBalanceTransaction } from "@/lib/helpers/logBalanceTransaction";
 
 export async function POST(req: Request) {
   try {
@@ -82,6 +83,12 @@ export async function POST(req: Request) {
 
     await User.findByIdAndUpdate(authUser._id, {
       $inc: { balance: 0.4 },
+    });
+
+    await logBalanceTransaction({
+      userId: authUser._id,
+      type: "follow_creator",
+      amount: 0.4,
     });
 
     return NextResponse.json({ success: true, message: "Followed" });

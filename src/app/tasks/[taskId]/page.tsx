@@ -17,6 +17,7 @@ import { useLinkAccount, usePrivy } from "@privy-io/react-auth";
 import { SimpleIcon } from "@/components/Common/SimpleIcon";
 import Link from "next/link";
 import { ProofSubmissionSection } from "@/components/Common/ProofSubmissionSection";
+import TaskNotFound from "@/components/Common/TaskNotFound";
 
 interface Task {
   id: string;
@@ -174,13 +175,15 @@ export default function TaskViewPage() {
     });
   };
 
-  if (loading || !task) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-background">
         <LoaderModal />
       </div>
     );
   }
+
+  if (!task) return <TaskNotFound />;
 
   return (
     <div className="min-h-screen bg-background text-white">

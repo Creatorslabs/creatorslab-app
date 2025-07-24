@@ -27,7 +27,7 @@ export const SolanaConnectionProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const [network, setNetwork] = useState<Network>("mainnet-beta");
+  const [network, setNetwork] = useState<Network>("devnet");
 
   const connection = useMemo(() => getConnection(network), [network]);
 

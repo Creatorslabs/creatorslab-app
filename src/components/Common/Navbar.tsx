@@ -4,7 +4,12 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Search } from "lucide-react";
-import { useConnectOrCreateWallet, usePrivy } from "@privy-io/react-auth";
+import {
+  useConnectOrCreateWallet,
+  useCreateWallet,
+  useLogout,
+  usePrivy,
+} from "@privy-io/react-auth";
 import { Suspense, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -34,34 +39,37 @@ function NavbarComp() {
 
   const [isOpen, setIsOpen] = useState(false);
 
-  const { connectOrCreateWallet } = useConnectOrCreateWallet({
-    onSuccess: ({ wallet }) => {
-      console.log("Wallet created or connected:", wallet);
+  const { linkWallet } = usePrivy();
+  const { logout } = useLogout({
+    onSuccess: () => router.push("/auth/signin"),
+  });
 
-      toast({
-        title: "Wallet Linked",
-        description: `Wallet ${wallet.address.slice(
-          0,
-          6
-        )}... linked successfully.`,
+  const connectWallet = () => {
+    try {
+      linkWallet({
+        walletChainType: "solana-only",
+        walletList: [
+          "phantom",
+          "backpack",
+          "detected_solana_wallets",
+          "solflare",
+          "wallet_connect",
+        ],
+        description: "Coonect your solana wallet",
       });
 
       fetch("/api/save-wallet", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ wallet: wallet.address }),
+        method: "PATCH",
       });
-    },
-
-    onError: (error) => {
+    } catch (error) {
       console.error("Wallet linking failed:", error);
       toast({
         title: "Wallet Error",
-        description: error || "Failed to link wallet.",
+        description: (error as Error).message || "Failed to link wallet.",
         variant: "destructive",
       });
-    },
-  });
+    }
+  };
 
   const closeModal = () => {
     setIsOpen(false);
@@ -154,7 +162,7 @@ function NavbarComp() {
           <Button
             variant="ghost"
             onClick={() => router.push("/auth/signin")}
-            className="text-xs lg:text-sm text-gray-300 px-4"
+            className="text-xs lg:text-sm text-gray-300 px-4 hover:bg-card"
           >
             Sign in
           </Button>
@@ -176,13 +184,13 @@ function NavbarComp() {
             <WalletSidebar
               privyUser={privyUser}
               balances={balances}
-              onCreateWallet={connectOrCreateWallet}
+              onCreateWallet={connectWallet}
             />
 
             {loading ? (
               <Skeleton className="w-6 h-6 lg:w-8 lg:h-8 rounded-full" />
             ) : (
-              <UserDropdown user={user} />
+              <UserDropdown user={user} onLogOut={logout} />
             )}
           </>
         )}

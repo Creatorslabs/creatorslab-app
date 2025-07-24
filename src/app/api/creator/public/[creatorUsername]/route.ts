@@ -16,6 +16,8 @@ export async function GET(_: Request, { params }: Params) {
 
     const { creatorUsername } = await params;
 
+    console.log("Creator username:", creatorUsername);
+
     const dbUser = await User.findOne({
       username: creatorUsername,
     }).lean<IUser>();
@@ -36,6 +38,8 @@ export async function GET(_: Request, { params }: Params) {
         { status: 403 }
       );
     }
+
+    console.log("DB user:", dbUser);
 
     const privyUser = await privy.getUserByEmail(dbUser.email!);
 

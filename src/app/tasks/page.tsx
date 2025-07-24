@@ -18,6 +18,7 @@ interface TaskCard {
   shares: string;
   gradient: string;
   avatar: string;
+  expiration: Date;
 }
 
 const sortOptions = ["newest", "oldest", "trending"];
@@ -135,7 +136,33 @@ function TasksPage() {
       {loading ? (
         <p className="text-gray-400 text-center">Loading tasks...</p>
       ) : tasks.length === 0 ? (
-        <p className="text-gray-400">No tasks found.</p>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="w-full py-12 flex flex-col items-center justify-center bg-card border border-border rounded-xl"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-12 h-12 text-gray-500 mb-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M9.75 9.75h4.5m-8.25 8.25h12a1.5 1.5 0 001.5-1.5V7.5a1.5 1.5 0 00-1.5-1.5h-12a1.5 1.5 0 00-1.5 1.5v9a1.5 1.5 0 001.5 1.5z"
+            />
+          </svg>
+          <h3 className="text-white text-lg font-semibold mb-1">
+            No Tasks Found
+          </h3>
+          <p className="text-sm text-gray-400 mb-4 max-w-md text-center">
+            There are currently no tasks that match your filters or search.
+          </p>
+        </motion.div>
       ) : (
         <>
           <motion.div
@@ -164,8 +191,6 @@ function TasksPage() {
                 </Button>
               )
             )}
-
-            {/* Invisible trigger still needed for desktop scroll */}
             {isDesktop && <div ref={observerRef} className="h-1" />}
           </div>
         </>

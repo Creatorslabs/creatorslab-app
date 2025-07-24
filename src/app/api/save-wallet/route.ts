@@ -1,21 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import connectDB from "@/lib/connectDB";
 import { User } from "@/lib/models/User";
 import { cookies } from "next/headers";
 import { privy } from "@/lib/privyClient";
 
-export async function POST(req: NextRequest) {
+export async function PATCH() {
   try {
     await connectDB();
-
-    const { wallet } = await req.json();
-
-    if (!wallet) {
-      return NextResponse.json(
-        { success: false, message: "Wallet is required" },
-        { status: 400 }
-      );
-    }
 
     const cookieStore = await cookies();
     const idToken = cookieStore.get("privy-id-token")?.value;
@@ -33,9 +24,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (!privyUser.wallet) {
+      return NextResponse.json(
+        { message: "No wallet found!" },
+        { status: 401 }
+      );
+    }
+
     const user = await User.findOneAndUpdate(
       { privyId: privyUser.id },
-      { wallet },
+      { wallet: privyUser?.wallet.address },
       { new: true }
     );
 

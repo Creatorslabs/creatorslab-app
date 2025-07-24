@@ -142,6 +142,7 @@ export async function GET(req: Request) {
       createdAt: task.createdAt || new Date(),
       participationCount:
         participationCountMap[(task._id as string).toString()] || 0,
+      expiration: task.expiration,
     }));
 
     if (sort === "trending") {

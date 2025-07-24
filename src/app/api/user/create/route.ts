@@ -1,5 +1,6 @@
 import connectDB from "@/lib/connectDB";
 import { generateReferralCode } from "@/lib/helpers/generate-referal-code";
+import { logBalanceTransaction } from "@/lib/helpers/logBalanceTransaction";
 import { User } from "@/lib/models/User";
 import { NextResponse } from "next/server";
 
@@ -22,7 +23,8 @@ export async function POST(req: Request) {
     const newUser = await User.create({
       privyId,
       email: email || null,
-      username: email?.split("@")[0] || `user_${Math.floor(Math.random() * 10000)}`,
+      username:
+        email?.split("@")[0] || `user_${Math.floor(Math.random() * 10000)}`,
       role,
       status: "Active",
       referralCode: generateReferralCode(),
@@ -35,9 +37,18 @@ export async function POST(req: Request) {
       },
     });
 
+    await logBalanceTransaction({
+      userId: newUser._id,
+      type: "signup_bonus",
+      amount: 3,
+    });
+
     return NextResponse.json({ success: true, data: newUser });
   } catch (err) {
     console.error("User creation error:", err);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }

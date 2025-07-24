@@ -3,7 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { privy } from "@/lib/privyClient";
 import connectDB from "@/lib/connectDB";
 import { User } from "@/lib/models/User";
-import { Task } from "@/lib/models/Task"; 
+import { Task } from "@/lib/models/Task";
+import { logBalanceTransaction } from "@/lib/helpers/logBalanceTransaction";
 
 export async function POST(req: NextRequest) {
   try {
@@ -87,6 +88,12 @@ export async function POST(req: NextRequest) {
       expiration: expiration || null,
       image,
       creator: localUser._id,
+    });
+
+    await logBalanceTransaction({
+      userId: localUser._id,
+      type: "create_task",
+      amount: rewardPoints * maxParticipants,
     });
 
     return NextResponse.json(

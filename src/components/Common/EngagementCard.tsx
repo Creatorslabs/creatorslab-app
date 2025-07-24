@@ -18,6 +18,7 @@ interface EngagementCardProps {
     shares: string;
     reward: string;
     avatar: string;
+    expiration: Date;
   };
 }
 
@@ -72,25 +73,32 @@ export default function EngagementCard({ index, card }: EngagementCardProps) {
           </div>
         </div>
 
-        <div className="p-4 pt-8">
-          <h3 className="text-white font-semibold text-base mb-1">
-            {card.title}
-          </h3>
-          <p className="text-xs text-gray-400 mb-4">{card.description}</p>
+        <div className="p-4 pt-8 space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-white font-semibold text-base">{card.title}</h3>
 
-          <div className="flex items-center gap-4 text-xs text-gray-300">
+            {card.expiration && new Date(card.expiration) < new Date() && (
+              <span className="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-md uppercase font-bold tracking-wide">
+                Expired
+              </span>
+            )}
+          </div>
+
+          <p className="text-xs text-gray-400">{card.description}</p>
+
+          <div className="flex flex-wrap items-center gap-3 text-xs text-gray-300">
             <div className="bg-primary text-white text-xs font-semibold px-3 py-1 rounded-lg">
               {card.reward}
             </div>
-            <div className="flex bg-card px-3 py-1 items-center gap-1 rounded-lg">
+            <div className="flex items-center gap-1 bg-card px-3 py-1 rounded-lg">
               <Heart className="w-4 h-4" />
               <span>{card.likes}</span>
             </div>
-            <div className="flex bg-card px-3 py-1 items-center gap-1 rounded-lg">
+            <div className="flex items-center gap-1 bg-card px-3 py-1 rounded-lg">
               <MessageCircle className="w-4 h-4" />
               <span>{card.comments}</span>
             </div>
-            <div className="flex bg-card px-3 py-1 items-center gap-1 rounded-lg">
+            <div className="flex items-center gap-1 bg-card px-3 py-1 rounded-lg">
               <Share className="w-4 h-4" />
               <span>{card.shares}</span>
             </div>

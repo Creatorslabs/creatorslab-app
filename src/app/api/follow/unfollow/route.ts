@@ -4,6 +4,7 @@ import { privy } from "@/lib/privyClient";
 import connectDB from "@/lib/connectDB";
 import { IUser, User } from "@/lib/models/User";
 import { Follow } from "@/lib/models/Follow";
+import { logBalanceTransaction } from "@/lib/helpers/logBalanceTransaction";
 
 export async function POST(req: Request) {
   try {
@@ -81,6 +82,12 @@ export async function POST(req: Request) {
         $inc: { balance: -5 },
       }),
     ]);
+
+    await logBalanceTransaction({
+      userId: authUser._id,
+      type: "unfollow_creator",
+      amount: 5,
+    });
 
     return NextResponse.json({ success: true, message: "Unfollowed" });
   } catch (error) {

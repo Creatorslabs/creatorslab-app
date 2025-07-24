@@ -46,44 +46,90 @@ export async function GET(req: NextRequest) {
 
     const txs = await response.json();
 
-    const formatted = txs.map((tx: any) => {
-      let type = tx.type || "unknown";
-      let sender = "";
-      let receiver = "";
-      let currency = "SOL";
-      let amount = tx.nativeTransfers?.[0]?.amount || "0";
+    const formatted = txs
+      .map((tx: any) => {
+        let type = tx.type || "unknown";
+        let sender = "";
+        let receiver = "";
+        let currency = "SOL";
+        let amount = tx.nativeTransfers?.[0]?.amount || "0";
 
-      if (type === "TRANSFER" && tx.description) {
-        const matches = tx.description.match(
-          /(\w{32,}) transferred ([\d.]+) (\w+) to (\w{32,})/
+        const desc = tx.description || "";
+        const lowerDesc = desc.toLowerCase();
+
+        console.log(
+          "[TX_API_GET] tx:",
+          `Type:${tx.type} - Description: ${tx.description}`
         );
-        if (matches) {
-          sender = matches[1];
-          amount = matches[2];
-          currency = matches[3];
-          receiver = matches[4];
 
-          if (sender === walletAddress) {
-            type = "send";
-          } else if (receiver === walletAddress) {
-            type = "receive";
+        if (type === "NFT_SALE" && desc.includes("sold nft to")) {
+          const match = desc.match(
+            /(\w{32,}) sold nft to (\w{32,}) for ([\d.]+) (\w+)/
+          );
+          if (match) {
+            sender = match[1];
+            receiver = match[2];
+            amount = match[3];
+            currency = match[4];
+            type = "nft_sale";
+          }
+        } else if (type === "NFT_LISTING" && desc.includes("listed nft for")) {
+          const match = desc.match(/(\w{32,}) listed nft for ([\d.]+) (\w+)/);
+          if (match) {
+            sender = match[1];
+            amount = match[2];
+            currency = match[3];
+            type = "nft_listing";
+          }
+        } else if (type === "COMPRESSED_NFT_MINT" && desc.includes("minted")) {
+          const match = desc.match(/(\w{32,}) minted (\d+) compressed nfts/);
+          if (match) {
+            sender = match[1];
+            amount = match[2];
+            currency = "NFT";
+            type = "compressed_nft_mint";
+          }
+        } else if (type === "TRANSFER" && desc.includes("transferred")) {
+          const match = desc.match(
+            /(\w{32,}) transferred a total ([\d.]+) (\w+) to/
+          );
+          if (match) {
+            sender = match[1];
+            amount = match[2];
+            currency = match[3];
+
+            if (sender === walletAddress) {
+              type = "send";
+            } else {
+              type = "receive";
+            }
           }
         }
-      }
 
-      return {
-        id: tx.signature,
-        type,
-        amount,
-        currency:
-          currency === "Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr"
-            ? "USDC"
-            : currency.toUpperCase(),
-        timestamp: format(new Date(tx.timestamp * 1000), "yyyy-MM-dd HH:mm:ss"),
-        sender,
-        receiver,
-      };
-    });
+        const numericAmount = parseFloat(amount || "0");
+        const isMint = type === "compressed_nft_mint";
+        const isRealTransaction = isMint || numericAmount > 0.00001;
+
+        if (!isRealTransaction) return null;
+
+        return {
+          id: tx.signature,
+          type,
+          amount,
+          currency:
+            currency === "Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr"
+              ? "USDC"
+              : currency.toUpperCase(),
+          timestamp: format(
+            new Date(tx.timestamp * 1000),
+            "yyyy-MM-dd HH:mm:ss"
+          ),
+          sender,
+          receiver,
+          interface: "sol",
+        };
+      })
+      .filter(Boolean);
 
     return NextResponse.json({ transactions: formatted });
   } catch (err) {

@@ -10,14 +10,21 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { useLogout } from "@privy-io/react-auth";
-import { useRouter } from "next/navigation";
+import { useLoader } from "@/hooks/useLoader";
 
-export default function UserDropdown({ user }: { user: any }) {
-  const router = useRouter();
-  const { logout } = useLogout({
-    onSuccess: () => router.push("/auth/signin"),
-  });
+export default function UserDropdown({
+  user,
+  onLogOut,
+}: {
+  user: any;
+  onLogOut: () => void;
+}) {
+  const { LoaderModal, showLoader } = useLoader();
+
+  const handleLogout = () => {
+    showLoader({ message: "Logging out." });
+    onLogOut();
+  };
 
   return (
     <DropdownMenu>
@@ -37,7 +44,7 @@ export default function UserDropdown({ user }: { user: any }) {
             {user?.email}
           </div>
         </DropdownMenuLabel>
-        
+
         <DropdownMenuSeparator className="bg-border" />
 
         <DropdownMenuItem asChild>
@@ -49,15 +56,16 @@ export default function UserDropdown({ user }: { user: any }) {
           </Link>
         </DropdownMenuItem>
 
-        <DropdownMenuSeparator className="bg-border"  />
+        <DropdownMenuSeparator className="bg-border" />
 
         <DropdownMenuItem
-          onClick={logout}
+          onClick={handleLogout}
           className="text-sm text-destructive hover:text-destructive bg-transparent px-3 py-2 cursor-pointer hover:bg-destructive/10 rounded"
         >
           Logout
         </DropdownMenuItem>
       </DropdownMenuContent>
+      <LoaderModal />
     </DropdownMenu>
   );
 }

@@ -69,7 +69,7 @@ export default function SignUp() {
 
       const { exist } = await res.json();
 
-      if (exist) {
+      if (!exist) {
         setStep(2);
       } else {
         setError("User already exist, go to login!");
