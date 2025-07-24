@@ -2,16 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-
-const fallbackCreators = [
-  "https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=40&h=40&fit=crop",
-  "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=40&h=40&fit=crop",
-  "https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=40&h=40&fit=crop",
-  "https://images.pexels.com/photos/1130626/pexels-photo-1130626.jpeg?auto=compress&cs=tinysrgb&w=40&h=40&fit=crop",
-  "https://images.pexels.com/photos/1043471/pexels-photo-1043471.jpeg?auto=compress&cs=tinysrgb&w=40&h=40&fit=crop",
-  "https://images.pexels.com/photos/1040880/pexels-photo-1040880.jpeg?auto=compress&cs=tinysrgb&w=40&h=40&fit=crop",
-  "https://images.pexels.com/photos/1065084/pexels-photo-1065084.jpeg?auto=compress&cs=tinysrgb&w=40&h=40&fit=crop",
-];
+import { logger } from "@/lib/logger";
 
 export default function TopCreators() {
   const [topCreators, setTopCreators] = useState<string[]>([]);
@@ -23,8 +14,7 @@ export default function TopCreators() {
         const data = await res.json();
         setTopCreators(data.creators);
       } catch (error) {
-        console.error("Failed to fetch top creators:", error);
-        setTopCreators(fallbackCreators);
+        logger.error("Failed to fetch top creators:", error);
       }
     };
 

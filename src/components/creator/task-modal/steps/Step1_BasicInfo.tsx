@@ -8,6 +8,7 @@ import { useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { upload } from "@vercel/blob/client";
 import { toast } from "@/hooks/use-toast";
+import { logger } from "@/lib/logger";
 
 export default function Step1_BasicInfo({
   formData,
@@ -79,7 +80,7 @@ export default function Step1_BasicInfo({
         description: "Failed to upload image, please try again!",
         variant: "destructive",
       });
-      console.error("Upload failed. Try again.");
+      logger.error("Upload failed. Try again.");
       setImagePreview(null);
     } finally {
       setUploading(false);

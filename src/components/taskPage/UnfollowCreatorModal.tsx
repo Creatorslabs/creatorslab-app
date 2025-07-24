@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "../ui/button";
+import { logger } from "@/lib/logger";
 
 interface ModalProps {
   isOpen: boolean;
@@ -26,7 +27,7 @@ export default function UnfollowCreatorModal({
       await handleUnfollow();
       onClose();
     } catch (error) {
-      console.error("Unfollow failed:", error);
+      logger.error("Unfollow failed:", error);
     } finally {
       setIsUnfollowing(false);
     }

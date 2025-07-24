@@ -3,6 +3,7 @@ import connectDB from "@/lib/connectDB";
 import { User } from "@/lib/models/User";
 import { cookies } from "next/headers";
 import { privy } from "@/lib/privyClient";
+import { logger } from "@/lib/logger";
 
 export async function PATCH() {
   try {
@@ -53,7 +54,7 @@ export async function PATCH() {
       },
     });
   } catch (err) {
-    console.error("Error saving wallet:", err);
+    logger.error("Error saving wallet:", err);
     return NextResponse.json(
       { success: false, message: "Internal Server Error" },
       { status: 500 }

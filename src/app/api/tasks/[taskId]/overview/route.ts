@@ -1,4 +1,5 @@
 import connectDB from "@/lib/connectDB";
+import { logger } from "@/lib/logger";
 import { Participation } from "@/lib/models/Participation";
 import { Task } from "@/lib/models/Task";
 import { ITask } from "@/types/Task";
@@ -40,7 +41,7 @@ export async function GET(
       currentParticipants,
     });
   } catch (error) {
-    console.error("[TASK_OVERVIEW_ERROR]", error);
+    logger.error("[TASK_OVERVIEW_ERROR]", error);
     return NextResponse.json({ message: "Server Error" }, { status: 500 });
   }
 }

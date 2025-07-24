@@ -11,6 +11,7 @@ import PurchaseEarnCard from "@/components/Home/PurchaseEarnCard";
 import CTA from "@/components/Home/CTA";
 import { useLoader } from "@/hooks/useLoader";
 import Link from "next/link";
+import { logger } from "@/lib/logger";
 
 interface TaskCard {
   id: string;
@@ -23,6 +24,7 @@ interface TaskCard {
   shares: string;
   gradient: string;
   avatar: string;
+  expiration: Date;
 }
 
 export default function Home() {
@@ -43,10 +45,10 @@ export default function Home() {
           setTaskCards(data.data.newestTask);
           setTrendingTasks(data.data.trendingTask);
         } else {
-          console.error("Failed to load tasks:", data.error);
+          logger.error("Failed to load tasks:", data.error);
         }
       } catch (error) {
-        console.error("Error fetching tasks:", error);
+        logger.error("Error fetching tasks:", error);
       } finally {
         hideLoader();
       }

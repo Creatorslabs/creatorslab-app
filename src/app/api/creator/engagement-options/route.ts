@@ -1,6 +1,7 @@
 import connectDB from "@/lib/connectDB";
 import { Engagement } from "@/lib/models/Engagement";
 import { NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
 
 export async function GET() {
   try {
@@ -39,7 +40,7 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error("Error fetching engagement options:", error);
+    logger.error("Error fetching engagement options:", error);
     return NextResponse.json(
       {
         success: false,

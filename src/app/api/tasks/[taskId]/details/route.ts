@@ -7,6 +7,7 @@ import { Task } from "@/lib/models/Task";
 import { IParticipation, Participation } from "@/lib/models/Participation";
 import { getTimeRemaining } from "@/lib/helpers/date-helpers";
 import { getTaskRequirements } from "@/lib/helpers/task-requirement";
+import { logger } from "@/lib/logger";
 
 interface Task {
   _id: string;
@@ -170,7 +171,7 @@ export async function GET(
 
     return NextResponse.json({ success: true, data: response });
   } catch (err) {
-    console.error("GET /api/task/[taskId] error:", err);
+    logger.error("GET /api/task/[taskId] error:", err);
     return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
 }

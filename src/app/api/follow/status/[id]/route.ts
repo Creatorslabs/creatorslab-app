@@ -4,6 +4,7 @@ import { privy } from "@/lib/privyClient";
 import connectDB from "@/lib/connectDB";
 import { IUser, User } from "@/lib/models/User";
 import { Follow } from "@/lib/models/Follow";
+import { logger } from "@/lib/logger";
 
 export async function GET(
   _req: Request,
@@ -57,7 +58,7 @@ export async function GET(
       isSelf: creatorId === localUser._id.toString(),
     });
   } catch (error) {
-    console.error("GET /api/follow/status/[id] error:", error);
+    logger.error("GET /api/follow/status/[id] error:", error);
     return NextResponse.json(
       { success: false, message: "Internal Server Error" },
       { status: 500 }

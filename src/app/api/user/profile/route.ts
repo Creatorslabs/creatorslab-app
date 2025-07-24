@@ -7,6 +7,7 @@ import { IUser, User } from "@/lib/models/User";
 import { Participation } from "@/lib/models/Participation";
 import { privy } from "@/lib/privyClient";
 import "@/lib/models/Task";
+import { logger } from "@/lib/logger";
 
 export async function GET() {
   try {
@@ -70,7 +71,7 @@ export async function GET() {
 
     return NextResponse.json({ success: true, data: response });
   } catch (error) {
-    console.error("GET /api/user/profile error:", error);
+    logger.error("GET /api/user/profile error:", error);
     return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
 }

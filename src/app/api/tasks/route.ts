@@ -3,6 +3,7 @@ import { Participation } from "@/lib/models/Participation";
 import { Task } from "@/lib/models/Task";
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
+import { logger } from "@/lib/logger";
 
 export async function GET(req: Request) {
   try {
@@ -16,8 +17,6 @@ export async function GET(req: Request) {
     const type = searchParams.get("type");
     const rawSearch = searchParams.get("search")?.trim();
     const creatorId = searchParams.get("creatorId");
-
-    console.log("Creator ID:", creatorId);
 
     const skip = (page - 1) * limit;
 
@@ -103,11 +102,11 @@ export async function GET(req: Request) {
     pipeline.push({ $skip: skip });
     pipeline.push({ $limit: limit });
 
-    // console.log("AGGREGATE PIPELINE:", JSON.stringify(pipeline, null, 2));
+    // logger.log("AGGREGATE PIPELINE:", JSON.stringify(pipeline, null, 2));
 
     const allTasks = await Task.aggregate(pipeline);
 
-    // console.log("All tasks:", allTasks);
+    // logger.log("All tasks:", allTasks);
 
     const participations = await Participation.find({
       taskId: { $in: allTasks.map((t) => t._id) },
@@ -164,7 +163,7 @@ export async function GET(req: Request) {
       },
     });
   } catch (error) {
-    console.error("GET /api/tasks error:", error);
+    logger.error("GET /api/tasks error:", error);
     return NextResponse.json(
       { success: false, message: "Internal Server Error" },
       { status: 500 }

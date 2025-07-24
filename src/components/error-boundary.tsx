@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Home, RefreshCw, AlertTriangle } from "lucide-react";
 import Image from "next/image";
+import { logger } from "@/lib/logger";
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -30,7 +31,7 @@ export class ErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error("Error caught by boundary:", error, errorInfo);
+    logger.error("Error caught by boundary:", error, errorInfo);
   }
 
   resetError = () => {

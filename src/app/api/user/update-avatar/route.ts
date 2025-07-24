@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/connectDB";
 import { User } from "@/lib/models/User";
 import { del } from "@vercel/blob";
+import { logger } from "@/lib/logger";
 
 export async function POST(req: NextRequest) {
   await connectDB();
@@ -33,7 +34,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ message: "Avatar updated", avatar: newUrl });
   } catch (error) {
-    console.error("Avatar update error:", error);
+    logger.error("Avatar update error:", error);
     return NextResponse.json(
       { message: "Internal server error" },
       { status: 500 }

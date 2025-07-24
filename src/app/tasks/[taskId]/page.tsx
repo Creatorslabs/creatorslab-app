@@ -18,6 +18,7 @@ import { SimpleIcon } from "@/components/Common/SimpleIcon";
 import Link from "next/link";
 import { ProofSubmissionSection } from "@/components/Common/ProofSubmissionSection";
 import TaskNotFound from "@/components/Common/TaskNotFound";
+import { logger } from "@/lib/logger";
 
 interface Task {
   id: string;
@@ -78,7 +79,7 @@ export default function TaskViewPage() {
       const { data } = await res.json();
       setTask(data);
     } catch (error) {
-      console.error(error);
+      logger.error(error);
     } finally {
       setLoading(false);
       hideLoader();
@@ -160,7 +161,7 @@ export default function TaskViewPage() {
       setShowEarnedModal(true);
       setShowSuccessModal(true);
     } catch (error) {
-      console.error("Error completing task:", error);
+      logger.error("Error completing task:", error);
     } finally {
       hideLoader();
     }

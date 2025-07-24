@@ -5,6 +5,7 @@ import { toast } from "@/hooks/use-toast";
 import { useLoader } from "@/hooks/useLoader";
 import CreatorProfile from "./CreatorProfile";
 import UserProfile from "./UserProfile";
+import { logger } from "@/lib/logger";
 
 const UnknownRole = ({ onRefresh }: { onRefresh: () => void }) => (
   <div className="flex flex-col items-center justify-center min-h-screen gap-4 text-center">
@@ -47,7 +48,7 @@ export default function UserProfileWrapper() {
         setUnknown(true);
       }
     } catch (error) {
-      console.error("Failed to load profile:", error);
+      logger.error("Failed to load profile:", error);
       toast({ title: "Error loading profile", variant: "destructive" });
       setUnknown(true);
     } finally {

@@ -8,6 +8,7 @@ import { usePrivy } from "@privy-io/react-auth";
 import PrivateKeyModal from "./PrivateKeyModal";
 import { useUserBalances } from "@/hooks/useUserBalances";
 import { useSolanaConnection } from "../context/SolanaConnectionContext";
+import { logger } from "@/lib/logger";
 
 export default function WalletSettingsTab() {
   const { user, ready, authenticated, exportWallet } = usePrivy();
@@ -35,7 +36,7 @@ export default function WalletSettingsTab() {
       setExportedKey(privateKey!);
       setIsModalOpen(true);
     } catch (error) {
-      console.error("Export failed:", error);
+      logger.error("Export failed:", error);
     } finally {
       setExporting(false);
     }

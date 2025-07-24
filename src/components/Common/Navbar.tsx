@@ -19,6 +19,7 @@ import { MultiStepTaskModal } from "../creator/task-modal/MultiStepTaskModal";
 import WalletSidebar from "./WalletSidebar";
 import { useUserBalances } from "@/hooks/useUserBalances";
 import { toast } from "@/hooks/use-toast";
+import { logger } from "@/lib/logger";
 
 function NavbarComp() {
   const pathname = usePathname();
@@ -62,7 +63,7 @@ function NavbarComp() {
         method: "PATCH",
       });
     } catch (error) {
-      console.error("Wallet linking failed:", error);
+      logger.error("Wallet linking failed:", error);
       toast({
         title: "Wallet Error",
         description: (error as Error).message || "Failed to link wallet.",
@@ -108,10 +109,10 @@ function NavbarComp() {
               role: data.data.role,
             });
           } else {
-            console.warn("User fetch error:", data);
+            logger.warn("User fetch error:", data);
           }
         } catch (err) {
-          console.error("Error fetching user:", err);
+          logger.error("Error fetching user:", err);
         } finally {
           setLoading(false);
         }

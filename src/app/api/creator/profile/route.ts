@@ -7,6 +7,7 @@ import connectDB from "@/lib/connectDB";
 import { IUser, User } from "@/lib/models/User";
 import { Task } from "@/lib/models/Task";
 import { Task as ITask } from "@/types/Task";
+import { logger } from "@/lib/logger";
 
 export async function GET() {
   try {
@@ -81,7 +82,7 @@ export async function GET() {
 
     return NextResponse.json({ success: true, data: responseData });
   } catch (error) {
-    console.error("GET /api/user/dashboard error:", error);
+    logger.error("GET /api/user/dashboard error:", error);
     return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
 }

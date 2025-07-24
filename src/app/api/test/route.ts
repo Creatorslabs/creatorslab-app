@@ -2,6 +2,7 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { privy } from "@/lib/privyClient";
+import { logger } from "@/lib/logger";
 
 export async function GET() {
   try {
@@ -16,7 +17,7 @@ export async function GET() {
 
     return NextResponse.json({ user });
   } catch (err) {
-    console.error("Privy verification error:", err);
+    logger.error("Privy verification error:", err);
     return NextResponse.json({ message: "Invalid token" }, { status: 401 });
   }
 }

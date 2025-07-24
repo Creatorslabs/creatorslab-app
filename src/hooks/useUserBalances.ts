@@ -1,5 +1,6 @@
 import { useSolanaConnection } from "@/components/context/SolanaConnectionContext";
 import { useEffect, useState, useCallback } from "react";
+import { logger } from "@/lib/logger";
 
 type Balances = {
   compiled: string;
@@ -41,7 +42,7 @@ export function useUserBalances() {
 
       setError(null);
     } catch (err) {
-      console.error("Error fetching balances:", err);
+      logger.error("Error fetching balances:", err);
       setError((err as Error).message);
       setBalances(defaultBalances);
     } finally {

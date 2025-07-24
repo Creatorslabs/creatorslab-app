@@ -5,6 +5,7 @@ import { Task } from "@/lib/models/Task";
 import { User } from "@/lib/models/User";
 import { NextRequest, NextResponse } from "next/server";
 import mongoose from "mongoose";
+import { logger } from "@/lib/logger";
 
 export async function POST(request: NextRequest) {
   try {
@@ -90,7 +91,7 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error processing participation:", error);
+    logger.error("Error processing participation:", error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

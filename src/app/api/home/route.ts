@@ -1,4 +1,5 @@
 import connectDB from "@/lib/connectDB";
+import { logger } from "@/lib/logger";
 import { Participation } from "@/lib/models/Participation";
 import { Task } from "@/lib/models/Task";
 import { IUser, User } from "@/lib/models/User";
@@ -32,7 +33,7 @@ export async function GET(req: Request) {
     const idToken = cookieStore.get("privy-id-token")?.value;
 
     if (!idToken) {
-      console.warn("No Privy ID Token found in cookies");
+      logger.warn("No Privy ID Token found in cookies");
     }
 
     let localUserId: string | null = null;
@@ -49,11 +50,11 @@ export async function GET(req: Request) {
           if (localUser) {
             localUserId = localUser._id.toString();
           } else {
-            console.warn("⚠️ No local user found for privyId:", privyUser.id);
+            logger.warn("No local user found for privyId:", privyUser.id);
           }
         }
       } catch (err) {
-        console.error("❌ Privy token error:", err);
+        logger.error("Privy token error:", err);
       }
     }
 
@@ -137,7 +138,7 @@ export async function GET(req: Request) {
       },
     });
   } catch (error) {
-    console.error("GET /api/explore error:", error);
+    logger.error("GET /api/explore error:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

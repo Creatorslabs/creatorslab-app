@@ -6,6 +6,7 @@ import { IUser, User } from "@/lib/models/User";
 import { PublicKey } from "@solana/web3.js";
 import { getAssociatedTokenAddress, getAccount } from "@solana/spl-token";
 import { getConnection } from "@/lib/solana/getConnection";
+import { logger } from "@/lib/logger";
 
 const USDC_MINT = new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
 const USDC_MINT_DEV = new PublicKey(
@@ -89,7 +90,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ success: true, balances });
   } catch (error) {
-    console.error("GET /api/user/balances error:", error);
+    logger.error("GET /api/user/balances error:", error);
     return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
 }

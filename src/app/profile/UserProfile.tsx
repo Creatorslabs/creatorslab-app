@@ -4,22 +4,16 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import {
-  useLinkAccount,
-  useLogout,
-  usePrivy,
-} from "@privy-io/react-auth";
+import { useLinkAccount, useLogout, usePrivy } from "@privy-io/react-auth";
 
 import { useLoader } from "@/hooks/useLoader";
+import { logger } from "@/lib/logger";
 
 import {
   ArrowLeft,
   BadgeCheck,
-  Copy,
   Eye,
   EyeOff,
-  Camera,
-  LogOut,
   Coins,
   XCircle,
 } from "lucide-react";
@@ -87,7 +81,7 @@ const UserProfile = () => {
       const { data } = await res.json();
       setUser(data);
     } catch (err) {
-      console.error("Refresh failed:", err);
+      logger.error("Refresh failed:", err);
     }
   };
 
@@ -107,7 +101,7 @@ const UserProfile = () => {
         setUser(data);
         toast({ title: "Profile loaded successfully!", variant: "success" });
       } catch (error) {
-        console.error("Error fetching user profile:", error);
+        logger.error("Error fetching user profile:", error);
         toast({ title: "Failed to load profile", variant: "error" });
       } finally {
         hideLoader();
@@ -131,7 +125,7 @@ const UserProfile = () => {
         title: `Failed to link ${details.linkMethod}`,
         variant: "destructive",
       });
-      console.log("Failed to link:", error);
+      logger.log("Failed to link:", error);
     },
   });
 

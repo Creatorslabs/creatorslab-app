@@ -6,6 +6,7 @@ import { Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import FollowCreatorModal from "../taskPage/FollowCreatorModal";
 import UnfollowCreatorModal from "../taskPage/UnfollowCreatorModal";
+import { logger } from "@/lib/logger";
 
 type FollowButtonProps = {
   creatorId: string;
@@ -35,7 +36,7 @@ export default function FollowButton({
         setIsSelf(json.isSelf);
       }
     } catch (err) {
-      console.error("Error fetching follow status:", err);
+      logger.error("Error fetching follow status:", err);
     } finally {
       setLoading(false);
     }
@@ -72,7 +73,7 @@ export default function FollowButton({
         if (onFollowClick) onFollowClick();
       }
     } catch (err) {
-      console.error("Follow toggle failed:", err);
+      logger.error("Follow toggle failed:", err);
       toast({
         title: "Network Error",
         description:

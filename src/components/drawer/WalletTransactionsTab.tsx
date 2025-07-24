@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import { useSolanaConnection } from "../context/SolanaConnectionContext";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
+import { logger } from "@/lib/logger";
 
 type Transaction = {
   id: string;
@@ -103,7 +104,7 @@ export default function WalletTransactionsTab({
         const data = await res.json();
         setTransactions(data.transactions || []);
       } catch (err) {
-        console.error("Failed to load transactions", err);
+        logger.error("Failed to load transactions", err);
       } finally {
         setLoading(false);
       }

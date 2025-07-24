@@ -3,6 +3,7 @@ import { IUser, User } from "@/lib/models/User";
 import { Follow } from "@/lib/models/Follow";
 import { NextResponse } from "next/server";
 import { privy } from "@/lib/privyClient";
+import { logger } from "@/lib/logger";
 
 interface Params {
   params: Promise<{
@@ -16,7 +17,7 @@ export async function GET(_: Request, { params }: Params) {
 
     const { creatorUsername } = await params;
 
-    console.log("Creator username:", creatorUsername);
+    logger.log("Creator username:", creatorUsername);
 
     const dbUser = await User.findOne({
       username: creatorUsername,
@@ -39,7 +40,7 @@ export async function GET(_: Request, { params }: Params) {
       );
     }
 
-    console.log("DB user:", dbUser);
+    logger.log("DB user:", dbUser);
 
     const privyUser = await privy.getUserByEmail(dbUser.email!);
 
@@ -72,7 +73,7 @@ export async function GET(_: Request, { params }: Params) {
       },
     });
   } catch (error) {
-    console.error("GET /api/creators/:creatorUsername error:", error);
+    logger.error("GET /api/creators/:creatorUsername error:", error);
     return NextResponse.json(
       { success: false, message: "Internal Server Error" },
       { status: 500 }

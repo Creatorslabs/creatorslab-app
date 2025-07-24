@@ -23,6 +23,7 @@ import { useRouter } from "next/navigation";
 import { SimpleIcon } from "@/components/Common/SimpleIcon";
 import Image from "next/image";
 import Illustration from "@/components/Common/3D-Illustration";
+import { logger } from "@/lib/logger";
 
 export default function SignIn() {
   const [loginType, setLoginType] = useState<"email" | "wallet">("wallet");
@@ -44,7 +45,7 @@ export default function SignIn() {
       router.push("/");
     },
     onError: (error) => {
-      console.error("Login error:", error);
+      logger.error("Login error:", error);
       toast({
         title: error || "Login failed",
         variant: "destructive",
@@ -80,7 +81,7 @@ export default function SignIn() {
       router.push("/");
     },
     onError: (error) => {
-      console.error("Login error:", error);
+      logger.error("Login error:", error);
       toast({
         title: error || "Login failed",
         variant: "destructive",
@@ -115,7 +116,7 @@ export default function SignIn() {
       await sendCode({ email, disableSignup: true });
       setStep(2);
     } catch (error) {
-      console.error("Failed to send code:", error);
+      logger.error("Failed to send code:", error);
       toast({
         title: (error as Error).message || "Failed to send verification code",
         variant: "destructive",
@@ -134,7 +135,7 @@ export default function SignIn() {
       await loginWithCode({ code: otp });
       router.push("/");
     } catch (error) {
-      console.error("Failed to login:", error);
+      logger.error("Failed to login:", error);
       toast({
         title: (error as Error).message || "Login failed",
         variant: "destructive",

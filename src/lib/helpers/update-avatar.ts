@@ -1,3 +1,5 @@
+import { logger } from "@/lib/logger";
+
 export async function updateAvatar(
   userId: string,
   newUrl: string,
@@ -15,7 +17,7 @@ export async function updateAvatar(
 
     return data;
   } catch (error) {
-    console.error("Error updating avatar:", error);
+    logger.error("Error updating avatar:", error);
     throw error;
   }
 }

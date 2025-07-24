@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { logger } from "@/lib/logger";
 
 const MONGODB_URI = process.env.MONGODB_URI as string;
 
@@ -30,26 +31,26 @@ async function connectDB(): Promise<typeof mongoose> {
   }
 
   if (!cached!.promise) {
-    // console.log("No cached promise found, creating new connection promise");
+    // logger.log("No cached promise found, creating new connection promise");
 
     cached!.promise = mongoose
       .connect(MONGODB_URI)
       .then((mongoose) => {
-        // console.log("MongoDB connected successfully");
+        // logger.log("MongoDB connected successfully");
         return mongoose;
       })
       .catch((error) => {
-        console.error("MongoDB connection error:", error);
+        logger.error("MongoDB connection error:", error);
         throw error;
       });
   } else {
-    // console.log("Using existing cached promise for connection");
+    // logger.log("Using existing cached promise for connection");
   }
 
   try {
     cached!.conn = await cached!.promise;
   } catch (e) {
-    console.error("Error while awaiting connection promise:", e);
+    logger.error("Error while awaiting connection promise:", e);
     cached!.promise = null;
     throw e;
   }

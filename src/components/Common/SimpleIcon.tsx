@@ -1,5 +1,6 @@
 "use client";
 
+import { logger } from "@/lib/logger";
 import React from "react";
 import * as icons from "simple-icons";
 
@@ -28,7 +29,7 @@ export const SimpleIcon = ({
   const icon: icons.SimpleIcon | undefined = (icons as any)[slug];
 
   if (!icon) {
-    console.warn(`Icon not found for platform: ${platform}`);
+    logger.warn(`Icon not found for platform: ${platform}`);
     return null;
   }
 

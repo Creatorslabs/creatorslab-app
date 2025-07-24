@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { privy } from "@/lib/privyClient";
 import connectDB from "@/lib/connectDB";
 import { User } from "@/lib/models/User";
+import { logger } from "@/lib/logger";
 
 export async function GET() {
   try {
@@ -32,7 +33,7 @@ export async function GET() {
 
     return NextResponse.json({ success: true, data: localUser });
   } catch (error) {
-    console.error("GET /api/user/me error:", error);
+    logger.error("GET /api/user/me error:", error);
     return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
 }

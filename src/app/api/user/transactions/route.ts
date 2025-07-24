@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { privy } from "@/lib/privyClient";
 import { format } from "date-fns";
+import { logger } from "@/lib/logger";
 
 const HELIUS_API_KEY = process.env.HELIUS_API_KEY!;
 const HELIUS_MAINNET = `https://api.helius.xyz/v0/addresses`;
@@ -57,7 +58,7 @@ export async function GET(req: NextRequest) {
         const desc = tx.description || "";
         const lowerDesc = desc.toLowerCase();
 
-        console.log(
+        logger.log(
           "[TX_API_GET] tx:",
           `Type:${tx.type} - Description: ${tx.description}`
         );
@@ -133,7 +134,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ transactions: formatted });
   } catch (err) {
-    console.error("[TX_API_GET]", err);
+    logger.error("[TX_API_GET]", err);
     return NextResponse.json(
       { message: "Internal Server Error" },
       { status: 500 }

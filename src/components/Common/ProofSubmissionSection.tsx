@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Upload, X, CheckCircle, Clock, AlertTriangle } from "lucide-react";
 import { put } from "@vercel/blob";
 import Image from "next/image";
+import { logger } from "@/lib/logger";
 
 type Props = {
   status: "pending" | "completed" | null;
@@ -29,12 +29,12 @@ async function deleteImageFromBlob(formData: { image?: string }) {
     });
 
     if (!res.ok) {
-      console.error("Failed to delete image from Blob");
+      logger.error("Failed to delete image from Blob");
     } else {
-      console.log("Image deleted successfully");
+      logger.log("Image deleted successfully");
     }
   } catch (err) {
-    console.error("Error deleting image:", err);
+    logger.error("Error deleting image:", err);
   }
 }
 
@@ -59,7 +59,7 @@ export function ProofSubmissionSection({
 
       setProofLink(blob.url);
     } catch (err) {
-      console.error("Image upload failed:", err);
+      logger.error("Image upload failed:", err);
     } finally {
       setUploading(false);
     }

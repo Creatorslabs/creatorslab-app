@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { formatDate, getTimeRemaining } from "@/lib/helpers/date-helpers";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
+import { logger } from "@/lib/logger";
 
 interface Props {
   taskId: string;
@@ -49,7 +50,7 @@ export default function TaskOverviewTab({ taskId }: Props) {
         const data = await res.json();
         setTask(data);
       } catch (error) {
-        console.error("Error fetching overview:", error);
+        logger.error("Error fetching overview:", error);
       } finally {
         setLoading(false);
       }

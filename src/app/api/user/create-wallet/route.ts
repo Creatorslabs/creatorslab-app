@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { privy } from "@/lib/privyClient";
+import { logger } from "@/lib/logger";
 
 export async function POST(req: NextRequest) {
   const cookieStore = await cookies();
@@ -33,7 +34,7 @@ export async function POST(req: NextRequest) {
       wallet: createdWallet,
     });
   } catch (err: any) {
-    console.error("Wallet creation failed:", err);
+    logger.error("Wallet creation failed:", err);
     return NextResponse.json(
       { message: err.message || "Wallet creation failed" },
       { status: 500 }

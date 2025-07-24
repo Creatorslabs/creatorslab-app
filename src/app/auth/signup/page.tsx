@@ -8,6 +8,7 @@ import { ArrowLeft } from "lucide-react";
 import { useLoginWithEmail, usePrivy } from "@privy-io/react-auth";
 import { toast } from "@/hooks/use-toast";
 import Image from "next/image";
+import { logger } from "@/lib/logger";
 
 export default function SignUp() {
   const [step, setStep] = useState(1);
@@ -33,7 +34,7 @@ export default function SignUp() {
             }),
           });
         } catch (err) {
-          console.error("Failed to create new user:", err);
+          logger.error("Failed to create new user:", err);
         }
       }
 
@@ -44,7 +45,7 @@ export default function SignUp() {
       });
     },
     onError: (error) => {
-      console.error("Login error:", error);
+      logger.error("Login error:", error);
       toast({
         title: error || "Login failed",
         variant: "destructive",
@@ -75,7 +76,7 @@ export default function SignUp() {
         setError("User already exist, go to login!");
       }
     } catch (error) {
-      console.error("Failed to send code:", error);
+      logger.error("Failed to send code:", error);
       toast({
         title: (error as Error).message || "Failed to send verification code",
         variant: "destructive",
@@ -93,7 +94,7 @@ export default function SignUp() {
       await sendCode({ email });
       setStep(3);
     } catch (error) {
-      console.error("Failed to send code:", error);
+      logger.error("Failed to send code:", error);
       toast({
         title: (error as Error).message || "Failed to send verification code",
         variant: "destructive",
@@ -112,7 +113,7 @@ export default function SignUp() {
       await loginWithCode({ code: otp });
       router.push("/");
     } catch (error) {
-      console.error("Failed to login:", error);
+      logger.error("Failed to login:", error);
       toast({
         title: (error as Error).message || "Login failed",
         variant: "destructive",

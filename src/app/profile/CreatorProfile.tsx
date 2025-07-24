@@ -25,6 +25,7 @@ import { MultiStepTaskModal } from "@/components/creator/task-modal/MultiStepTas
 import AvatarUploader from "@/components/Common/AvatarUploader";
 import { updateAvatar } from "@/lib/helpers/update-avatar";
 import EditableUsername from "@/components/Common/EditableUsername";
+import { logger } from "@/lib/logger";
 
 interface Task {
   id: string;
@@ -80,7 +81,7 @@ export default function CreatorProfile() {
       const { data } = await res.json();
       setCreator(data);
     } catch (error) {
-      console.error("Silent refresh failed:", error);
+      logger.error("Silent refresh failed:", error);
     }
   };
 
@@ -95,7 +96,7 @@ export default function CreatorProfile() {
         const { data } = await res.json();
         setCreator(data);
       } catch (error) {
-        console.error("Error fetching creator profile:", error);
+        logger.error("Error fetching creator profile:", error);
         toast({
           title: "Failed to load creator profile",
           variant: "destructive",
@@ -122,7 +123,7 @@ export default function CreatorProfile() {
         title: `Failed to link ${details.linkMethod}`,
         variant: "destructive",
       });
-      console.log("Failed to link:", error);
+      logger.log("Failed to link:", error);
     },
   });
 

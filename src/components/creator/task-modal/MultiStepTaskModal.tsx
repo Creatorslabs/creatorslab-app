@@ -19,6 +19,7 @@ import Step4_DetailsContent from "./steps/Step4_DetailsContent";
 import Step5_ReviewConfirm from "./steps/Step5_ReviewConfirm";
 import { validateStep } from "./validateStep";
 import { toast } from "@/hooks/use-toast";
+import { logger } from "@/lib/logger";
 
 export type TaskData = {
   _id?: string;
@@ -69,7 +70,6 @@ export function MultiStepTaskModal({
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-
   useEffect(() => {
     const fetchPlatforms = async () => {
       try {
@@ -78,7 +78,7 @@ export function MultiStepTaskModal({
         setEngagementOptions(data.data.engagementOptions);
         setSocialPlatforms(data.data.socialPlatforms);
       } catch (err) {
-        console.error(err);
+        logger.error(err);
       }
     };
     fetchPlatforms();
@@ -149,17 +149,17 @@ export function MultiStepTaskModal({
       });
 
       if (!res.ok) {
-        console.error("Failed to delete image from Blob");
+        logger.error("Failed to delete image from Blob");
       } else {
-        console.log("Image deleted successfully");
+        logger.log("Image deleted successfully");
       }
     } catch (err) {
-      console.error("Error deleting image:", err);
+      logger.error("Error deleting image:", err);
     }
   }
 
   const handleSubmit = async () => {
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     try {
       const res = await fetch("/api/creator/submit-task", {
         method: "POST",
@@ -186,13 +186,13 @@ export function MultiStepTaskModal({
 
       await handleClose(true);
     } catch (err) {
-      console.error("Submission error:", err);
+      logger.error("Submission error:", err);
       toast({
         title: "Something went wrong while submitting the task.",
         variant: "destructive",
       });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
   };
 

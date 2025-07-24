@@ -1,5 +1,6 @@
 import connectDB from "@/lib/connectDB";
 import { generateReferralCode } from "@/lib/helpers/generate-referal-code";
+import { logger } from "@/lib/logger";
 import { User } from "@/lib/models/User";
 import { NextResponse } from "next/server";
 
@@ -21,7 +22,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ exist: !!existing });
   } catch (err) {
-    console.error("User creation error:", err);
+    logger.error("User creation error:", err);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

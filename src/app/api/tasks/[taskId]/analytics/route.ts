@@ -1,4 +1,5 @@
 import connectDB from "@/lib/connectDB";
+import { logger } from "@/lib/logger";
 import { Participation } from "@/lib/models/Participation";
 import { Task } from "@/lib/models/Task";
 import { NextResponse } from "next/server";
@@ -62,7 +63,7 @@ export async function GET(
       totalDistributed,
     });
   } catch (error) {
-    console.error("Analytics Error:", error);
+    logger.error("Analytics Error:", error);
     return NextResponse.json(
       { message: "Something went wrong" },
       { status: 500 }

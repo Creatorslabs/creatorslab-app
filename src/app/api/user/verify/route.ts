@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/connectDB";
 import { privy } from "@/lib/privyClient";
 import { User } from "@/lib/models/User";
+import { logger } from "@/lib/logger";
 
 export async function PATCH() {
   try {
@@ -42,7 +43,7 @@ export async function PATCH() {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("PATCH /api/user/verify error:", error);
+    logger.error("PATCH /api/user/verify error:", error);
     return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
 }

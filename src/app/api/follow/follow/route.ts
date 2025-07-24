@@ -5,6 +5,7 @@ import connectDB from "@/lib/connectDB";
 import { IUser, User } from "@/lib/models/User";
 import { Follow } from "@/lib/models/Follow";
 import { logBalanceTransaction } from "@/lib/helpers/logBalanceTransaction";
+import { logger } from "@/lib/logger";
 
 export async function POST(req: Request) {
   try {
@@ -93,7 +94,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, message: "Followed" });
   } catch (error) {
-    console.error("POST /api/follow/follow error:", error);
+    logger.error("POST /api/follow/follow error:", error);
     return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
 }

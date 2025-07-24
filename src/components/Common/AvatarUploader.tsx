@@ -6,6 +6,7 @@ import { Camera, X } from "lucide-react";
 import { upload } from "@vercel/blob/client";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
+import { logger } from "@/lib/logger";
 
 interface Props {
   currentAvatar: string;
@@ -69,7 +70,7 @@ export default function AvatarUploader({
       onUploadComplete(blob.url);
       toast({ title: "Avatar updated successfully" });
     } catch (err) {
-      console.error(err);
+      logger.error(err);
       toast({ title: "Upload failed", variant: "destructive" });
     } finally {
       setUploading(false);

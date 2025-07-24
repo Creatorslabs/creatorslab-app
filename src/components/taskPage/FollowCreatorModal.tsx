@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "../ui/button";
+import { logger } from "@/lib/logger";
 
 interface ModalProps {
   isOpen: boolean;
@@ -23,7 +24,7 @@ export default function FollowCreatorModal({
       await handleFollow();
       onClose();
     } catch (error) {
-      console.error("Follow failed:", error);
+      logger.error("Follow failed:", error);
     } finally {
       setIsFollowing(false);
     }

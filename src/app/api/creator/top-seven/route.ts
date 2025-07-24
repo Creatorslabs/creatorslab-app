@@ -4,6 +4,7 @@ import { User } from "@/lib/models/User";
 import { Task } from "@/lib/models/Task";
 import { Participation } from "@/lib/models/Participation";
 import { Follow } from "@/lib/models/Follow";
+import { logger } from "@/lib/logger";
 
 const fallbackCreators = [
   "https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=40&h=40&fit=crop",
@@ -80,7 +81,7 @@ export async function GET() {
       creators: uniqueImages.slice(0, 7),
     });
   } catch (err) {
-    console.error("Error in GET /api/creators/top:", err);
+    logger.error("Error in GET /api/creators/top:", err);
     return NextResponse.json(
       { success: false, message: "Server error" },
       { status: 500 }

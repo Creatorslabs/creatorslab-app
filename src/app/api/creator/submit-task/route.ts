@@ -5,6 +5,7 @@ import connectDB from "@/lib/connectDB";
 import { User } from "@/lib/models/User";
 import { Task } from "@/lib/models/Task";
 import { logBalanceTransaction } from "@/lib/helpers/logBalanceTransaction";
+import { logger } from "@/lib/logger";
 
 export async function POST(req: NextRequest) {
   try {
@@ -101,7 +102,7 @@ export async function POST(req: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("Task creation error:", error);
+    logger.error("Task creation error:", error);
     return NextResponse.json(
       { message: "Internal Server Error" },
       { status: 500 }

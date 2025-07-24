@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useLoader } from "@/hooks/useLoader";
 import CreatorNotFound from "@/components/Common/CreatorNotFound";
+import { logger } from "@/lib/logger";
 
 interface TaskCard {
   id: string;
@@ -70,7 +71,7 @@ const Page = () => {
         const data = await res.json();
         setCreator(data.data);
       } catch (err) {
-        console.error("Failed to fetch creator:", err);
+        logger.error("Failed to fetch creator:", err);
       } finally {
         setPageLoading(false);
         hideLoader();
@@ -95,7 +96,7 @@ const Page = () => {
 
         setHasMore(data.pagination.hasMore);
       } catch (err) {
-        console.error("Failed to fetch tasks:", err);
+        logger.error("Failed to fetch tasks:", err);
       }
       setLoading(false);
       setFetchingMore(false);

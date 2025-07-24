@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Pencil, Check, X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useDebounce } from "@/hooks/useDebounce";
+import { logger } from "@/lib/logger";
 
 export default function EditableUsername({
   initialName,
@@ -34,7 +35,7 @@ export default function EditableUsername({
         const data = await res.json();
         setIsAvailable(data.available);
       } catch (err) {
-        console.error(err);
+        logger.error(err);
         setIsAvailable(null);
       } finally {
         setLoading(false);

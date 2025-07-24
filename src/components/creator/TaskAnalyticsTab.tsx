@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
+import { logger } from "@/lib/logger";
 
 interface TaskAnalyticsData {
   totalParticipants: number;
@@ -28,7 +29,7 @@ export default function TaskAnalyticsTab({ taskId }: Props) {
         const data = await res.json();
         setAnalytics(data);
       } catch (error) {
-        console.error("Failed to load analytics", error);
+        logger.error("Failed to load analytics", error);
       } finally {
         setLoading(false);
       }

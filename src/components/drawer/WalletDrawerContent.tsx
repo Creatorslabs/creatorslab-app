@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 import { useUserBalances } from "@/hooks/useUserBalances";
 import { WalletDisplay } from "./WalletDisplay";
+import { logger } from "@/lib/logger";
 
 export default function WalletDrawerContent({
   privyUser,
@@ -46,7 +47,7 @@ export default function WalletDrawerContent({
       setIsRefreshing(true);
       await refreshBalances();
     } catch (err) {
-      console.error("Failed to refresh balances:", err);
+      logger.error("Failed to refresh balances:", err);
     } finally {
       setIsRefreshing(false);
     }

@@ -5,6 +5,7 @@ import { Copy, Check, ExternalLink, Shield } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { logger } from "@/lib/logger";
 
 export function WalletDisplay({
   shortAddress,
@@ -21,7 +22,7 @@ export function WalletDisplay({
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch (err) {
-      console.error("Copy failed", err);
+      logger.error("Copy failed", err);
     }
   };
 

@@ -14,6 +14,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Pagination } from "@/components/ui/pagination";
 import { Skeleton } from "@/components/ui/skeleton";
+import { logger } from "@/lib/logger";
 
 interface Props {
   taskId: string;
@@ -53,7 +54,7 @@ export default function TaskParticipantsTab({ taskId }: Props) {
         setMaxParticipants(data.maxParticipants || 0);
         setTotalPages(data.totalPages || 1);
       } catch (error) {
-        console.error("Error fetching participants:", error);
+        logger.error("Error fetching participants:", error);
       } finally {
         setLoading(false);
       }

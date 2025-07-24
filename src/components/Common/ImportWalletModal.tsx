@@ -6,6 +6,7 @@ import { useImportWallet } from "@privy-io/react-auth/solana";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
+import { logger } from "@/lib/logger";
 
 interface Props {
   isOpen: boolean;
@@ -30,7 +31,7 @@ export default function ImportWalletModal({ isOpen, onClose }: Props) {
       });
       onClose();
     } catch (error) {
-      console.error("Failed to import wallet:", error);
+      logger.error("Failed to import wallet:", error);
       toast({
         title: "Import Failed",
         description:

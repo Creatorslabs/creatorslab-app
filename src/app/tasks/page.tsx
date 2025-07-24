@@ -6,6 +6,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import FilterControls from "@/components/taskPage/FilterControls";
+import { logger } from "@/lib/logger";
 
 interface TaskCard {
   id: string;
@@ -87,7 +88,7 @@ function TasksPage() {
         setTasks((prev) => [...prev, ...newTasks]);
       }
     } catch (err) {
-      console.error("Failed to fetch tasks", err);
+      logger.error("Failed to fetch tasks", err);
     } finally {
       setLoading(false);
       setFetchingMore(false);
