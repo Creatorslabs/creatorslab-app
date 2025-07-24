@@ -65,7 +65,7 @@ export async function GET(_: Request, { params }: Params) {
       data: {
         id: dbUser._id,
         username: dbUser.username,
-        image: dbUser.image || "https://i.pravatar.cc/100",
+        image: dbUser.image || "/default-avatar.png",
         isVerified: Boolean(isVerified),
         twitter: privyUser.twitter?.username,
         discord: privyUser.discord?.username?.replace(/#\d+$/, ""),

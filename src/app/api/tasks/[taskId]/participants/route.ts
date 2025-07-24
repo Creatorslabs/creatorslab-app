@@ -36,7 +36,7 @@ export async function GET(
       joinedAt: p.createdAt,
       user: {
         username: p.userId?.username || "Unknown",
-        image: p.userId?.image || "https://i.pravatar.cc/100",
+        image: p.userId?.image || "/default-avatar.png",
       },
     })),
     currentParticipants: totalParticipants,

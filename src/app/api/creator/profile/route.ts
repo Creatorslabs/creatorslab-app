@@ -73,7 +73,7 @@ export async function GET() {
       id: dbUser._id.toString(),
       username: dbUser.username,
       email: dbUser.email,
-      avatar: dbUser.image || "https://i.pravatar.cc/100",
+      avatar: dbUser.image || "/default-avatar.png",
       verified,
       balance: dbUser.balance.toFixed(4),
       inviteLink,

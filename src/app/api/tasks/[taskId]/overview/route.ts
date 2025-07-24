@@ -29,7 +29,7 @@ export async function GET(
     return NextResponse.json({
       creator: {
         username: task.creator?.username || "Anonymous",
-        image: task.creator?.image || "https://i.pravatar.cc/100",
+        image: task.creator?.image || "/default-avatar.png",
       },
       title: task.title,
       target: task.target,

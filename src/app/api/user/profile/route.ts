@@ -61,7 +61,7 @@ export async function GET() {
       id: dbUser._id.toString(),
       name: dbUser.username || "Unnamed",
       username: dbUser.username || "unknown",
-      avatar: dbUser.image || "https://i.pravatar.cc/100",
+      avatar: dbUser.image || "/default-avatar.png",
       verified: isVerified,
       email: dbUser.email || "",
       inviteLink: `${process.env.NEXTAUTH_URL}/auth/signup/${dbUser.referralCode}`,
