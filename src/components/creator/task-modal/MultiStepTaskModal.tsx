@@ -20,6 +20,8 @@ import Step5_ReviewConfirm from "./steps/Step5_ReviewConfirm";
 import { validateStep } from "./validateStep";
 import { toast } from "@/hooks/use-toast";
 import { logger } from "@/lib/logger";
+import { GetRewardPoints } from "@/lib/helpers/getRewardPoint";
+import { useUserBalances } from "@/hooks/useUserBalances";
 
 export type TaskData = {
   _id?: string;
@@ -65,6 +67,7 @@ export function MultiStepTaskModal({
   const [socialPlatforms, setSocialPlatforms] = useState<
     { value: string; label: string }[]
   >([]);
+  const { balances } = useUserBalances();
 
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
@@ -118,12 +121,24 @@ export function MultiStepTaskModal({
   };
 
   const handleEngagementToggle = (engagement: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      type: prev.type.includes(engagement)
+    const reward = GetRewardPoints(engagement);
+
+    setFormData((prev) => {
+      const isActive = prev.type.includes(engagement);
+      const updatedType = isActive
         ? prev.type.filter((e) => e !== engagement)
-        : [...prev.type, engagement],
-    }));
+        : [...prev.type, engagement];
+
+      const updatedPoints = isActive
+        ? prev.rewardPoints - reward
+        : prev.rewardPoints + reward;
+
+      return {
+        ...prev,
+        type: updatedType,
+        rewardPoints: updatedPoints < 0 ? 0 : updatedPoints,
+      };
+    });
   };
 
   const nextStep = () => {
@@ -177,8 +192,7 @@ export function MultiStepTaskModal({
         });
         return;
       }
-
-      const result = await res.json();
+      await res.json();
 
       toast({
         title: "Task submitted successfully",
@@ -302,7 +316,12 @@ export function MultiStepTaskModal({
 
           <Button
             onClick={currentStep === totalSteps ? handleSubmit : nextStep}
-            disabled={!validateStep(currentStep, formData)}
+            disabled={
+              !validateStep(currentStep, formData) ||
+              (currentStep === 3 &&
+                formData.rewardPoints * formData.maxParticipants >
+                  parseFloat(balances.cls))
+            }
             className="bg-purple-600 hover:bg-purple-700 text-foreground disabled:opacity-50"
           >
             {currentStep === totalSteps ? (

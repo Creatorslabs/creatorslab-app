@@ -4,14 +4,15 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useUserBalances } from "@/hooks/useUserBalances";
 
 export default function Step3_RewardsTarget({
   formData,
   handleInputChange,
 }: any) {
   const [targetError, setTargetError] = useState("");
+  const { balances } = useUserBalances();
 
-  // Validate the URL when target changes
   useEffect(() => {
     if (!formData.target) {
       setTargetError("");
@@ -64,7 +65,7 @@ export default function Step3_RewardsTarget({
       </div>
 
       {/* Reward Points */}
-      <div className="space-y-2">
+      {/* <div className="space-y-2">
         <Label htmlFor="rewardPoints" className="text-gray-300 text-sm">
           Reward Points
         </Label>
@@ -79,7 +80,7 @@ export default function Step3_RewardsTarget({
           }}
           className="bg-card-box border-border text-foreground input-no-spinner"
         />
-      </div>
+      </div> */}
 
       {/* Max Participants */}
       <div className="space-y-2">
@@ -100,6 +101,27 @@ export default function Step3_RewardsTarget({
           }}
           className="bg-card-box border-border text-foreground input-no-spinner"
         />
+      </div>
+
+      <div className="space-y-2 text-sm">
+        {formData.rewardPoints > 0 && formData.maxParticipants > 0 && (
+          <>
+            <p>
+              Total cost:{" "}
+              <span className="font-medium text-primary">
+                {formData.rewardPoints * formData.maxParticipants} CLS
+              </span>
+            </p>
+
+            {formData.rewardPoints * formData.maxParticipants >
+              parseFloat(balances.cls) && (
+              <p className="text-red-500">
+                You don't have enough points to create this task. Please reduce
+                the reward or number of participants.
+              </p>
+            )}
+          </>
+        )}
       </div>
     </motion.div>
   );

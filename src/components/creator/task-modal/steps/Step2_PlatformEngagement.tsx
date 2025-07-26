@@ -29,14 +29,12 @@ export default function Step2_PlatformEngagement({
       transition={{ duration: 0.4, ease: "easeOut" }}
       className="space-y-6"
     >
-      {/* Header */}
       <div className="text-center mb-6">
         <p className="text-gray-400 text-sm">
           Choose the social platform and engagement types
         </p>
       </div>
 
-      {/* Platform Select */}
       <div className="space-y-2">
         <Label className="text-gray-300 text-sm">Social Platform</Label>
         <Select
@@ -44,6 +42,7 @@ export default function Step2_PlatformEngagement({
           onValueChange={(value) => {
             handleInputChange("platform", value);
             handleInputChange("type", []);
+            handleInputChange("rewardPoints", 0);
           }}
         >
           <SelectTrigger className="bg-card-box border-border text-foreground">
@@ -58,7 +57,6 @@ export default function Step2_PlatformEngagement({
           </SelectContent>
         </Select>
 
-        {/* Selected Platform Badge */}
         <AnimatePresence>
           {selectedPlatform && (
             <motion.div
@@ -86,7 +84,6 @@ export default function Step2_PlatformEngagement({
         </AnimatePresence>
       </div>
 
-      {/* Engagement Type Section */}
       <AnimatePresence>
         {selectedPlatform && (
           <motion.div
@@ -119,7 +116,6 @@ export default function Step2_PlatformEngagement({
               )}
             </div>
 
-            {/* Selected Engagement Badges */}
             <AnimatePresence>
               {formData.type.length > 0 && (
                 <motion.div
