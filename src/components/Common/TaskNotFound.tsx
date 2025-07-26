@@ -19,7 +19,7 @@ export default function TaskNotFound() {
       <FileQuestion className="w-12 h-12 text-muted-foreground mb-4" />
       <h2 className="text-lg text-white font-semibold mb-1">Task not found</h2>
       <p className="text-sm text-gray-400 mb-6">
-        This task might have been removed or doesn't exist.
+        This task might have been removed or doesn&apos;t exist.
       </p>
 
       <div className="flex gap-3">

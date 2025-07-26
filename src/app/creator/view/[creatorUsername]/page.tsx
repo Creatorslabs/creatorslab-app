@@ -279,7 +279,7 @@ const Page = () => {
                       align="center"
                       className="text-xs bg-card text-foreground"
                     >
-                      You are viewing {creator.username}'s profile
+                      You are viewing {creator.username}&apos;s profile
                     </TooltipContent>
                   </Tooltip>
                 </div>
