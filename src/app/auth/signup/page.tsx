@@ -9,6 +9,8 @@ import { useLoginWithEmail, usePrivy } from "@privy-io/react-auth";
 import { toast } from "@/hooks/use-toast";
 import Image from "next/image";
 import { logger } from "@/lib/logger";
+import WelcomeModal from "@/components/WelcomeModal";
+import { Button } from "@/components/ui/button";
 
 export default function SignUp() {
   const [step, setStep] = useState(1);
@@ -19,6 +21,7 @@ export default function SignUp() {
   const [role, setRole] = useState<"user" | "creator" | null>(null);
   const router = useRouter();
   const { ready, authenticated } = usePrivy();
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
 
   const { sendCode, loginWithCode } = useLoginWithEmail({
     onComplete: async (data) => {
@@ -111,7 +114,7 @@ export default function SignUp() {
     setIsLoading(true);
     try {
       await loginWithCode({ code: otp });
-      router.push("/");
+      setShowWelcomeModal(true);
     } catch (error) {
       logger.error("Failed to login:", error);
       toast({
@@ -422,6 +425,10 @@ export default function SignUp() {
           </AnimatePresence>
         </motion.div>
       </div>
+      <WelcomeModal
+        isOpen={showWelcomeModal}
+        onClose={() => router.push("/")}
+      />
     </div>
   );
 }

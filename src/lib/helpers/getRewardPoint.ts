@@ -3,41 +3,41 @@ export const GetRewardPoints = (engagement: string): number => {
 
   switch (key) {
     case "view":
-      return 2;
+      return 0.1;
     case "like":
     case "favorite":
     case "upvote":
-      return 10;
+      return 0.3;
     case "comment":
     case "reply":
-      return 15;
+      return 0.5;
     case "share":
     case "retweet":
     case "repost":
-      return 25;
+      return 0.8;
     case "follow":
     case "subscribe":
-      return 20;
+      return 0.4;
     case "tag":
-      return 10;
+      return 0.2;
     case "mention":
-      return 15;
+      return 0.4;
     case "dm":
     case "message":
-      return 5;
+      return 1;
     case "save":
     case "bookmark":
-      return 12;
+      return 0.3;
     case "click":
     case "link_click":
-      return 8;
+      return 0.7;
     case "video_watch":
     case "watch":
-      return 10;
+      return 1.2;
     case "story_reaction":
-      return 10;
+      return 0.2;
     case "reaction":
-      return 10;
+      return 0.2;
     default:
       return 0;
   }
