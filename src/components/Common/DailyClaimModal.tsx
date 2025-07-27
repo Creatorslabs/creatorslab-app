@@ -84,7 +84,6 @@ export const DailyClaimModal = () => {
 
   return (
     <>
-      {/* Trigger Button */}
       <button
         className="px-6 py-2 rounded-lg bg-[#F4B30C] text-black font-semibold"
         onClick={() => setOpen(true)}
@@ -123,7 +122,7 @@ export const DailyClaimModal = () => {
                 </p>
               ) : claimed ? (
                 <p className="text-sm mb-4">
-                  You've claimed today's reward. Come back in{" "}
+                  You&apos;ve claimed today&apos;s reward. Come back in{" "}
                   <span className="font-medium text-yellow-600">
                     {formatCountdown(countdown)}
                   </span>

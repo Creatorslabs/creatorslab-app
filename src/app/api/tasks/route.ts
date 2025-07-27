@@ -184,8 +184,8 @@ export async function GET(req: Request) {
       };
     });
 
-    let activeTasks = tasksWithExtra.filter((task) => !task.isExpired);
-    let expiredTasks = tasksWithExtra.filter((task) => task.isExpired);
+    const activeTasks = tasksWithExtra.filter((task) => !task.isExpired);
+    const expiredTasks = tasksWithExtra.filter((task) => task.isExpired);
 
     if (sort === "trending") {
       const sortByTrendingScore = (a: any, b: any) =>
