@@ -3,7 +3,13 @@
 import { use, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ArrowLeft, Copy, CheckCircle, ExternalLink } from "lucide-react";
+import {
+  ArrowLeft,
+  Copy,
+  CheckCircle,
+  ExternalLink,
+  FolderOpen,
+} from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useLoader } from "@/hooks/useLoader";
@@ -19,6 +25,9 @@ import Link from "next/link";
 import { ProofSubmissionSection } from "@/components/Common/ProofSubmissionSection";
 import TaskNotFound from "@/components/Common/TaskNotFound";
 import { logger } from "@/lib/logger";
+import { TaskLikeButton } from "@/components/taskActions/TaskLikeButton";
+import { parseCount } from "@/lib/helpers/calculateTrendingScore";
+import CommentsSection from "@/components/taskPage/CommentsSection";
 
 interface Task {
   id: string;
@@ -37,6 +46,9 @@ interface Task {
   participants: number;
   maxParticipants: number;
   target: string;
+  likes: string;
+  comments: string;
+  shares: number;
   otherTasks: any[];
   status: "pending" | "completed" | null;
   requirements: string[];
@@ -227,7 +239,15 @@ export default function TaskViewPage() {
               </div>
 
               <div className="relative z-10 mt-12">
-                <h1 className="text-2xl font-bold mb-4">{task.title}</h1>
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <h1 className="text-2xl font-bold flex-1 min-w-0 break-words">
+                    {task.title}
+                  </h1>
+                  <TaskLikeButton
+                    taskId={task.id}
+                    initialLikes={parseCount(task.likes)}
+                  />
+                </div>
               </div>
             </motion.div>
 
@@ -424,41 +444,73 @@ export default function TaskViewPage() {
               className="bg-card-box border border-border rounded-xl p-6"
             >
               <h3 className="text-white font-semibold mb-2">
-                Other Task from TH
+                Other Task from {task.creator.username}
               </h3>
               <p className="text-gray-400 text-sm mb-4">
                 Get started with more task to earn more $CLS
               </p>
-              <p className="text-gray-400 text-sm mb-6">0 / 3</p>
+              <p className="text-gray-400 text-sm mb-6">
+                {task.otherTasks.length} task
+                {task.otherTasks.length !== 1 ? "s" : ""} available
+              </p>
 
-              <div className="space-y-4">
-                {task.otherTasks.map((otherTask, index) => (
-                  <motion.div
-                    key={otherTask.id}
-                    initial={{ y: 10, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.3 + index * 0.05 }}
-                    onClick={() => router.push(`/tasks/${otherTask.id}`)}
-                    className="p-4 bg-card border border-border rounded-xl hover:border-primary/60 transition cursor-pointer flex flex-col justify-between"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                        <SimpleIcon
-                          platform={otherTask.platform}
-                          className="w-5 h-5 text-primary"
-                        />
+              {task.otherTasks.length === 0 ? (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="text-center text-gray-400 text-sm py-8"
+                >
+                  <div className="flex justify-center mb-2">
+                    <FolderOpen className="w-10 h-10 text-gray-400" />
+                  </div>
+                  <p>
+                    No other tasks available from {task.creator.username} right
+                    now.
+                  </p>
+                  <p className="text-xs mt-1 text-muted-foreground">
+                    Check back later or explore tasks from other creators.
+                  </p>
+                </motion.div>
+              ) : (
+                <div className="space-y-4">
+                  {task.otherTasks.map((otherTask, index) => (
+                    <motion.div
+                      key={otherTask.id}
+                      initial={{ y: 10, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      transition={{ delay: 0.3 + index * 0.05 }}
+                      onClick={() => router.push(`/tasks/${otherTask.id}`)}
+                      className="p-4 bg-card border border-border rounded-xl hover:border-primary/60 transition cursor-pointer flex flex-col justify-between"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                          <SimpleIcon
+                            platform={otherTask.platform}
+                            className="w-5 h-5 text-primary"
+                          />
+                        </div>
+                        <span className="text-sm text-white font-medium truncate">
+                          {otherTask.title}
+                        </span>
                       </div>
-                      <span className="text-sm text-white font-medium truncate">
-                        {otherTask.title}
-                      </span>
-                    </div>
 
-                    <div className="mt-3 self-start bg-primary/10 text-primary px-3 py-1.5 rounded-lg text-xs font-semibold">
-                      $CLS {otherTask.reward}
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
+                      <div className="mt-3 self-start bg-primary/10 text-primary px-3 py-1.5 rounded-lg text-xs font-semibold">
+                        $CLS {otherTask.reward}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              className="bg-card-box border border-border rounded-xl p-6"
+            >
+              <h3 className="text-white font-semibold mb-4">Comments</h3>
+              <CommentsSection taskId={task.id} />
             </motion.div>
           </div>
         </div>

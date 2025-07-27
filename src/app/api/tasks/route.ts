@@ -4,6 +4,10 @@ import { Task } from "@/lib/models/Task";
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 import { logger } from "@/lib/logger";
+import { TaskLike } from "@/lib/models/TaskLike";
+import { TaskComment } from "@/lib/models/TaskComment";
+import { TaskShare } from "@/lib/models/TaskShare";
+import { calculateTrendingScore } from "@/lib/helpers/calculateTrendingScore";
 
 export async function GET(req: Request) {
   try {
@@ -121,6 +125,33 @@ export async function GET(req: Request) {
       {}
     );
 
+    const taskIds = allTasks.map((t) => t._id);
+
+    const [likeCounts, commentCounts, shareCounts] = await Promise.all([
+      TaskLike.aggregate([
+        { $match: { taskId: { $in: taskIds } } },
+        { $group: { _id: "$taskId", count: { $sum: 1 } } },
+      ]),
+      TaskComment.aggregate([
+        { $match: { taskId: { $in: taskIds } } },
+        { $group: { _id: "$taskId", count: { $sum: 1 } } },
+      ]),
+      TaskShare.aggregate([
+        { $match: { taskId: { $in: taskIds } } },
+        { $group: { _id: "$taskId", count: { $sum: 1 } } },
+      ]),
+    ]);
+
+    const likesMap = Object.fromEntries(
+      likeCounts.map((c) => [c._id.toString(), c.count])
+    );
+    const commentsMap = Object.fromEntries(
+      commentCounts.map((c) => [c._id.toString(), c.count])
+    );
+    const sharesMap = Object.fromEntries(
+      shareCounts.map((c) => [c._id.toString(), c.count])
+    );
+
     const formatCount = (count: number): string => {
       if (count >= 1_000_000) return (count / 1_000_000).toFixed(1) + "M";
       if (count >= 1_000) return (count / 1_000).toFixed(1) + "K";
@@ -130,6 +161,7 @@ export async function GET(req: Request) {
     const now = new Date();
 
     const tasksWithExtra = allTasks.map((task) => {
+      const idStr = task._id.toString();
       const expirationDate = task.expiration ? new Date(task.expiration) : null;
       const isExpired = expirationDate ? expirationDate <= now : false;
 
@@ -139,9 +171,9 @@ export async function GET(req: Request) {
         description: task.description,
         image: task.image,
         reward: `${task.rewardPoints} $CLS`,
-        likes: formatCount(Math.floor(Math.random() * 3000 + 50)),
-        comments: formatCount(Math.floor(Math.random() * 1000 + 10)),
-        shares: formatCount(Math.floor(Math.random() * 500 + 5)),
+        likes: formatCount(likesMap[idStr] || 0),
+        comments: formatCount(commentsMap[idStr] || 0),
+        shares: formatCount(sharesMap[idStr] || 0),
         gradient: "from-blue-600 to-purple-600",
         avatar: task.creator?.image || "",
         createdAt: task.createdAt || new Date(),
@@ -156,12 +188,11 @@ export async function GET(req: Request) {
     let expiredTasks = tasksWithExtra.filter((task) => task.isExpired);
 
     if (sort === "trending") {
-      activeTasks.sort(
-        (a, b) => (b.participationCount ?? 0) - (a.participationCount ?? 0)
-      );
-      expiredTasks.sort(
-        (a, b) => (b.participationCount ?? 0) - (a.participationCount ?? 0)
-      );
+      const sortByTrendingScore = (a: any, b: any) =>
+        calculateTrendingScore(b) - calculateTrendingScore(a);
+
+      activeTasks.sort(sortByTrendingScore);
+      expiredTasks.sort(sortByTrendingScore);
     } else if (sort === "oldest") {
       activeTasks.sort(
         (a, b) =>
@@ -182,7 +213,6 @@ export async function GET(req: Request) {
       );
     }
 
-    // Final combined result
     const resultTasks = [...activeTasks, ...expiredTasks];
 
     return NextResponse.json({
