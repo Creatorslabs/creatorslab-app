@@ -116,8 +116,8 @@ export default function Step3_RewardsTarget({
             {formData.rewardPoints * formData.maxParticipants >
               parseFloat(balances.cls) && (
               <p className="text-red-500">
-                You don't have enough points to create this task. Please reduce
-                the reward or number of participants.
+                You don&apos;t have enough points to create this task. Please
+                reduce the reward or number of participants.
               </p>
             )}
           </>

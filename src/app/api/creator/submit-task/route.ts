@@ -70,9 +70,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const total = rewardPoints * maxParticipants;
+
     if (expiration && new Date(expiration) < new Date()) {
       return NextResponse.json(
         { message: "Expiration date cannot be in the past" },
+        { status: 400 }
+      );
+    }
+
+    if (localUser.balance < total) {
+      return NextResponse.json(
+        { message: "Not enough balance to create this task." },
         { status: 400 }
       );
     }
@@ -89,6 +98,10 @@ export async function POST(req: NextRequest) {
       expiration: expiration || null,
       image,
       creator: localUser._id,
+    });
+
+    User.findByIdAndUpdate(localUser._id, {
+      $inc: { balance: -total },
     });
 
     await logBalanceTransaction({
