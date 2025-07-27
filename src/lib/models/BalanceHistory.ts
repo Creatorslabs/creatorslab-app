@@ -7,7 +7,8 @@ export type BalanceActionType =
   | "buy_cls"
   | "convert_cls"
   | "create_task"
-  | "completed_task";
+  | "completed_task"
+  | "daily_login";
 
 export interface IBalanceHistory extends Document {
   userId: mongoose.Types.ObjectId;
@@ -35,6 +36,7 @@ const BalanceHistorySchema = new Schema<IBalanceHistory>(
         "convert_cls",
         "create_task",
         "completed_task",
+        "daily_login",
       ],
       required: true,
     },

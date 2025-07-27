@@ -36,7 +36,7 @@ export default function Step2_PlatformEngagement({
       </div>
 
       <div className="space-y-2">
-        <Label className="text-gray-300 text-sm">Social Platform</Label>
+        <Label className="text-gray-300 text-sm">Social Platforms</Label>
         <Select
           value={selectedPlatform}
           onValueChange={(value) => {
@@ -145,6 +145,19 @@ export default function Step2_PlatformEngagement({
             </AnimatePresence>
           </motion.div>
         )}
+        <AnimatePresence>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="text-gray-500 text-sm mt-2"
+          >
+            Total Reward Points:{" "}
+            <span className="font-semibold text-purple-400">
+              {formData.rewardPoints}
+            </span>
+          </motion.p>
+        </AnimatePresence>
       </AnimatePresence>
     </motion.div>
   );

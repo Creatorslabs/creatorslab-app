@@ -305,25 +305,37 @@ export default function SignUp() {
                   Choose your role
                 </h1>
 
-                <div className="flex justify-around gap-4 flex-wrap py-6">
-                  {["User", "Creator"].map((roleOption) => (
-                    <motion.div
-                      key={roleOption}
-                      onClick={() => {
-                        setRole(roleOption.toLowerCase() as "user" | "creator");
-                      }}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className={`p-8 rounded-md border-2 cursor-pointer transition-all duration-200 
-                        ${
-                          role === roleOption.toLowerCase()
-                            ? "border-white bg-white/80 text-black"
-                            : "border-card bg-white/50 text-gray-700 hover:bg-white/70"
-                        }`}
-                    >
-                      <p className="font-medium text-lg">{roleOption}</p>
-                    </motion.div>
-                  ))}
+                <div className="flex justify-around gap-6 flex-wrap py-8">
+                  {["User", "Creator"].map((roleOption) => {
+                    const isActive = role === roleOption.toLowerCase();
+                    return (
+                      <motion.div
+                        key={roleOption}
+                        onClick={() =>
+                          setRole(
+                            roleOption.toLowerCase() as "user" | "creator"
+                          )
+                        }
+                        whileHover={{ scale: 1.08, rotate: -1 }}
+                        whileTap={{ scale: 0.96 }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 300,
+                          damping: 20,
+                        }}
+                        className={`w-40 h-32 flex items-center justify-center rounded-xl font-semibold text-lg shadow-lg cursor-pointer
+              transition-all duration-300 border-2
+              ${
+                isActive
+                  ? "bg-primary text-white border-primary"
+                  : "bg-secondary/20 text-secondary border-secondary hover:bg-secondary/30"
+              }
+            `}
+                      >
+                        {roleOption}
+                      </motion.div>
+                    );
+                  })}
                 </div>
 
                 {role && (

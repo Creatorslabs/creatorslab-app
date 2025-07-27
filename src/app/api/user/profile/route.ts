@@ -1,5 +1,3 @@
-export const runtime = "nodejs";
-
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/connectDB";
@@ -65,7 +63,7 @@ export async function GET() {
       verified: isVerified,
       email: dbUser.email || "",
       inviteLink: `${process.env.NEXTAUTH_URL}/auth/signup/${dbUser.referralCode}`,
-      balance: dbUser.balance?.toFixed(4) || "0.0000",
+      balance: dbUser.balance?.toFixed(1) || "0.0000",
       pendingClaims,
     };
 

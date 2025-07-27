@@ -21,6 +21,7 @@ export const GetRewardPoints = (engagement: string): number => {
     case "tag":
       return 0.2;
     case "mention":
+    case "quote":
       return 0.4;
     case "dm":
     case "message":

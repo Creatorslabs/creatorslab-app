@@ -14,13 +14,18 @@ function RefreshPage() {
     showLoader({ message: "Refreshing session..." });
 
     const refreshSession = async () => {
-      const token = await getAccessToken();
-      const redirectUri = searchParams.get("redirect_uri") || "/";
+      try {
+        const token = await getAccessToken();
+        const redirectUri = searchParams.get("redirect_uri") || "/";
 
-      if (token) {
-        router.replace(redirectUri);
-      } else {
-        router.replace("/login");
+        if (token) {
+          router.replace(redirectUri);
+        } else {
+          router.replace("/login");
+        }
+      } catch (error) {
+        console.error("Session refresh failed:", error);
+        router.replace("/");
       }
     };
 

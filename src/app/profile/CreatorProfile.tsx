@@ -26,6 +26,7 @@ import AvatarUploader from "@/components/Common/AvatarUploader";
 import { updateAvatar } from "@/lib/helpers/update-avatar";
 import EditableUsername from "@/components/Common/EditableUsername";
 import { logger } from "@/lib/logger";
+import DailyClaimModal from "@/components/Common/DailyClaimModal";
 
 interface Task {
   id: string;
@@ -244,7 +245,8 @@ export default function CreatorProfile() {
                       <div className="flex items-center gap-2 border border-white/50 px-3 py-1 rounded-lg">
                         <Icon icon={siDiscord} />
                         <span className="text-white text-sm">
-                          {privyUser?.discord?.username || "Not Linked"}
+                          {privyUser?.discord?.username?.replace(/#\d+$/, "") ||
+                            "Not Linked"}
                         </span>
                       </div>
                     </div>
@@ -311,9 +313,11 @@ export default function CreatorProfile() {
                   <button className="p-2 sm:px-6 sm:py-2 rounded-lg bg-gradient-to-r from-[#5d3fd1] to-[#03abff]">
                     Buy $CLS
                   </button>
-                  <button className="p-2 sm:px-6 sm:py-2 rounded-lg bg-[#F4B30C] text-black">
+                  {/* <button className="p-2 sm:px-6 sm:py-2 rounded-lg bg-[#F4B30C] text-black">
                     Claim $CLS
-                  </button>
+                  </button> */}
+
+                  <DailyClaimModal />
                 </div>
               </div>
             </motion.div>
@@ -341,7 +345,7 @@ export default function CreatorProfile() {
                   icon={<Icon icon={siDiscord} />}
                   platform="Discord"
                   linked={!!privyUser?.discord}
-                  handle={privyUser?.discord?.username}
+                  handle={privyUser?.discord?.username?.replace(/#\d+$/, "")}
                   action={linkSocial}
                 />
               </div>

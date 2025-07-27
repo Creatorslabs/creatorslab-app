@@ -86,19 +86,19 @@ export default function EngagementCard({ index, card }: EngagementCardProps) {
 
           <p className="text-xs text-gray-400">{card.description}</p>
 
-          <div className="flex flex-wrap items-center gap-3 text-xs text-gray-300">
-            <div className="bg-primary text-white text-xs font-semibold px-3 py-1 rounded-lg">
+          <div className="flex flex-nowrap items-center gap-3 text-xs text-gray-300 overflow-x-auto">
+            <div className="bg-primary text-white text-xs font-semibold px-3 py-1 rounded-lg whitespace-nowrap">
               {card.reward}
             </div>
-            <div className="flex items-center gap-1 bg-card px-3 py-1 rounded-lg">
+            <div className="flex items-center gap-1 bg-card px-3 py-1 rounded-lg whitespace-nowrap">
               <Heart className="w-4 h-4" />
               <span>{card.likes}</span>
             </div>
-            <div className="flex items-center gap-1 bg-card px-3 py-1 rounded-lg">
+            <div className="flex items-center gap-1 bg-card px-3 py-1 rounded-lg whitespace-nowrap">
               <MessageCircle className="w-4 h-4" />
               <span>{card.comments}</span>
             </div>
-            <div className="flex items-center gap-1 bg-card px-3 py-1 rounded-lg">
+            <div className="flex items-center gap-1 bg-card px-3 py-1 rounded-lg whitespace-nowrap">
               <Share className="w-4 h-4" />
               <span>{card.shares}</span>
             </div>

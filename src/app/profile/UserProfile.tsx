@@ -255,7 +255,7 @@ const UserProfile = () => {
                     icon={<Icon icon={siDiscord} />}
                     platform="Discord"
                     linked={!!privyUser?.discord}
-                    handle={privyUser?.discord?.username}
+                    handle={privyUser?.discord?.username?.replace(/#\d+$/, "")}
                     action={linkSocial}
                   />
                 </div>

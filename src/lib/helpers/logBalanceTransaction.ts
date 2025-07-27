@@ -15,7 +15,8 @@ export const logBalanceTransaction = async ({
     | "buy_cls"
     | "convert_cls"
     | "create_task"
-    | "completed_task";
+    | "completed_task"
+    | "daily_login";
   amount: number;
 }) => {
   await connectDB();

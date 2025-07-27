@@ -1,5 +1,3 @@
-// export const runtime = "nodejs";
-
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { privy } from "@/lib/privyClient";
@@ -44,6 +42,7 @@ export async function GET() {
 
     const inviteLink = `${process.env.NEXTAUTH_URL}/auth/signup/${dbUser.username}`;
     const tasks = await Task.find({ creator: dbUser._id })
+      .sort({ createdAt: -1 })
       .populate({
         path: "creator",
         select: "username image",
@@ -75,7 +74,7 @@ export async function GET() {
       email: dbUser.email,
       avatar: dbUser.image || "/default-avatar.png",
       verified,
-      balance: dbUser.balance.toFixed(4),
+      balance: dbUser.balance.toFixed(1),
       inviteLink,
       tasks: mappedTasks,
     };

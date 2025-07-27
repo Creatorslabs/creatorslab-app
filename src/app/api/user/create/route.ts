@@ -29,7 +29,7 @@ export async function POST(req: Request) {
       role,
       status: "Active",
       referralCode: generateReferralCode(),
-      balance: 30,
+      balance: role === "creator" ? 50 : 10,
       lastLoginDate: new Date(),
       verification: {
         email: !!email,

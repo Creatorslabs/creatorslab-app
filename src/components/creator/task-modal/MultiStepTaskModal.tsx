@@ -22,6 +22,9 @@ import { toast } from "@/hooks/use-toast";
 import { logger } from "@/lib/logger";
 import { GetRewardPoints } from "@/lib/helpers/getRewardPoint";
 import { useUserBalances } from "@/hooks/useUserBalances";
+import { Task } from "@/lib/models/Task";
+import TaskNoticeModal from "@/components/taskPage/TaskNoticeModal";
+import Step6_Warning from "./steps/Step6_Warning";
 
 export type TaskData = {
   _id?: string;
@@ -106,7 +109,7 @@ export function MultiStepTaskModal({
     }
   }, [task, isOpen]);
 
-  const totalSteps = 5;
+  const totalSteps = 6;
   const progress = (currentStep / totalSteps) * 100;
   const stepTitles = [
     "Basic Information",
@@ -114,6 +117,7 @@ export function MultiStepTaskModal({
     "Rewards & Target",
     "Details & Content",
     "Review & Confirm",
+    "Warning - submit task",
   ];
 
   const handleInputChange = (field: keyof TaskData, value: any) => {
@@ -256,6 +260,7 @@ export function MultiStepTaskModal({
           socialPlatforms={socialPlatforms}
         />
       ),
+      6: <Step6_Warning />,
     };
 
     return (

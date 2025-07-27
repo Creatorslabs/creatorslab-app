@@ -127,28 +127,63 @@ export async function GET(req: Request) {
       return count.toString();
     };
 
-    const resultTasks = allTasks.map((task) => ({
-      id: (task._id as mongoose.Types.ObjectId).toString(),
-      title: task.title,
-      description: task.description,
-      image: task.image,
-      reward: `${task.rewardPoints} $CLS`,
-      likes: formatCount(Math.floor(Math.random() * 3000 + 50)),
-      comments: formatCount(Math.floor(Math.random() * 1000 + 10)),
-      shares: formatCount(Math.floor(Math.random() * 500 + 5)),
-      gradient: "from-blue-600 to-purple-600",
-      avatar: task.creator?.image || "",
-      createdAt: task.createdAt || new Date(),
-      participationCount:
-        participationCountMap[(task._id as string).toString()] || 0,
-      expiration: task.expiration,
-    }));
+    const now = new Date();
+
+    const tasksWithExtra = allTasks.map((task) => {
+      const expirationDate = task.expiration ? new Date(task.expiration) : null;
+      const isExpired = expirationDate ? expirationDate <= now : false;
+
+      return {
+        id: (task._id as mongoose.Types.ObjectId).toString(),
+        title: task.title,
+        description: task.description,
+        image: task.image,
+        reward: `${task.rewardPoints} $CLS`,
+        likes: formatCount(Math.floor(Math.random() * 3000 + 50)),
+        comments: formatCount(Math.floor(Math.random() * 1000 + 10)),
+        shares: formatCount(Math.floor(Math.random() * 500 + 5)),
+        gradient: "from-blue-600 to-purple-600",
+        avatar: task.creator?.image || "",
+        createdAt: task.createdAt || new Date(),
+        participationCount:
+          participationCountMap[(task._id as string).toString()] || 0,
+        expiration: task.expiration,
+        isExpired,
+      };
+    });
+
+    let activeTasks = tasksWithExtra.filter((task) => !task.isExpired);
+    let expiredTasks = tasksWithExtra.filter((task) => task.isExpired);
 
     if (sort === "trending") {
-      resultTasks.sort(
+      activeTasks.sort(
         (a, b) => (b.participationCount ?? 0) - (a.participationCount ?? 0)
       );
+      expiredTasks.sort(
+        (a, b) => (b.participationCount ?? 0) - (a.participationCount ?? 0)
+      );
+    } else if (sort === "oldest") {
+      activeTasks.sort(
+        (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      );
+      expiredTasks.sort(
+        (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      );
+    } else {
+      activeTasks.sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+      expiredTasks.sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
     }
+
+    // Final combined result
+    const resultTasks = [...activeTasks, ...expiredTasks];
 
     return NextResponse.json({
       success: true,
