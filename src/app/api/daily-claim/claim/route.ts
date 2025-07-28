@@ -59,19 +59,19 @@ export async function POST() {
       });
     }
 
-    localUser.balance += 1;
+    localUser.balance += 0.2;
     await localUser.save();
 
     await logBalanceTransaction({
       userId: localUser._id,
       type: "daily_login",
-      amount: 3,
+      amount: 0.2,
     });
 
     return NextResponse.json({
       success: true,
       message: "Claimed successfully",
-      reward: 1,
+      reward: 0.2,
     });
   } catch (error) {
     logger.error("POST /api/daily-claim/claim error:", error);
