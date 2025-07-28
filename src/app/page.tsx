@@ -12,6 +12,7 @@ import CTA from "@/components/Home/CTA";
 import { useLoader } from "@/hooks/useLoader";
 import Link from "next/link";
 import { logger } from "@/lib/logger";
+import ScrollToTopButton from "@/components/Common/ScrollToTopButton";
 
 interface TaskCard {
   id: string;
@@ -130,6 +131,8 @@ export default function Home() {
         </div>
 
         <CTA handleSignUp={handleSignUp} />
+
+        <ScrollToTopButton />
       </div>
 
       <WelcomeModal

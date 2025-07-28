@@ -84,21 +84,25 @@ export default function EngagementCard({ index, card }: EngagementCardProps) {
             )}
           </div>
 
-          <p className="text-xs text-gray-400">{card.description}</p>
+          <p className="text-xs text-gray-400">
+            {card.description.length > 75
+              ? `${card.description.slice(0, 75)}...`
+              : card.description}
+          </p>
 
-          <div className="flex flex-nowrap items-center gap-3 text-xs text-gray-300 overflow-x-auto">
-            <div className="bg-primary text-white text-xs font-semibold px-3 py-1 rounded-lg whitespace-nowrap">
+          <div className="flex w-full items-center gap-3 text-xs text-gray-300 overflow-hidden whitespace-nowrap">
+            <div className="flex-1 flex justify-center bg-primary text-white font-semibold px-3 py-2 rounded-lg">
               {card.reward}
             </div>
-            <div className="flex items-center gap-1 bg-card px-3 py-1 rounded-lg whitespace-nowrap">
+            <div className="flex-1 flex items-center justify-center gap-1 bg-card px-3 py-2 rounded-lg">
               <Heart className="w-4 h-4" />
               <span>{card.likes}</span>
             </div>
-            <div className="flex items-center gap-1 bg-card px-3 py-1 rounded-lg whitespace-nowrap">
+            <div className="flex-1 flex items-center justify-center gap-1 bg-card px-3 py-2 rounded-lg">
               <MessageCircle className="w-4 h-4" />
               <span>{card.comments}</span>
             </div>
-            <div className="flex items-center gap-1 bg-card px-3 py-1 rounded-lg whitespace-nowrap">
+            <div className="flex-1 flex items-center justify-center gap-1 bg-card px-3 py-2 rounded-lg">
               <Share className="w-4 h-4" />
               <span>{card.shares}</span>
             </div>

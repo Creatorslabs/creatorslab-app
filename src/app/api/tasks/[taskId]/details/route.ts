@@ -8,6 +8,9 @@ import { IParticipation, Participation } from "@/lib/models/Participation";
 import { getTimeRemaining } from "@/lib/helpers/date-helpers";
 import { getTaskRequirements } from "@/lib/helpers/task-requirement";
 import { logger } from "@/lib/logger";
+import { TaskLike } from "@/lib/models/TaskLike";
+import { TaskShare } from "@/lib/models/TaskShare";
+import { TaskComment } from "@/lib/models/TaskComment";
 
 interface Task {
   _id: string;
@@ -65,12 +68,21 @@ export async function GET(
 
     const creatorId = task.creator._id;
 
-    const [participants, userParticipation] = await Promise.all([
+    const [
+      participants,
+      userParticipation,
+      likesCount,
+      shareCount,
+      commentCount,
+    ] = await Promise.all([
       Participation.countDocuments({ taskId }),
       Participation.findOne({
         taskId,
         userId: user._id,
       }).lean<IParticipation>(),
+      TaskLike.countDocuments({ taskId }),
+      TaskShare.countDocuments({ taskId }),
+      TaskComment.countDocuments({ taskId }),
     ]);
 
     const participatedTaskIds = await Participation.find({
@@ -167,6 +179,9 @@ export async function GET(
       requirements,
       canParticipate,
       reason: canParticipate ? null : reason,
+      likes: likesCount,
+      shares: shareCount,
+      comments: commentCount,
     };
 
     return NextResponse.json({ success: true, data: response });

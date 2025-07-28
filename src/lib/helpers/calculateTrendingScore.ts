@@ -2,6 +2,7 @@ export const parseCount = (str: string): number => {
   if (!str) return 0;
   if (str.endsWith("M")) return parseFloat(str) * 1_000_000;
   if (str.endsWith("K")) return parseFloat(str) * 1_000;
+
   return parseInt(str);
 };
 

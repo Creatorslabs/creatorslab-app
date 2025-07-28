@@ -6,16 +6,23 @@ import { Copy, Check, Share2, X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { SimpleIcon } from "../Common/SimpleIcon";
 import { logger } from "@/lib/logger";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 interface ShareButtonProps {
   taskId: string;
   taskLink: string;
+  shares: number;
 }
 
-export default function ShareButton({ taskId, taskLink }: ShareButtonProps) {
+export default function ShareButton({
+  taskId,
+  taskLink,
+  shares,
+}: ShareButtonProps) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
+  const [shareCount, setShareCount] = useState(shares || 0);
 
   const encodedLink = encodeURIComponent(taskLink);
   const shareText = encodeURIComponent("Check out this task on CreatorsLab!");
@@ -67,6 +74,8 @@ export default function ShareButton({ taskId, taskLink }: ShareButtonProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ platform }),
       });
+
+      setShareCount((prev) => prev + 1);
     } catch (error) {
       toast({
         title: "Failed to share task",
@@ -77,12 +86,24 @@ export default function ShareButton({ taskId, taskLink }: ShareButtonProps) {
 
   return (
     <>
-      <button
-        onClick={() => setOpen(true)}
-        className={`w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg bg-card text-white hover:bg-card/80 transition-all duration-200`}
-      >
-        <Share2 className="w-4 h-4 md:w-5 md:h-5" />
-      </button>
+      <Tooltip>
+        <TooltipTrigger>
+          <button
+            onClick={() => setOpen(true)}
+            className={`w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg bg-card text-white hover:bg-card/80 transition-all duration-200 cursor-pointer`}
+          >
+            <Share2 className="w-4 h-4 md:w-5 md:h-5" />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent
+          side="top"
+          className="bg-card-box text-sm text-foreground"
+        >
+          <p>
+            {shareCount} share{shareCount !== 1 ? "s" : ""}
+          </p>
+        </TooltipContent>
+      </Tooltip>
 
       <AnimatePresence>
         {open && (

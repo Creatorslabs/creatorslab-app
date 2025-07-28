@@ -26,7 +26,6 @@ import { ProofSubmissionSection } from "@/components/Common/ProofSubmissionSecti
 import TaskNotFound from "@/components/Common/TaskNotFound";
 import { logger } from "@/lib/logger";
 import { TaskLikeButton } from "@/components/taskActions/TaskLikeButton";
-import { parseCount } from "@/lib/helpers/calculateTrendingScore";
 import CommentsSection from "@/components/taskPage/CommentsSection";
 import TaskNoticeModal from "@/components/taskPage/TaskNoticeModal";
 import ShareButton from "@/components/taskActions/ShareButton";
@@ -48,8 +47,8 @@ interface Task {
   participants: number;
   maxParticipants: number;
   target: string;
-  likes: string;
-  comments: string;
+  likes: number;
+  comments: number;
   shares: number;
   otherTasks: any[];
   status: "pending" | "completed" | null;
@@ -71,12 +70,7 @@ export default function TaskViewPage() {
   const [showWarningModal, setShowWarningModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showNoticeModal, setShowNoticeModal] = useState(false);
-  const [earnedAmount, setEarnedAmount] = useState("0.5");
   const [proofLink, setProofLink] = useState("");
-  const [connectedAccounts, setConnectedAccounts] = useState({
-    twitter: false,
-    telegram: false,
-  });
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -123,12 +117,6 @@ export default function TaskViewPage() {
   const handleTaskComplete = async () => {
     setSubmitting(true);
 
-    if (!connectedAccounts.twitter) {
-      setShowWarningModal(true);
-      hideLoader();
-      return;
-    }
-
     if (task?.status !== null) {
       toast({
         title: "Task Already Completed",
@@ -168,8 +156,6 @@ export default function TaskViewPage() {
         });
         return;
       }
-
-      setEarnedAmount(task?.reward || "0");
 
       await fetchTask();
 
@@ -246,17 +232,15 @@ export default function TaskViewPage() {
                   <h1 className="text-2xl font-bold flex-1 min-w-0 break-words">
                     {task.title}
                   </h1>
-                  <div className="flex flex-col-reverse md:flex-row items-start md:items-center gap-4">
-                    <ShareButton
-                      taskId={task.id}
-                      taskLink={`https://app.creatorslab.cc/tasks/${task.id}`}
-                    />
-                    <TaskLikeButton
-                      taskId={task.id}
-                      initialLikes={parseCount(task.likes)}
-                    />
-                  </div>
                 </div>
+              </div>
+              <div className="absolute top-2 right-2 sm:bottom-auto sm:top-2 md:top-auto md:bottom-2 flex flex-col-reverse md:flex-row items-start md:items-center gap-4">
+                <ShareButton
+                  taskId={task.id}
+                  taskLink={`https://app.creatorslab.cc/tasks/${task.id}`}
+                  shares={task.shares}
+                />
+                <TaskLikeButton taskId={task.id} initialLikes={task.likes} />
               </div>
             </motion.div>
 
@@ -518,7 +502,13 @@ export default function TaskViewPage() {
               transition={{ delay: 0.6 }}
               className="bg-card-box border border-border rounded-xl p-6"
             >
-              <h3 className="text-white font-semibold mb-4">Comments</h3>
+              <div className="flex justify-between items-center text-white font-semibold mb-4">
+                <h3>Comments</h3>
+                <p>
+                  {task.comments} comment{task.comments > 1 && "s"}
+                </p>
+              </div>
+
               <CommentsSection taskId={task.id} />
             </motion.div>
           </div>
@@ -533,7 +523,7 @@ export default function TaskViewPage() {
       <EarnedCLSModal
         isOpen={showEarnedModal}
         onClose={() => setShowEarnedModal(false)}
-        amount={earnedAmount}
+        amount={task.reward}
       />
       <WarningModal
         isOpen={showWarningModal}

@@ -7,6 +7,7 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import FilterControls from "@/components/taskPage/FilterControls";
 import { logger } from "@/lib/logger";
+import ScrollToTopButton from "@/components/Common/ScrollToTopButton";
 
 interface TaskCard {
   id: string;
@@ -22,7 +23,7 @@ interface TaskCard {
   expiration: Date;
 }
 
-const sortOptions = ["newest", "oldest", "trending"];
+const sortOptions = ["newest", "oldest", "trending", "highest", "lowest"];
 const platforms = [
   "all",
   "twitter",
@@ -84,6 +85,8 @@ function TasksPage() {
       setHasMore(newTasks.length > 0);
       if (reset) {
         setTasks(newTasks);
+
+        window.scrollTo({ top: 0, behavior: "smooth" });
       } else {
         setTasks((prev) => [...prev, ...newTasks]);
       }
@@ -124,6 +127,7 @@ function TasksPage() {
 
   return (
     <div className="min-h-screen bg-background px-4 lg:px-8 py-6 text-white">
+      <ScrollToTopButton />
       {/* Filters */}
       <FilterControls
         platform={platform}

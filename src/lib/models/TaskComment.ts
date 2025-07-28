@@ -4,6 +4,7 @@ export interface ITaskComment extends Document {
   taskId: mongoose.Types.ObjectId;
   userId: mongoose.Types.ObjectId;
   message: string;
+  replyTo?: mongoose.Types.ObjectId;
   createdAt: Date;
 }
 
@@ -24,6 +25,11 @@ const TaskCommentSchema: Schema<ITaskComment> = new Schema(
       required: true,
       trim: true,
       maxlength: 1000,
+    },
+    replyTo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "TaskComment",
+      default: null,
     },
   },
   {

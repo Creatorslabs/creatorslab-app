@@ -1,3 +1,4 @@
+import { parseCount } from "./../../../lib/helpers/calculateTrendingScore";
 import connectDB from "@/lib/connectDB";
 import { Participation } from "@/lib/models/Participation";
 import { Task } from "@/lib/models/Task";
@@ -93,6 +94,10 @@ export async function GET(req: Request) {
     const sortField =
       sort === "oldest"
         ? { createdAt: 1 }
+        : sort === "highest"
+        ? { rewardPoints: -1, createdAt: -1 }
+        : sort === "lowest"
+        ? { rewardPoints: 1, createdAt: 1 }
         : sort === "trending"
         ? {}
         : rawSearch
@@ -202,6 +207,12 @@ export async function GET(req: Request) {
         (a, b) =>
           new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
       );
+    } else if (sort === "highest") {
+      activeTasks.sort((a, b) => parseCount(b.reward) - parseCount(a.reward));
+      expiredTasks.sort((a, b) => parseCount(b.reward) - parseCount(a.reward));
+    } else if (sort === "lowest") {
+      activeTasks.sort((a, b) => parseCount(a.reward) - parseCount(b.reward));
+      expiredTasks.sort((a, b) => parseCount(a.reward) - parseCount(b.reward));
     } else {
       activeTasks.sort(
         (a, b) =>

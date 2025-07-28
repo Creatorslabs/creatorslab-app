@@ -2,20 +2,55 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/connectDB";
 import { TaskComment } from "@/lib/models/TaskComment";
 import { getLoggedInUser } from "@/lib/auth/getUser";
+import { Filter } from "bad-words";
 
 export async function GET(
-  _: Request,
+  req: Request,
   context: { params: Promise<{ taskId: string }> }
 ) {
   try {
     await connectDB();
     const { taskId } = await context.params;
-    const comments = await TaskComment.find({ taskId: taskId })
+
+    const { searchParams } = new URL(req.url);
+
+    const page = parseInt(searchParams.get("page") || "1", 10);
+    const limit = parseInt(searchParams.get("limit") || "10", 10);
+    const skip = (page - 1) * limit;
+
+    const allComments = await TaskComment.find({ taskId })
       .sort({ createdAt: -1 })
       .populate("userId", "username image")
       .lean();
 
-    return NextResponse.json({ success: true, data: comments });
+    const topLevelComments = allComments.filter((c) => !c.replyTo);
+    const replies = allComments.filter((c) => c.replyTo);
+
+    const paginatedTopLevel = topLevelComments.slice(skip, skip + limit);
+
+    const commentsWithReplies = paginatedTopLevel.map((comment) => {
+      const commentReplies = replies
+        .filter((reply) => reply.replyTo?.toString() === comment._id.toString())
+        .sort(
+          (a, b) =>
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        );
+
+      return {
+        ...comment,
+        replies: commentReplies,
+      };
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: commentsWithReplies,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(topLevelComments.length / limit),
+        totalComments: topLevelComments.length,
+      },
+    });
   } catch (error) {
     return NextResponse.json(
       { success: false, message: "Failed to fetch comments" },
@@ -31,13 +66,22 @@ export async function POST(
   try {
     await connectDB();
     const body = await req.json();
-    const { message } = body;
+    const { message, replyTo } = body;
 
     const { taskId } = await context.params;
 
-    if (!message) {
+    if (!message || message.length > 250) {
       return NextResponse.json(
-        { success: false, message: "Message is required" },
+        { success: false, message: "Message must be 250 characters or fewer." },
+        { status: 400 }
+      );
+    }
+
+    const filter = new Filter();
+
+    if (filter.isProfane(message)) {
+      return NextResponse.json(
+        { success: false, message: "Inappropriate language is not allowed." },
         { status: 400 }
       );
     }
@@ -52,6 +96,7 @@ export async function POST(
       taskId: taskId,
       userId: user._id,
       message,
+      replyTo: replyTo || null,
     });
 
     return NextResponse.json({ success: true, data: comment });
