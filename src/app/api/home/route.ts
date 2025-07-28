@@ -2,23 +2,14 @@ import connectDB from "@/lib/connectDB";
 import { logger } from "@/lib/logger";
 import { Participation } from "@/lib/models/Participation";
 import { Task } from "@/lib/models/Task";
+import { TaskLike } from "@/lib/models/TaskLike";
+import { TaskComment } from "@/lib/models/TaskComment";
+import { TaskShare } from "@/lib/models/TaskShare";
 import { IUser, User } from "@/lib/models/User";
 import { privy } from "@/lib/privyClient";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-
-function getRandomCount(base: number = 1000): string {
-  const num = base + Math.random() * base;
-
-  if (num >= 1_000_000) {
-    return (num / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
-  }
-  if (num >= 1_000) {
-    return (num / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
-  }
-
-  return Math.floor(num).toString();
-}
+import { calculateTrendingScore } from "@/lib/helpers/calculateTrendingScore";
 
 export async function GET(req: Request) {
   try {
@@ -31,10 +22,6 @@ export async function GET(req: Request) {
 
     const cookieStore = await cookies();
     const idToken = cookieStore.get("privy-id-token")?.value;
-
-    if (!idToken) {
-      logger.warn("No Privy ID Token found in cookies");
-    }
 
     let localUserId: string | null = null;
 
@@ -58,7 +45,6 @@ export async function GET(req: Request) {
       }
     }
 
-    // Get user participations
     const userParticipations = localUserId
       ? await Participation.find({ userId: localUserId })
           .select("taskId")
@@ -69,7 +55,6 @@ export async function GET(req: Request) {
       userParticipations.map((p) => p.taskId.toString())
     );
 
-    // NEWEST TASKS (filter user participated if logged in)
     const newestQuery: any = { status: "active" };
     if (localUserId) {
       newestQuery._id = { $nin: Array.from(participatedTaskIds) };
@@ -85,14 +70,13 @@ export async function GET(req: Request) {
       Task.countDocuments(newestQuery),
     ]);
 
-    // TRENDING: Aggregate by participation count
     const trendingAgg = await Participation.aggregate([
       { $group: { _id: "$taskId", count: { $sum: 1 } } },
       { $sort: { count: -1 } },
       { $limit: limit },
     ]);
 
-    const trendingTaskIds = trendingAgg.map((item: any) => item._id);
+    const trendingTaskIds = trendingAgg.map((item) => item._id);
     let trendingTasks = await Task.find({
       _id: { $in: trendingTaskIds },
       status: "active",
@@ -100,7 +84,6 @@ export async function GET(req: Request) {
       .populate("creator", "image")
       .lean();
 
-    // If there are no participations, fall back to latest tasks
     if (trendingTasks.length === 0) {
       trendingTasks = await Task.find({ status: "active" })
         .sort({ createdAt: -1 })
@@ -109,24 +92,63 @@ export async function GET(req: Request) {
         .lean();
     }
 
-    // Format response
-    const formatTask = (task: any) => ({
-      id: task._id.toString(),
-      title: task.title,
-      description: task.description,
-      image: task.image,
-      reward: `${task.rewardPoints} $CLS`,
-      likes: getRandomCount(1000),
-      comments: getRandomCount(5000),
-      shares: getRandomCount(100),
-      avatar: task.creator?.image || "",
-    });
+    const allTasks = [...newestTasks, ...trendingTasks];
+    const taskIds = allTasks.map((t) => t._id);
+
+    const [likeCounts, commentCounts, shareCounts] = await Promise.all([
+      TaskLike.aggregate([
+        { $match: { taskId: { $in: taskIds } } },
+        { $group: { _id: "$taskId", count: { $sum: 1 } } },
+      ]),
+      TaskComment.aggregate([
+        { $match: { taskId: { $in: taskIds } } },
+        { $group: { _id: "$taskId", count: { $sum: 1 } } },
+      ]),
+      TaskShare.aggregate([
+        { $match: { taskId: { $in: taskIds } } },
+        { $group: { _id: "$taskId", count: { $sum: 1 } } },
+      ]),
+    ]);
+
+    const likesMap = Object.fromEntries(
+      likeCounts.map((c) => [c._id.toString(), c.count])
+    );
+    const commentsMap = Object.fromEntries(
+      commentCounts.map((c) => [c._id.toString(), c.count])
+    );
+    const sharesMap = Object.fromEntries(
+      shareCounts.map((c) => [c._id.toString(), c.count])
+    );
+
+    const formatCount = (count: number): string => {
+      if (count >= 1_000_000) return (count / 1_000_000).toFixed(1) + "M";
+      if (count >= 1_000) return (count / 1_000).toFixed(1) + "K";
+      return count.toString();
+    };
+
+    const formatTask = (task: any) => {
+      const idStr = task._id.toString();
+      return {
+        id: idStr,
+        title: task.title,
+        description: task.description,
+        image: task.image,
+        reward: `${task.rewardPoints} $CLS`,
+        likes: formatCount(likesMap[idStr] || 0),
+        comments: formatCount(commentsMap[idStr] || 0),
+        shares: formatCount(sharesMap[idStr] || 0),
+        avatar: task.creator?.image || "",
+      };
+    };
+
+    const sortByTrendingScore = (a: any, b: any) =>
+      calculateTrendingScore(b) - calculateTrendingScore(a);
 
     return NextResponse.json({
       success: true,
       data: {
         newestTask: newestTasks.map(formatTask),
-        trendingTask: trendingTasks.map(formatTask),
+        trendingTask: trendingTasks.map(formatTask).sort(sortByTrendingScore),
       },
       pagination: {
         page,
