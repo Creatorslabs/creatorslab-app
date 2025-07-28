@@ -74,17 +74,17 @@ export const TaskLikeButton = ({
         <button
           onClick={toggleLike}
           disabled={isLoading}
-          className={`w-10 h-10 flex items-center justify-center rounded-lg bg-card transition-all duration-200
-              ${hasLiked ? "text-red-500" : "text-white"} 
-              ${isLoading ? "opacity-50 pointer-events-none" : ""}`}
+          className={`w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg bg-card transition-all duration-200
+    ${hasLiked ? "text-red-500" : "text-white"} 
+    ${isLoading ? "opacity-50 pointer-events-none" : ""}`}
         >
           <Heart
-            className={`w-5 h-5 transition 
-                ${
-                  hasLiked
-                    ? "fill-red-500 stroke-red-500"
-                    : "fill-transparent stroke-white"
-                }`}
+            className={`w-4 h-4 md:w-5 md:h-5 transition 
+      ${
+        hasLiked
+          ? "fill-red-500 stroke-red-500"
+          : "fill-transparent stroke-white"
+      }`}
           />
         </button>
       </TooltipTrigger>

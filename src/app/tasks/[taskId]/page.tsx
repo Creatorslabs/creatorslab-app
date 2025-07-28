@@ -19,7 +19,7 @@ import EarnedCLSModal from "@/components/taskPage/EarnedCLSModal";
 import WarningModal from "@/components/taskPage/WarningModal";
 import SuccessModal from "@/components/taskPage/SuccessModal";
 import FollowButton from "@/components/Common/FollowButton";
-import { useLinkAccount, usePrivy } from "@privy-io/react-auth";
+import { usePrivy } from "@privy-io/react-auth";
 import { SimpleIcon } from "@/components/Common/SimpleIcon";
 import Link from "next/link";
 import { ProofSubmissionSection } from "@/components/Common/ProofSubmissionSection";
@@ -28,6 +28,8 @@ import { logger } from "@/lib/logger";
 import { TaskLikeButton } from "@/components/taskActions/TaskLikeButton";
 import { parseCount } from "@/lib/helpers/calculateTrendingScore";
 import CommentsSection from "@/components/taskPage/CommentsSection";
+import TaskNoticeModal from "@/components/taskPage/TaskNoticeModal";
+import ShareButton from "@/components/taskActions/ShareButton";
 
 interface Task {
   id: string;
@@ -68,6 +70,7 @@ export default function TaskViewPage() {
   const [showEarnedModal, setShowEarnedModal] = useState(false);
   const [showWarningModal, setShowWarningModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showNoticeModal, setShowNoticeModal] = useState(false);
   const [earnedAmount, setEarnedAmount] = useState("0.5");
   const [proofLink, setProofLink] = useState("");
   const [connectedAccounts, setConnectedAccounts] = useState({
@@ -118,7 +121,7 @@ export default function TaskViewPage() {
   };
 
   const handleTaskComplete = async () => {
-    showLoader({ message: "Completing task..." });
+    setSubmitting(true);
 
     if (!connectedAccounts.twitter) {
       setShowWarningModal(true);
@@ -175,7 +178,7 @@ export default function TaskViewPage() {
     } catch (error) {
       logger.error("Error completing task:", error);
     } finally {
-      hideLoader();
+      setSubmitting(false);
     }
   };
 
@@ -239,14 +242,20 @@ export default function TaskViewPage() {
               </div>
 
               <div className="relative z-10 mt-12">
-                <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex flex-wrap items-start justify-between gap-4">
                   <h1 className="text-2xl font-bold flex-1 min-w-0 break-words">
                     {task.title}
                   </h1>
-                  <TaskLikeButton
-                    taskId={task.id}
-                    initialLikes={parseCount(task.likes)}
-                  />
+                  <div className="flex flex-col-reverse md:flex-row items-start md:items-center gap-4">
+                    <ShareButton
+                      taskId={task.id}
+                      taskLink={`https://app.creatorslab.cc/tasks/${task.id}`}
+                    />
+                    <TaskLikeButton
+                      taskId={task.id}
+                      initialLikes={parseCount(task.likes)}
+                    />
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -533,6 +542,13 @@ export default function TaskViewPage() {
       <SuccessModal
         isOpen={showSuccessModal}
         onClose={() => setShowSuccessModal(false)}
+      />
+
+      <TaskNoticeModal
+        isOpen={showNoticeModal}
+        isSubmitting={submitting}
+        handleSubmit={handleTaskComplete}
+        onClose={() => setShowNoticeModal(false)}
       />
 
       <LoaderModal />

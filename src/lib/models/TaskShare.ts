@@ -2,6 +2,8 @@ import mongoose, { Schema, Document, Model } from "mongoose";
 
 export interface ITaskShare extends Document {
   taskId: mongoose.Types.ObjectId;
+  platform?: string;
+  userId?: mongoose.Types.ObjectId;
   createdAt: Date;
 }
 
@@ -11,6 +13,16 @@ const TaskShareSchema: Schema<ITaskShare> = new Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Task",
       required: true,
+    },
+    platform: {
+      type: String,
+      enum: ["clipboard", "facebook", "twitter", "telegram", "whatsapp"],
+      required: true,
+    },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: false,
     },
   },
   {
