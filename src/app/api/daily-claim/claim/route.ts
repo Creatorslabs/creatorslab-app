@@ -59,7 +59,7 @@ export async function POST() {
       });
     }
 
-    localUser.balance += 5;
+    localUser.balance += 1;
     await localUser.save();
 
     await logBalanceTransaction({
@@ -71,7 +71,7 @@ export async function POST() {
     return NextResponse.json({
       success: true,
       message: "Claimed successfully",
-      reward: 5,
+      reward: 1,
     });
   } catch (error) {
     logger.error("POST /api/daily-claim/claim error:", error);
