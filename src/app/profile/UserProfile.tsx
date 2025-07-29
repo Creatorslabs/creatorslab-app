@@ -28,7 +28,6 @@ import { updateAvatar } from "@/lib/helpers/update-avatar";
 import EditableUsername from "@/components/Common/EditableUsername";
 import InviteLinkButton from "@/components/Common/InviteLink";
 import DailyClaimModal from "@/components/Common/DailyClaimModal";
-import { SimpleIcon } from "@/components/Common/SimpleIcon";
 import ClaimCard from "@/components/Common/ClaimCard";
 
 interface PendingClaim {
