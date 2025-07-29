@@ -49,7 +49,7 @@ export const DailyClaimModal = () => {
       const data = await res.json();
 
       if (data.success) {
-        toast({ title: "🎉 You've claimed 5 $CLS!" });
+        toast({ title: "You've claimed 0.2 $CLS!" });
         setCanClaim(false);
         setClaimed(true);
         setCountdown(86400); // reset countdown to 24hr
@@ -131,7 +131,7 @@ export const DailyClaimModal = () => {
               ) : (
                 <p className="text-sm mb-4">
                   Claim your daily{" "}
-                  <span className="font-bold text-yellow-500">5 $CLS</span>{" "}
+                  <span className="font-bold text-yellow-500">0.2 $CLS</span>{" "}
                   reward.
                 </p>
               )}
@@ -146,7 +146,7 @@ export const DailyClaimModal = () => {
                     : "bg-[#F4B30C] text-black hover:bg-yellow-400"
                 }`}
               >
-                {claiming ? "Claiming..." : "Claim 5 Daily $CLS"}
+                {claiming ? "Claiming..." : "Claim 0.2 Daily $CLS"}
               </motion.button>
             </motion.div>
           </motion.div>

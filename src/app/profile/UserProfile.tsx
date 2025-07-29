@@ -27,6 +27,7 @@ import AvatarUploader from "@/components/Common/AvatarUploader";
 import { updateAvatar } from "@/lib/helpers/update-avatar";
 import EditableUsername from "@/components/Common/EditableUsername";
 import InviteLinkButton from "@/components/Common/InviteLink";
+import DailyClaimModal from "@/components/Common/DailyClaimModal";
 
 interface PendingClaim {
   id: string;
@@ -315,9 +316,7 @@ const UserProfile = () => {
                     <button className="px-6 py-2 rounded-lg bg-gradient-to-r from-[#5d3fd1] to-[#03abff] text-white">
                       Buy $CLS
                     </button>
-                    <button className="px-6 py-2 rounded-lg bg-[#F4B30C] text-black">
-                      Claim $CLS
-                    </button>
+                    <DailyClaimModal />
                   </div>
                 </div>
               </div>
