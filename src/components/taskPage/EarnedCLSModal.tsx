@@ -53,7 +53,8 @@ export default function EarnedCLSModal({ isOpen, onClose }: ModalProps) {
               <span className="text-yellow-400">pending review</span>
             </h3>
             <p className="text-gray-400 text-sm mb-6">
-              You'll be notified once it's approved and eligible for rewards.
+              You'll be notified once it&apos;s approved and eligible for
+              rewards.
             </p>
 
             <Button
