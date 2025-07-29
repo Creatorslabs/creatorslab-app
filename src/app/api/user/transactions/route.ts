@@ -91,9 +91,7 @@ export async function GET(req: NextRequest) {
             type = "compressed_nft_mint";
           }
         } else if (type === "TRANSFER" && desc.includes("transferred")) {
-          const match = desc.match(
-            /(\w{32,}) transferred a total ([\d.]+) (\w+) to/
-          );
+          const match = desc.match(/(\w{32,}) transferred ([\d.]+) (\w+) to/);
           if (match) {
             sender = match[1];
             amount = match[2];
