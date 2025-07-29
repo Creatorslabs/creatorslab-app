@@ -81,6 +81,14 @@ export async function GET(req: NextRequest) {
       }
     }
 
+    if (walletAddress && !localUser.wallet) {
+      await User.findOneAndUpdate(
+        { privyId: privyUser.id },
+        { wallet: walletAddress },
+        { new: true }
+      );
+    }
+
     const compiled =
       parseFloat(balances.cls) * 0.02 +
       parseFloat(balances.usdc) +

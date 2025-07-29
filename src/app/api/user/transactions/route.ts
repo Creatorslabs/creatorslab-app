@@ -58,13 +58,13 @@ export async function GET(req: NextRequest) {
         const desc = tx.description || "";
         const lowerDesc = desc.toLowerCase();
 
-        logger.log(
-          "[TX_API_GET] tx:",
-          `Type:${tx.type} - Description: ${tx.description}`
-        );
+        // logger.log(
+        //   "[TX_API_GET] tx:",
+        //   `Type:${tx.type} - Description: ${tx.description}`
+        // );
 
-        if (type === "NFT_SALE" && desc.includes("sold nft to")) {
-          const match = desc.match(
+        if (type === "NFT_SALE" && lowerDesc.includes("sold nft to")) {
+          const match = lowerDesc.match(
             /(\w{32,}) sold nft to (\w{32,}) for ([\d.]+) (\w+)/
           );
           if (match) {
@@ -74,24 +74,36 @@ export async function GET(req: NextRequest) {
             currency = match[4];
             type = "nft_sale";
           }
-        } else if (type === "NFT_LISTING" && desc.includes("listed nft for")) {
-          const match = desc.match(/(\w{32,}) listed nft for ([\d.]+) (\w+)/);
+        } else if (
+          type === "NFT_LISTING" &&
+          lowerDesc.includes("listed nft for")
+        ) {
+          const match = lowerDesc.match(
+            /(\w{32,}) listed nft for ([\d.]+) (\w+)/
+          );
           if (match) {
             sender = match[1];
             amount = match[2];
             currency = match[3];
             type = "nft_listing";
           }
-        } else if (type === "COMPRESSED_NFT_MINT" && desc.includes("minted")) {
-          const match = desc.match(/(\w{32,}) minted (\d+) compressed nfts/);
+        } else if (
+          type === "COMPRESSED_NFT_MINT" &&
+          lowerDesc.includes("minted")
+        ) {
+          const match = lowerDesc.match(
+            /(\w{32,}) minted (\d+) compressed nfts/
+          );
           if (match) {
             sender = match[1];
             amount = match[2];
             currency = "NFT";
             type = "compressed_nft_mint";
           }
-        } else if (type === "TRANSFER" && desc.includes("transferred")) {
-          const match = desc.match(/(\w{32,}) transferred ([\d.]+) (\w+) to/);
+        } else if (type === "TRANSFER" && lowerDesc.includes("transferred")) {
+          const match = lowerDesc.match(
+            /(\w{32,}) transferred ([\d.]+) (\w+) to/
+          );
           if (match) {
             sender = match[1];
             amount = match[2];

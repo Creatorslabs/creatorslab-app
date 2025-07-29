@@ -4,7 +4,6 @@ import { Participation } from "@/lib/models/Participation";
 import { Task } from "@/lib/models/Task";
 import { User } from "@/lib/models/User";
 import { NextRequest, NextResponse } from "next/server";
-import mongoose from "mongoose";
 import { logger } from "@/lib/logger";
 
 export async function POST(request: NextRequest) {
@@ -54,7 +53,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (new Date(task.expiration) < new Date()) {
+    if (task.expiration && new Date(task.expiration) < new Date()) {
       return NextResponse.json({ error: "Task has expired" }, { status: 400 });
     }
 

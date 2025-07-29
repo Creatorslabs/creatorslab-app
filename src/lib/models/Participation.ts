@@ -3,7 +3,7 @@ import { Schema, model, models, Document } from "mongoose";
 export interface IParticipation extends Document {
   userId: string;
   taskId: string;
-  status: "pending" | "completed";
+  status: "pending" | "completed" | "claimed" | "rejected";
   proof?: string;
   createdAt?: Date;
 }
@@ -14,7 +14,7 @@ const ParticipationSchema = new Schema<IParticipation>(
     taskId: { type: String, ref: "Task", required: true },
     status: {
       type: String,
-      enum: ["pending", "completed"],
+      enum: ["pending", "completed", "claimed", "rejected"],
       default: "pending",
     },
     proof: String,

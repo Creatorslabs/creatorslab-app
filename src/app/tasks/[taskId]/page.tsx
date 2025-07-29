@@ -407,7 +407,7 @@ export default function TaskViewPage() {
               </div>
 
               <Button
-                onClick={handleTaskComplete}
+                onClick={() => setShowNoticeModal(true)}
                 className="w-full mt-6 py-6 bg-primary hover:bg-primary/80 text-white"
                 disabled={
                   !task.canParticipate ||

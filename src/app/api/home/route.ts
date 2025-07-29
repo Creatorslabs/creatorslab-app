@@ -1,101 +1,65 @@
+import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import connectDB from "@/lib/connectDB";
-import { logger } from "@/lib/logger";
-import { Participation } from "@/lib/models/Participation";
 import { Task } from "@/lib/models/Task";
+import { IUser, User } from "@/lib/models/User";
 import { TaskLike } from "@/lib/models/TaskLike";
 import { TaskComment } from "@/lib/models/TaskComment";
 import { TaskShare } from "@/lib/models/TaskShare";
-import { IUser, User } from "@/lib/models/User";
+import { Participation } from "@/lib/models/Participation";
 import { privy } from "@/lib/privyClient";
-import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
 import { calculateTrendingScore } from "@/lib/helpers/calculateTrendingScore";
+import { logger } from "@/lib/logger";
 
 export async function GET(req: Request) {
   try {
     await connectDB();
 
-    const { searchParams } = new URL(req.url);
-    const page = parseInt(searchParams.get("page") || "1", 10);
-    const limit = parseInt(searchParams.get("limit") || "10", 10);
-    const skip = (page - 1) * limit;
-
     const cookieStore = await cookies();
     const idToken = cookieStore.get("privy-id-token")?.value;
-
     let localUserId: string | null = null;
+    let participatedIds: string[] = [];
 
     if (idToken) {
       try {
         const privyUser = await privy.getUser({ idToken });
+        const localUser = await User.findOne({ privyId: privyUser.id })
+          .select("_id")
+          .lean<IUser>();
+        if (localUser) {
+          localUserId = localUser._id.toString();
 
-        if (privyUser) {
-          const localUser = await User.findOne({ privyId: privyUser.id })
-            .select("_id username email")
-            .lean<IUser>();
-
-          if (localUser) {
-            localUserId = localUser._id.toString();
-          } else {
-            logger.warn("No local user found for privyId:", privyUser.id);
-          }
+          participatedIds = await Participation.find({
+            userId: localUserId,
+          }).distinct("taskId");
         }
       } catch (err) {
         logger.error("Privy token error:", err);
       }
     }
 
-    const userParticipations = localUserId
-      ? await Participation.find({ userId: localUserId })
-          .select("taskId")
-          .lean()
-      : [];
-
-    const participatedTaskIds = new Set(
-      userParticipations.map((p) => p.taskId.toString())
-    );
-
-    const newestQuery: any = { status: "active" };
-    if (localUserId) {
-      newestQuery._id = { $nin: Array.from(participatedTaskIds) };
-    }
-
-    const [newestTasks, totalTasks] = await Promise.all([
-      Task.find(newestQuery)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .populate("creator", "image")
-        .lean(),
-      Task.countDocuments(newestQuery),
-    ]);
-
-    const trendingAgg = await Participation.aggregate([
-      { $group: { _id: "$taskId", count: { $sum: 1 } } },
-      { $sort: { count: -1 } },
-      { $limit: limit },
-    ]);
-
-    const trendingTaskIds = trendingAgg.map((item) => item._id);
-    let trendingTasks = await Task.find({
-      _id: { $in: trendingTaskIds },
+    const now = new Date();
+    const baseQuery = {
       status: "active",
-    })
+      $or: [
+        { expiration: { $exists: false } },
+        { expiration: null },
+        { expiration: { $gt: now } },
+      ],
+    };
+
+    const excludeQuery = localUserId
+      ? { ...baseQuery, _id: { $nin: participatedIds } }
+      : baseQuery;
+
+    const activeTasks = await Task.find(excludeQuery)
+      .sort({ createdAt: -1 })
       .populate("creator", "image")
       .lean();
 
-    if (trendingTasks.length === 0) {
-      trendingTasks = await Task.find({ status: "active" })
-        .sort({ createdAt: -1 })
-        .limit(limit)
-        .populate("creator", "image")
-        .lean();
-    }
+    const taskIds = activeTasks.map((task) => task._id);
 
-    const allTasks = [...newestTasks, ...trendingTasks];
-    const taskIds = allTasks.map((t) => t._id);
-
-    const [likeCounts, commentCounts, shareCounts] = await Promise.all([
+    const [likes, comments, shares, participations] = await Promise.all([
       TaskLike.aggregate([
         { $match: { taskId: { $in: taskIds } } },
         { $group: { _id: "$taskId", count: { $sum: 1 } } },
@@ -108,17 +72,19 @@ export async function GET(req: Request) {
         { $match: { taskId: { $in: taskIds } } },
         { $group: { _id: "$taskId", count: { $sum: 1 } } },
       ]),
+      Participation.aggregate([
+        { $match: { taskId: { $in: taskIds } } },
+        { $group: { _id: "$taskId", count: { $sum: 1 } } },
+      ]),
     ]);
 
-    const likesMap = Object.fromEntries(
-      likeCounts.map((c) => [c._id.toString(), c.count])
-    );
-    const commentsMap = Object.fromEntries(
-      commentCounts.map((c) => [c._id.toString(), c.count])
-    );
-    const sharesMap = Object.fromEntries(
-      shareCounts.map((c) => [c._id.toString(), c.count])
-    );
+    const toMap = (arr: any[]) =>
+      Object.fromEntries(arr.map((item) => [item._id.toString(), item.count]));
+
+    const likesMap = toMap(likes);
+    const commentsMap = toMap(comments);
+    const sharesMap = toMap(shares);
+    const participationsMap = toMap(participations);
 
     const formatCount = (count: number): string => {
       if (count >= 1_000_000) return (count / 1_000_000).toFixed(1) + "M";
@@ -137,6 +103,8 @@ export async function GET(req: Request) {
         likes: formatCount(likesMap[idStr] || 0),
         comments: formatCount(commentsMap[idStr] || 0),
         shares: formatCount(sharesMap[idStr] || 0),
+        participations: participationsMap[idStr] || 0,
+        createdAt: task.createdAt,
         avatar: task.creator?.image || "",
       };
     };
@@ -144,19 +112,16 @@ export async function GET(req: Request) {
     const sortByTrendingScore = (a: any, b: any) =>
       calculateTrendingScore(b) - calculateTrendingScore(a);
 
+    const formattedTrendingTasks = activeTasks
+      .map(formatTask)
+      .sort(sortByTrendingScore)
+      .slice(0, 6);
+
     return NextResponse.json({
       success: true,
       data: {
-        newestTask: newestTasks.map(formatTask),
-        trendingTask: trendingTasks.map(formatTask).sort(sortByTrendingScore),
-      },
-      pagination: {
-        page,
-        limit,
-        total: totalTasks,
-        pages: Math.ceil(totalTasks / limit),
-        hasNext: page < Math.ceil(totalTasks / limit),
-        hasPrev: page > 1,
+        trendingTask: formattedTrendingTasks,
+        newestTask: activeTasks.slice(0, 6).map(formatTask),
       },
     });
   } catch (error) {
