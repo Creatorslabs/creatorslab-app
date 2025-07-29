@@ -1,17 +1,14 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import { Button } from "../ui/button";
+import Image from "next/image";
 
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-export default function EarnedCLSModal({
-  isOpen,
-  onClose,
-  amount,
-}: ModalProps & { amount: string }) {
+export default function EarnedCLSModal({ isOpen, onClose }: ModalProps) {
   return (
     <AnimatePresence>
       {isOpen && (
@@ -43,22 +40,27 @@ export default function EarnedCLSModal({
               transition={{ delay: 0.2, type: "spring" }}
               className="w-16 h-16 mx-auto mb-6 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center"
             >
-              <span className="text-2xl">🎉</span>
+              <Image
+                src="/images/logo.png"
+                width={25}
+                height={25}
+                alt="Creatorlab logo"
+              />
             </motion.div>
 
             <h3 className="text-xl font-bold text-white mb-2">
-              You just earned{" "}
-              <span className="text-cyan-400">{amount} CLS</span>
+              Task is currently{" "}
+              <span className="text-yellow-400">pending review</span>
             </h3>
             <p className="text-gray-400 text-sm mb-6">
-              Go to the profile page and claim your amazing token rewards!
+              You'll be notified once it's approved and eligible for rewards.
             </p>
 
             <Button
               onClick={onClose}
-              className="w-full bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white font-medium py-3"
+              className="w-full bg-gray-700 hover:bg-gray-800 text-white font-medium py-3"
             >
-              Let&apos;s Go!
+              Got It
             </Button>
           </motion.div>
         </motion.div>

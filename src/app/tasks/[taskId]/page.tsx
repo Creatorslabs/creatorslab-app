@@ -520,7 +520,6 @@ export default function TaskViewPage() {
       <EarnedCLSModal
         isOpen={showEarnedModal}
         onClose={() => setShowEarnedModal(false)}
-        amount={task.reward}
       />
       <WarningModal
         isOpen={showWarningModal}

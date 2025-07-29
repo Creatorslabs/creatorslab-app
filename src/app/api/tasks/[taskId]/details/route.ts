@@ -53,7 +53,7 @@ export async function GET(
       return NextResponse.json({ message: "Invalid user" }, { status: 401 });
     }
 
-    logger.log("User from Privy:", privyUser);
+    // logger.log("User from Privy:", privyUser);
 
     const user = await User.findOne({ privyId: privyUser.id }).lean<IUser>();
     if (!user) {
