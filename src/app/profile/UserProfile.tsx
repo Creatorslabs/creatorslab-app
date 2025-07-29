@@ -28,12 +28,17 @@ import { updateAvatar } from "@/lib/helpers/update-avatar";
 import EditableUsername from "@/components/Common/EditableUsername";
 import InviteLinkButton from "@/components/Common/InviteLink";
 import DailyClaimModal from "@/components/Common/DailyClaimModal";
+import { SimpleIcon } from "@/components/Common/SimpleIcon";
+import ClaimCard from "@/components/Common/ClaimCard";
 
 interface PendingClaim {
   id: string;
   task: string;
   amount: string;
-  icon: string;
+  platform: string;
+  canClaim: boolean;
+  isClaimed: boolean;
+  status: string;
 }
 
 interface UserProfile {
@@ -142,18 +147,31 @@ const UserProfile = () => {
     }
   };
 
-  const handleClaimReward = (claimId: string) => {
-    toast({ title: "Reward claimed!", variant: "success" });
-    setUser((prev) =>
-      prev
-        ? {
-            ...prev,
-            pendingClaims: prev.pendingClaims.filter(
-              (claim) => claim.id !== claimId
-            ),
-          }
-        : null
-    );
+  const handleClaimReward = async (taskId: string) => {
+    try {
+      const res = await fetch("/api/tasks/claim", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ taskId }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to claim reward");
+      }
+
+      toast({ title: "Reward claimed!", variant: "success" });
+
+      refreshUser();
+    } catch (err: any) {
+      toast({
+        title: err.message || "Failed to claim reward",
+        variant: "error",
+      });
+    }
   };
 
   if (!user) return <LoaderModal />;
@@ -290,7 +308,7 @@ const UserProfile = () => {
                 />
                 <div className="absolute top-0 p-5 sm:p-8">
                   <span className="text-gray-500">Wallet Balance</span>
-                  <p className="text-xl sm:text-4xl flex gap-4 items-center my-4">
+                  <p className="text-4xl flex gap-4 items-center my-4">
                     $CLS{" "}
                     <AnimatePresence mode="wait">
                       <motion.span
@@ -324,29 +342,12 @@ const UserProfile = () => {
                 <p className="text-lg mb-2">My Rewards</p>
                 <div className="space-y-3">
                   {user.pendingClaims.map((claim, index) => (
-                    <motion.div
+                    <ClaimCard
                       key={claim.id}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.4 + index * 0.1 }}
-                      className="flex items-center justify-between p-4 bg-card rounded-lg border border-border"
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">{claim.icon}</span>
-                        <div>
-                          <p className="text-sm font-medium">{claim.task}</p>
-                          <p className="text-sm text-blue-400 font-medium">
-                            {claim.amount}
-                          </p>
-                        </div>
-                      </div>
-                      <Button
-                        onClick={() => handleClaimReward(claim.id)}
-                        className="bg-yellow-500 hover:bg-yellow-600 text-black font-medium px-4 py-2"
-                      >
-                        Claim
-                      </Button>
-                    </motion.div>
+                      claim={claim}
+                      index={index}
+                      onClaim={handleClaimReward}
+                    />
                   ))}
                   {user.pendingClaims.length === 0 && (
                     <div className="text-center py-8 text-gray-400">

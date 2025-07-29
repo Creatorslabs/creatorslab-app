@@ -8,7 +8,7 @@ const maskEmail = (email: string) => {
 
   const visible = name.slice(0, 2);
   const masked = "*".repeat(Math.max(name.length - 2, 4));
-  return `${visible}${masked}@${domain}`;
+  return `${visible}${masked.slice(0, 6)}@${domain}`;
 };
 
 export const EmailCard = ({

@@ -59,7 +59,7 @@ export default function EarnedCLSModal({ isOpen, onClose }: ModalProps) {
 
             <Button
               onClick={onClose}
-              className="w-full bg-gray-700 hover:bg-gray-800 text-white font-medium py-3"
+              className="w-full bg-primary hover:bg-secondary text-white font-medium py-3"
             >
               Got It
             </Button>

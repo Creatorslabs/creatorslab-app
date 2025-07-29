@@ -40,7 +40,6 @@ export async function GET() {
 
     const participations = await Participation.find({
       userId: dbUser._id.toString(),
-      status: "pending",
     })
       .populate("taskId")
       .lean();
@@ -48,10 +47,13 @@ export async function GET() {
     const pendingClaims = participations.map((p: any) => {
       const task = p.taskId;
       return {
-        id: p._id.toString(),
+        id: task._id.toString(),
         task: task?.title || "Untitled task",
-        amount: task?.reward || "$CLS 0.00",
-        icon: task?.icon || "🎯",
+        amount: `CLS ${task?.rewardPoints ? task?.rewardPoints : "0.00"}`,
+        platform: task?.platform || "unknown",
+        canClaim: p.status === "completed",
+        isClaimed: p.status === "claimed",
+        status: p.status,
       };
     });
 
@@ -63,7 +65,7 @@ export async function GET() {
       verified: isVerified,
       email: dbUser.email || "",
       inviteLink: `${process.env.NEXTAUTH_URL}/auth/signup/${dbUser.referralCode}`,
-      balance: dbUser.balance?.toFixed(1) || "0.0000",
+      balance: dbUser.balance?.toFixed(1) || "0.0",
       pendingClaims,
     };
 

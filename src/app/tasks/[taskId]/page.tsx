@@ -152,8 +152,11 @@ export default function TaskViewPage() {
           description: errorData.error || "Failed to complete task.",
           variant: "destructive",
         });
+        setSubmitting(false);
         return;
       }
+
+      setShowNoticeModal(false);
 
       await fetchTask();
 
@@ -525,14 +528,12 @@ export default function TaskViewPage() {
         isOpen={showWarningModal}
         onClose={() => setShowWarningModal(false)}
       />
-
       <TaskNoticeModal
         isOpen={showNoticeModal}
         isSubmitting={submitting}
         handleSubmit={handleTaskComplete}
         onClose={() => setShowNoticeModal(false)}
       />
-
       <LoaderModal />
     </div>
   );
