@@ -53,6 +53,8 @@ export async function GET(
       return NextResponse.json({ message: "Invalid user" }, { status: 401 });
     }
 
+    logger.log("User from Privy:", privyUser);
+
     const user = await User.findOne({ privyId: privyUser.id }).lean<IUser>();
     if (!user) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
@@ -120,14 +122,6 @@ export async function GET(
 
     const now = new Date();
 
-    const hasTwitter = privyUser.linkedAccounts?.some(
-      (acc: any) => acc.type === "oauth" && acc.provider === "twitter"
-    );
-
-    const hasDiscord = privyUser.linkedAccounts?.some(
-      (acc: any) => acc.type === "oauth" && acc.provider === "discord"
-    );
-
     if (String(user._id) === String(creatorId)) {
       canParticipate = false;
       reason = "You cannot participate in your own task.";
@@ -143,12 +137,12 @@ export async function GET(
     } else if (userParticipation) {
       canParticipate = false;
       reason = "You have already participated in this task.";
-    } else if (!hasTwitter || !hasDiscord) {
+    } else if (!privyUser.twitter || !privyUser.discord) {
       canParticipate = false;
 
-      if (!hasTwitter && hasDiscord) {
+      if (!privyUser.twitter && privyUser.discord) {
         reason = "You must link your Twitter account to participate.";
-      } else if (!hasDiscord && hasTwitter) {
+      } else if (!privyUser.discord && privyUser.twitter) {
         reason = "You must link your Discord account to participate.";
       } else {
         reason =

@@ -17,7 +17,6 @@ import { toast } from "@/hooks/use-toast";
 import FollowCreatorModal from "@/components/taskPage/FollowCreatorModal";
 import EarnedCLSModal from "@/components/taskPage/EarnedCLSModal";
 import WarningModal from "@/components/taskPage/WarningModal";
-import SuccessModal from "@/components/taskPage/SuccessModal";
 import FollowButton from "@/components/Common/FollowButton";
 import { usePrivy } from "@privy-io/react-auth";
 import { SimpleIcon } from "@/components/Common/SimpleIcon";
@@ -68,7 +67,6 @@ export default function TaskViewPage() {
   const [showFollowModal, setShowFollowModal] = useState(false);
   const [showEarnedModal, setShowEarnedModal] = useState(false);
   const [showWarningModal, setShowWarningModal] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showNoticeModal, setShowNoticeModal] = useState(false);
   const [proofLink, setProofLink] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -160,7 +158,6 @@ export default function TaskViewPage() {
       await fetchTask();
 
       setShowEarnedModal(true);
-      setShowSuccessModal(true);
     } catch (error) {
       logger.error("Error completing task:", error);
     } finally {
@@ -528,10 +525,6 @@ export default function TaskViewPage() {
       <WarningModal
         isOpen={showWarningModal}
         onClose={() => setShowWarningModal(false)}
-      />
-      <SuccessModal
-        isOpen={showSuccessModal}
-        onClose={() => setShowSuccessModal(false)}
       />
 
       <TaskNoticeModal
