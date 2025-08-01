@@ -116,8 +116,9 @@ export async function POST(req: NextRequest) {
     );
   } catch (error) {
     logger.error("Task creation error:", error);
+    console.error("Task creation error:", error);
     return NextResponse.json(
-      { message: "Internal Server Error" },
+      { message: (error as Error).message },
       { status: 500 }
     );
   }
