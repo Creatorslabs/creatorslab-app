@@ -212,7 +212,7 @@ export function MultiStepTaskModal({
 
   const handleClose = async (wasSubmitted: boolean = false) => {
     if (!wasSubmitted) {
-      await deleteImageFromBlob(formData);
+      deleteImageFromBlob(formData);
     }
 
     setCurrentStep(1);
