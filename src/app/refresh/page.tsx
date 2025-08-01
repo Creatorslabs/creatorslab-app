@@ -1,6 +1,7 @@
 "use client";
 
 import { useLoader } from "@/hooks/useLoader";
+import { logger } from "@/lib/logger";
 import { getAccessToken } from "@privy-io/react-auth";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, Suspense } from "react";
@@ -14,23 +15,30 @@ function RefreshPage() {
     showLoader({ message: "Refreshing session..." });
 
     const fallbackTimeout = setTimeout(() => {
+      logger.warn("Fallback triggered — redirecting to /");
       router.replace("/");
-    }, 10000);
+    }, 5000);
+
+    const withTimeout = <T,>(promise: Promise<T>, timeout = 4000): Promise<T> =>
+      Promise.race([
+        promise,
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error("Timeout")), timeout)
+        ),
+      ]);
 
     const refreshSession = async () => {
       try {
-        const token = await getAccessToken();
         const redirectUri = searchParams.get("redirect_uri") || "/";
+        logger.log("Fetching token with timeout...");
 
-        if (token) {
-          clearTimeout(fallbackTimeout);
-          router.replace(redirectUri);
-        } else {
-          clearTimeout(fallbackTimeout);
-          router.replace("/login");
-        }
-      } catch (error) {
-        console.error("Session refresh failed:", error);
+        const token = await withTimeout(getAccessToken(), 4000);
+        logger.log("Token fetched:", !!token);
+
+        clearTimeout(fallbackTimeout);
+        router.replace(token ? redirectUri : "/login");
+      } catch (err) {
+        logger.error("Token fetch failed:", err);
         clearTimeout(fallbackTimeout);
         router.replace("/");
       }
@@ -44,12 +52,10 @@ function RefreshPage() {
   return <LoaderModal />;
 }
 
-function page() {
+export default function Page() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <RefreshPage />
     </Suspense>
   );
 }
-
-export default page;
