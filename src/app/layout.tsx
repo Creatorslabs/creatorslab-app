@@ -5,6 +5,7 @@ import AppShell from "@/components/AppShell";
 import { Toaster } from "sonner";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export const metadata: Metadata = {
   title: "Creatorslab",
@@ -24,6 +25,7 @@ export default function RootLayout({
           <ErrorBoundary>
             <AppShell>{children}</AppShell>
           </ErrorBoundary>
+          <SpeedInsights />
           <Analytics />
           <Toaster position="top-right" />
         </Providers>
