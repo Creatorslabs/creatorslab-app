@@ -41,10 +41,9 @@ export default function Step4_DetailsContent({
         </p>
       </div>
 
-      {/* Custom Dark DatePicker */}
       <div className="space-y-2">
         <Label htmlFor="expiration" className="text-gray-300 text-sm">
-          Expiration Date
+          {`Expiration Date (optional)`}
         </Label>
 
         <div className="flex items-center gap-3">
@@ -69,7 +68,6 @@ export default function Step4_DetailsContent({
         </div>
       </div>
 
-      {/* Task Category */}
       <div className="space-y-2">
         <Label htmlFor="category" className="text-gray-300 text-sm">
           Task Category
@@ -89,7 +87,6 @@ export default function Step4_DetailsContent({
         </Select>
       </div>
 
-      {/* Description */}
       <div className="space-y-2">
         <Label htmlFor="description" className="text-gray-300 text-sm">
           Description
