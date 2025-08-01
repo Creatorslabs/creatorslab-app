@@ -6,11 +6,7 @@ export interface IUser extends Document {
   image?: string;
   username?: string;
   email?: string;
-  privyId: {
-    type: string;
-    unique: true;
-    required: true;
-  };
+  privyId: string;
   wallet?: string;
   status: "Active" | "Deactivated";
   reason?: string;
