@@ -13,24 +13,33 @@ function RefreshPage() {
   useEffect(() => {
     showLoader({ message: "Refreshing session..." });
 
+    const fallbackTimeout = setTimeout(() => {
+      router.replace("/");
+    }, 10000);
+
     const refreshSession = async () => {
       try {
         const token = await getAccessToken();
         const redirectUri = searchParams.get("redirect_uri") || "/";
 
         if (token) {
+          clearTimeout(fallbackTimeout);
           router.replace(redirectUri);
         } else {
+          clearTimeout(fallbackTimeout);
           router.replace("/login");
         }
       } catch (error) {
         console.error("Session refresh failed:", error);
+        clearTimeout(fallbackTimeout);
         router.replace("/");
       }
     };
 
     refreshSession();
-  }, [router, searchParams]);
+
+    return () => clearTimeout(fallbackTimeout);
+  }, [router, searchParams, showLoader]);
 
   return <LoaderModal />;
 }
