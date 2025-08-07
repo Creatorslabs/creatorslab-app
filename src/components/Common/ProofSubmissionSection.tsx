@@ -7,6 +7,7 @@ import { Upload, X, CheckCircle, Clock, AlertTriangle } from "lucide-react";
 import { put } from "@vercel/blob";
 import Image from "next/image";
 import { logger } from "@/lib/logger";
+import { cn } from "@/lib/utils";
 
 type Props = {
   status: "pending" | "completed" | null;
@@ -154,7 +155,14 @@ export function ProofSubmissionSection({
             )}
           </div>
         ) : (
-          <label className="relative inline-flex items-center gap-2 text-sm cursor-pointer text-blue-400 hover:text-blue-300">
+          <div
+            className={cn(
+              "relative items-center gap-2 px-4 py-2 text-sm bg-blue-50 rounded-md",
+              canParticipate
+                ? "text-blue-400 hover:text-blue-300 cursor-pointer"
+                : "text-gray-300 cursor-not-allowed"
+            )}
+          >
             <Upload className="w-4 h-4" />
             <span>{uploading ? "Uploading..." : "Click to upload image"}</span>
             <input
@@ -164,7 +172,7 @@ export function ProofSubmissionSection({
               disabled={!canParticipate}
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
             />
-          </label>
+          </div>
         )}
       </div>
     </motion.div>
