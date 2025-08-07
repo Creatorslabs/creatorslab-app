@@ -154,15 +154,15 @@ export function ProofSubmissionSection({
             )}
           </div>
         ) : (
-          <label className="flex items-center gap-2 text-sm cursor-pointer text-blue-400 hover:text-blue-300">
+          <label className="relative inline-flex items-center gap-2 text-sm cursor-pointer text-blue-400 hover:text-blue-300">
             <Upload className="w-4 h-4" />
             <span>{uploading ? "Uploading..." : "Click to upload image"}</span>
             <input
               type="file"
               accept="image/*"
               onChange={handleImageUpload}
-              className="hidden"
               disabled={!canParticipate}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
             />
           </label>
         )}
