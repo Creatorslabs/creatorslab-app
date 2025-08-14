@@ -121,6 +121,7 @@ export default function TaskViewPage() {
         description: "You have already completed this task.",
         variant: "warning",
       });
+      setSubmitting(false);
       hideLoader();
       return;
     }
@@ -131,6 +132,7 @@ export default function TaskViewPage() {
         description: "Please provide a proof link to complete the task.",
         variant: "warning",
       });
+      setSubmitting(false);
       hideLoader();
       return;
     }
