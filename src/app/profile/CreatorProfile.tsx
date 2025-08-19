@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowLeft,
@@ -27,6 +27,7 @@ import { updateAvatar } from "@/lib/helpers/update-avatar";
 import EditableUsername from "@/components/Common/EditableUsername";
 import { logger } from "@/lib/logger";
 import DailyClaimModal from "@/components/Common/DailyClaimModal";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 interface Task {
   id: string;
@@ -63,52 +64,30 @@ const Icon = ({ icon }: { icon: { svg: string; hex: string } }) => {
 
 export default function CreatorProfile() {
   const router = useRouter();
-  const [creator, setCreator] = useState<Creator | null>(null);
   const { user: privyUser } = usePrivy();
   const [isBalanceVisible, setIsBalanceVisible] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-
-  const closeModal = () => {
-    setIsOpen(false);
-  };
-
   const { showLoader, hideLoader, LoaderModal } = useLoader();
+  const queryClient = useQueryClient();
 
-  const refreshCreator = async () => {
-    try {
-      const res = await fetch("/api/creator/profile");
-      if (!res.ok) return;
-
-      const { data } = await res.json();
-      setCreator(data);
-    } catch (error) {
-      logger.error("Silent refresh failed:", error);
-    }
-  };
-
-  useEffect(() => {
-    const fetchCreator = async () => {
+  const { data: creator, isLoading } = useQuery<Creator>({
+    queryKey: ["creatorProfile"],
+    queryFn: async () => {
       showLoader({ message: "Loading creator profile..." });
-
       try {
         const res = await fetch("/api/creator/profile");
         if (!res.ok) throw new Error("Failed to fetch creator profile");
-
         const { data } = await res.json();
-        setCreator(data);
-      } catch (error) {
-        logger.error("Error fetching creator profile:", error);
-        toast({
-          title: "Failed to load creator profile",
-          variant: "destructive",
-        });
+        return data as Creator;
       } finally {
         hideLoader();
       }
-    };
+    },
+  });
 
-    fetchCreator();
-  }, []);
+  const refreshCreator = async () => {
+    await queryClient.invalidateQueries({ queryKey: ["creatorProfile"] });
+  };
 
   const { linkDiscord, linkTwitter, linkEmail } = useLinkAccount({
     onSuccess: async ({ linkMethod }: { linkMethod: string }) => {
@@ -135,7 +114,6 @@ export default function CreatorProfile() {
         break;
       case "discord":
         linkDiscord();
-      default:
         break;
     }
   };
@@ -151,7 +129,7 @@ export default function CreatorProfile() {
     }
   };
 
-  if (!creator) {
+  if (isLoading || !creator) {
     return <LoaderModal />;
   }
 
@@ -193,7 +171,7 @@ export default function CreatorProfile() {
               className="relative rounded-2xl p-6 overflow-hidden"
               style={{
                 background:
-                  window.innerWidth < 768
+                  typeof window !== "undefined" && window.innerWidth < 768
                     ? "linear-gradient(35deg, #0F0529 0%, #016495 27%, #25205C 46%)"
                     : "linear-gradient(90deg, #0F0529 0%, #016495 27%, #25205C 46%, #A3452A 63%, #017AA6 83%, #333397 100%)",
               }}
@@ -295,7 +273,7 @@ export default function CreatorProfile() {
                       exit={{ opacity: 0, y: -5 }}
                       transition={{ duration: 0.3 }}
                     >
-                      $CLS {isBalanceVisible ? creator?.balance : "****"}
+                      $CLS {isBalanceVisible ? creator.balance : "****"}
                     </motion.span>
                   </AnimatePresence>
                   <button
@@ -313,9 +291,6 @@ export default function CreatorProfile() {
                   <button className="p-2 sm:px-6 sm:py-2 rounded-lg bg-gradient-to-r from-[#5d3fd1] to-[#03abff]">
                     Buy $CLS
                   </button>
-                  {/* <button className="p-2 sm:px-6 sm:py-2 rounded-lg bg-[#F4B30C] text-black">
-                    Claim $CLS
-                  </button> */}
 
                   <DailyClaimModal />
                 </div>
@@ -368,7 +343,7 @@ export default function CreatorProfile() {
         </div>
       </div>
 
-      <MultiStepTaskModal isOpen={isOpen} onClose={closeModal} />
+      <MultiStepTaskModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
       <LoaderModal />
     </div>
   );

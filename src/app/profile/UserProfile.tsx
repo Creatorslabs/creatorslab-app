@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useLinkAccount, useLogout, usePrivy } from "@privy-io/react-auth";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { useLoader } from "@/hooks/useLoader";
 import { logger } from "@/lib/logger";
@@ -64,57 +65,74 @@ const Icon = ({ icon }: { icon: { svg: string; hex: string } }) => {
   );
 };
 
+const fetchUserProfile = async (): Promise<UserProfile> => {
+  const res = await fetch("/api/user/profile");
+  if (!res.ok) throw new Error("Failed to fetch profile");
+  const { data } = await res.json();
+  return data;
+};
+
 const UserProfile = () => {
   const [isBalanceVisible, setIsBalanceVisible] = useState(false);
-  const [user, setUser] = useState<UserProfile | null>(null);
   const { user: privyUser } = usePrivy();
-
   const { showLoader, hideLoader, LoaderModal } = useLoader();
   const router = useRouter();
+  const queryClient = useQueryClient();
+
   const { logout } = useLogout({
     onSuccess() {
       router.push("/auth/signin");
     },
   });
 
-  const refreshUser = async () => {
-    try {
-      const res = await fetch("/api/user/profile");
-
-      if (!res.ok) throw new Error("Failed to refresh user");
-
-      const { data } = await res.json();
-      setUser(data);
-    } catch (err) {
-      logger.error("Refresh failed:", err);
-    }
-  };
-
-  const hasFetchedRef = useRef(false);
-
-  useEffect(() => {
-    if (hasFetchedRef.current) return;
-    hasFetchedRef.current = true;
-
-    const fetchUserProfile = async () => {
+  // Fetch user profile
+  const {
+    data: user,
+    isLoading,
+    isError,
+    error,
+  } = useQuery<UserProfile, Error>({
+    queryKey: ["userProfile"],
+    queryFn: async () => {
       showLoader({ message: "Loading your profile..." });
-
       try {
-        const res = await fetch("/api/user/profile");
-        if (!res.ok) throw new Error("Failed to fetch profile");
-        const { data } = await res.json();
-        setUser(data);
+        const data = await fetchUserProfile();
         toast({ title: "Profile loaded successfully!", variant: "success" });
-      } catch (error) {
-        logger.error("Error fetching user profile:", error);
-        toast({ title: "Failed to load profile", variant: "error" });
+        return data;
       } finally {
         hideLoader();
       }
-    };
+    },
+    retry: 1,
+  });
 
-    fetchUserProfile();
-  }, []);
+  // Refresh user after mutations
+  const refreshUser = () =>
+    queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+
+  // Claim reward mutation
+  const claimMutation = useMutation({
+    mutationFn: async (taskId: string) => {
+      const res = await fetch("/api/tasks/claim", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ taskId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to claim reward");
+      return data;
+    },
+    onSuccess: () => {
+      toast({ title: "Reward claimed!", variant: "success" });
+      refreshUser();
+    },
+    onError: (err: any) => {
+      toast({
+        title: err.message || "Failed to claim reward",
+        variant: "error",
+      });
+    },
+  });
 
   const { linkDiscord, linkTwitter, linkEmail } = useLinkAccount({
     onSuccess: async ({ linkMethod }: { linkMethod: string }) => {
@@ -123,7 +141,7 @@ const UserProfile = () => {
         variant: "success",
       });
       await fetch("/api/user/verify", { method: "PATCH" });
-      await refreshUser();
+      refreshUser();
     },
     onError: (error, details) => {
       toast({
@@ -141,39 +159,20 @@ const UserProfile = () => {
         break;
       case "discord":
         linkDiscord();
-      default:
         break;
     }
   };
 
-  const handleClaimReward = async (taskId: string) => {
-    try {
-      const res = await fetch("/api/tasks/claim", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ taskId }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to claim reward");
-      }
-
-      toast({ title: "Reward claimed!", variant: "success" });
-
-      refreshUser();
-    } catch (err: any) {
-      toast({
-        title: err.message || "Failed to claim reward",
-        variant: "error",
-      });
-    }
-  };
-
-  if (!user) return <LoaderModal />;
+  if (isLoading) return <LoaderModal />;
+  if (isError) {
+    toast({ title: error.message, variant: "error" });
+    return (
+      <div className="flex items-center justify-center min-h-screen text-gray-400">
+        Failed to load profile
+      </div>
+    );
+  }
+  if (!user) return null;
 
   return (
     <div className="min-h-screen bg-background text-white p-4 lg:p-6">
@@ -345,7 +344,7 @@ const UserProfile = () => {
                       key={claim.id}
                       claim={claim}
                       index={index}
-                      onClaim={handleClaimReward}
+                      onClaim={(id) => claimMutation.mutate(id)}
                     />
                   ))}
                   {user.pendingClaims.length === 0 && (

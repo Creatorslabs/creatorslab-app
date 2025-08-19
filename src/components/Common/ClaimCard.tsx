@@ -17,7 +17,7 @@ interface ClaimCardProps {
     canClaim: boolean;
   };
   index: number;
-  onClaim: (taskId: string) => Promise<void>;
+  onClaim: (taskId: string) => void;
 }
 
 export default function ClaimCard({ claim, index, onClaim }: ClaimCardProps) {

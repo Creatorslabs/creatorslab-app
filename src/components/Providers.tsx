@@ -4,12 +4,38 @@ import { PrivyProvider } from "@privy-io/react-auth";
 import { toSolanaWalletConnectors } from "@privy-io/react-auth/solana";
 import { SolanaConnectionProvider } from "./context/SolanaConnectionContext";
 import { TooltipProvider } from "./ui/tooltip";
+import {
+  QueryClient,
+  QueryClientProvider,
+  QueryCache,
+} from "@tanstack/react-query";
+import { toast } from "@/hooks/use-toast";
 
 const privyAppId = process.env.NEXT_PUBLIC_PRIVY_APP_ID!;
 const privyClietId = process.env.NEXT_PUBLIC_PRIVY_WEB_CLIENT_ID!;
 
 const solanaConnectors = toSolanaWalletConnectors({
   shouldAutoConnect: true,
+});
+
+// Create a global QueryClient
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      refetchOnWindowFocus: false,
+    },
+  },
+  queryCache: new QueryCache({
+    onError: (error: unknown) => {
+      toast({
+        title: "Request failed",
+        description:
+          error instanceof Error ? error.message : "Something went wrong",
+        variant: "destructive",
+      });
+    },
+  }),
 });
 
 export default function Providers({ children }: { children: React.ReactNode }) {
@@ -57,10 +83,11 @@ export default function Providers({ children }: { children: React.ReactNode }) {
             },
           }}
         >
-          {children}
+          <QueryClientProvider client={queryClient}>
+            {children}
+          </QueryClientProvider>
         </PrivyProvider>
       </SolanaConnectionProvider>
     </TooltipProvider>
-    //Bro coded this
   );
 }
