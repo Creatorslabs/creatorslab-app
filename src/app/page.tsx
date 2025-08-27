@@ -29,7 +29,6 @@ interface TaskCard {
 }
 
 export default function Home() {
-  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [trendingTasks, setTrendingTasks] = useState<TaskCard[]>([]);
   const [taskCards, setTaskCards] = useState<TaskCard[]>([]);
   const { showLoader, hideLoader, LoaderModal } = useLoader();
@@ -57,10 +56,6 @@ export default function Home() {
 
     fetchTasks();
   }, []);
-
-  const handleSignUp = () => {
-    setShowWelcomeModal(true);
-  };
 
   return (
     <div className="min-h-screen bg-background text-white">
@@ -130,15 +125,11 @@ export default function Home() {
           ))}
         </div>
 
-        <CTA handleSignUp={handleSignUp} />
+        <CTA />
 
         <ScrollToTopButton />
       </div>
 
-      <WelcomeModal
-        isOpen={showWelcomeModal}
-        onClose={() => setShowWelcomeModal(false)}
-      />
       <LoaderModal />
     </div>
   );

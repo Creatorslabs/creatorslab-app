@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import React from "react";
 
-function CTA({ handleSignUp }: { handleSignUp: () => void }) {
+function CTA() {
   return (
     <motion.div
       initial={{ y: 20, opacity: 0 }}
@@ -17,10 +17,7 @@ function CTA({ handleSignUp }: { handleSignUp: () => void }) {
           Creating a long term relationship among builders and content creators,
           to a wider global web3 communities.
         </p>
-        <button
-          onClick={handleSignUp}
-          className="bg-white/20 hover:bg-white/30 px-6 py-3 rounded-lg font-medium transition-colors"
-        >
+        <button className="bg-white/20 hover:bg-white/30 px-6 py-3 rounded-lg font-medium transition-colors">
           Become a member
         </button>
       </div>
