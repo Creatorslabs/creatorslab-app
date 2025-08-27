@@ -468,7 +468,7 @@ export default function TaskViewPage() {
                 </motion.div>
               ) : (
                 <div className="space-y-4">
-                  {task.otherTasks.map((otherTask, index) => (
+                  {task.otherTasks.slice(0, 5).map((otherTask, index) => (
                     <motion.div
                       key={otherTask.id}
                       initial={{ y: 10, opacity: 0 }}

@@ -69,8 +69,11 @@ function PurchaseEarnCard() {
           <p className="text-sm opacity-90 mb-4">
             Burn CLS to earn SOL. (Coming Soon)
           </p>
-          <button className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg font-medium transition-colors">
-            Buy $CLS
+          <button
+            className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg font-medium transition-colors"
+            disabled
+          >
+            Burn $CLS (Coming soon)
           </button>
         </div>
         <div className="absolute -right-4 -bottom-4 w-24 h-24 opacity-20">

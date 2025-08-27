@@ -4,10 +4,11 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Upload, X, CheckCircle, Clock, AlertTriangle } from "lucide-react";
-import { put } from "@vercel/blob";
 import Image from "next/image";
 import { logger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
+import { upload } from "@vercel/blob/client";
+import { Progress } from "@/components/ui/progress";
 
 type Props = {
   status: "pending" | "completed" | null;
@@ -19,21 +20,14 @@ type Props = {
 
 async function deleteImageFromBlob(formData: { image?: string }) {
   if (!formData.image) return;
-
   try {
     const res = await fetch("/api/delete-image", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ url: formData.image }),
     });
-
-    if (!res.ok) {
-      logger.error("Failed to delete image from Blob");
-    } else {
-      logger.log("Image deleted successfully");
-    }
+    if (!res.ok) logger.error("Failed to delete image from Blob");
+    else logger.log("Image deleted successfully");
   } catch (err) {
     logger.error("Error deleting image:", err);
   }
@@ -47,20 +41,33 @@ export function ProofSubmissionSection({
   reason,
 }: Props) {
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [preview, setPreview] = useState<string | null>(null);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !canParticipate) return;
 
+    const localUrl = URL.createObjectURL(file);
+    setPreview(localUrl);
+
     try {
       setUploading(true);
-      const blob = await put(file.name, file, {
+      setUploadProgress(0);
+
+      const newBlob = await upload(file.name, file, {
         access: "public",
+        handleUploadUrl: "/api/upload",
+        onUploadProgress(e) {
+          setUploadProgress(e.percentage);
+        },
       });
 
-      setProofLink(blob.url);
+      setProofLink(newBlob.url);
+      setPreview(null);
     } catch (err) {
       logger.error("Image upload failed:", err);
+      setPreview(null);
     } finally {
       setUploading(false);
     }
@@ -70,6 +77,8 @@ export function ProofSubmissionSection({
     if (!proofLink || !canParticipate) return;
     await deleteImageFromBlob({ image: proofLink });
     setProofLink("");
+    setPreview(null);
+    setUploadProgress(0);
   };
 
   const statusDisplay = {
@@ -89,8 +98,18 @@ export function ProofSubmissionSection({
       color: "text-green-400",
     },
   };
-
   const current = statusDisplay[status ?? "null"];
+
+  const imageUrl =
+    preview ||
+    (proofLink.includes("vercel") && proofLink.includes("blob")
+      ? proofLink
+      : "");
+
+  const maskedLink =
+    proofLink && proofLink.includes("vercel") && proofLink.includes("blob")
+      ? `https://********${proofLink.slice(-4)}`
+      : proofLink;
 
   return (
     <motion.div
@@ -99,6 +118,7 @@ export function ProofSubmissionSection({
       transition={{ delay: 0.2 }}
       className="space-y-4 p-4 border border-border bg-card-box rounded-xl"
     >
+      {/* Status */}
       <div className="flex items-center gap-2">
         {current.icon}
         <span className={`text-sm font-medium ${current.color}`}>
@@ -106,6 +126,7 @@ export function ProofSubmissionSection({
         </span>
       </div>
 
+      {/* Restriction warning */}
       {!canParticipate && reason && (
         <div className="flex items-start gap-2 p-3 rounded-md bg-yellow-900/30 text-yellow-300 border border-yellow-800 text-sm">
           <AlertTriangle className="w-4 h-4 mt-0.5" />
@@ -113,34 +134,35 @@ export function ProofSubmissionSection({
         </div>
       )}
 
+      {/* Proof link */}
       <div className="space-y-2">
         <label className="text-white text-sm font-medium">
           Paste proof link
         </label>
         <Input
           placeholder="https://..."
-          value={proofLink}
+          value={maskedLink}
           onChange={(e) => setProofLink(e.target.value)}
           className="border border-border"
-          disabled={!canParticipate}
+          disabled={!canParticipate || !!imageUrl}
         />
       </div>
 
+      {/* Image upload */}
       <div className="space-y-2">
         <label className="text-white text-sm font-medium">
           Or upload image proof
         </label>
 
-        {proofLink &&
-        proofLink.startsWith("https://blob.vercel-storage.com") ? (
-          <div className="relative w-full max-w-sm">
+        {imageUrl ? (
+          <div className="relative w-48">
             <Image
-              src={proofLink}
+              src={imageUrl}
               alt="Uploaded proof"
-              className="w-full h-auto rounded-lg border border-border"
-              width={150}
-              height={100}
-              quality={75}
+              className="w-full h-auto rounded-lg border border-border object-cover"
+              width={200}
+              height={140}
+              quality={80}
               loader={({ src, width, quality }) =>
                 `${src}?w=${width}&q=${quality || 75}`
               }
@@ -153,18 +175,24 @@ export function ProofSubmissionSection({
                 <X className="w-4 h-4 text-white" />
               </button>
             )}
+            {uploading && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 rounded-lg text-white text-sm gap-2">
+                <span>Uploading...</span>
+                <Progress value={uploadProgress} className="w-32 h-2" />
+              </div>
+            )}
           </div>
         ) : (
           <div
             className={cn(
-              "relative items-center gap-2 px-4 py-2 text-sm bg-blue-50 rounded-md",
+              "relative flex items-center justify-center gap-2 px-4 py-10 border border-dashed border-border rounded-lg text-sm transition",
               canParticipate
-                ? "text-blue-400 hover:text-blue-300 cursor-pointer"
-                : "text-gray-300 cursor-not-allowed"
+                ? "hover:bg-accent/10 cursor-pointer text-gray-300"
+                : "text-gray-500 cursor-not-allowed"
             )}
           >
-            <Upload className="w-4 h-4" />
-            <span>{uploading ? "Uploading..." : "Click to upload image"}</span>
+            <Upload className="w-5 h-5" />
+            <span>{uploading ? `Uploading...` : "Click to upload image"}</span>
             <input
               type="file"
               accept="image/*"
