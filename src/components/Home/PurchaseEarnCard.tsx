@@ -13,14 +13,14 @@ function PurchaseEarnCard() {
         className="bg-gradient-to-r from-blue-600 to-cyan-500 rounded-xl p-6 relative overflow-hidden"
       >
         <div className="relative z-10">
-          <h3 className="text-xl font-bold mb-2">Purchase $CLS</h3>
+          <h3 className="text-xl font-bold mb-2">Stake $CLS</h3>
           <p className="text-sm opacity-90 mb-4">
             By staking $CLS to support a project, users can show their support
             and potentially earn a share of the project&apos;s future success.
             (Tokens, NFTs, whitelists).
           </p>
           <button className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg font-medium transition-colors">
-            Buy $CLS
+            Stake now
           </button>
         </div>
         <div className="absolute -right-4 -bottom-4 w-24 h-24 opacity-20">
@@ -41,7 +41,7 @@ function PurchaseEarnCard() {
           <h3 className="text-xl font-bold mb-2">GasPass</h3>
           <p className="text-sm opacity-90 mb-4">
             Claim airdrops without paying upfront gas. Borrow now, repay later
-            with a small fee. (Coming Q4 2025)
+            with a small fee.
           </p>
           <button
             disabled
