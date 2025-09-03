@@ -117,7 +117,11 @@ export function MultiStepTaskModal({
   ];
 
   const handleInputChange = (field: keyof TaskData, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({
+      ...prev,
+      [field]:
+        field === "rewardPoints" ? parseFloat(Number(value).toFixed(2)) : value,
+    }));
   };
 
   const handleEngagementToggle = (engagement: string) => {
@@ -136,7 +140,7 @@ export function MultiStepTaskModal({
       return {
         ...prev,
         type: updatedType,
-        rewardPoints: updatedPoints < 0 ? 0 : updatedPoints,
+        rewardPoints: parseFloat(Math.max(updatedPoints, 0).toFixed(2)),
       };
     });
   };
@@ -176,12 +180,15 @@ export function MultiStepTaskModal({
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
+      const payload = {
+        ...formData,
+        rewardPoints: parseFloat(formData.rewardPoints.toFixed(2)),
+      };
+
       const res = await fetch("/api/creator/submit-task", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
