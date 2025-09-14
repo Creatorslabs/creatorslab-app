@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { useLoader } from "@/hooks/useLoader";
@@ -10,20 +10,32 @@ import { logger } from "@/lib/logger";
 
 type UserRole = "user" | "creator";
 
+interface UserData {
+  id: string;
+  name: string;
+  username: string;
+  avatar: string;
+  verified: boolean;
+  email: string;
+  inviteLink: string;
+  balance: string;
+  role: UserRole;
+}
+
 interface UserResponse {
-  data?: {
-    role?: UserRole;
-  };
+  success: boolean;
+  data: UserData;
 }
 
 async function fetchUser(): Promise<UserResponse> {
-  const res = await fetch("/api/user/me");
+  const res = await fetch("/api/profile");
   if (!res.ok) throw new Error("Failed to fetch user");
   return res.json();
 }
 
 export default function UserProfileWrapper() {
   const { LoaderModal, showLoader, hideLoader } = useLoader();
+  const queryClient = useQueryClient();
 
   const { data, isLoading, isError, error } = useQuery<UserResponse>({
     queryKey: ["user-profile"],
@@ -32,7 +44,6 @@ export default function UserProfileWrapper() {
     staleTime: 1000 * 60,
   });
 
-  // Handle side effects separately
   useEffect(() => {
     if (isLoading) {
       showLoader({ message: "Loading your profile..." });
@@ -53,7 +64,8 @@ export default function UserProfileWrapper() {
   }, [error]);
 
   if (isLoading) return <LoaderModal />;
-  if (isError) {
+
+  if (isError || !data?.data) {
     return (
       <div className="flex items-center justify-center min-h-screen text-gray-400">
         Could not load your profile.
@@ -61,14 +73,16 @@ export default function UserProfileWrapper() {
     );
   }
 
-  const role = data?.data?.role ?? null;
+  const user = data.data;
+  const role = user.role || "user"; // default to user if missing
 
-  if (role === "creator") return <CreatorProfile />;
-  if (role === "user") return <UserProfile />;
+  const refreshProfile = () =>
+    queryClient.invalidateQueries({ queryKey: ["user-profile"] });
 
-  return (
-    <div className="flex items-center justify-center min-h-screen text-gray-400">
-      Could not determine your role.
-    </div>
-  );
+  if (role === "creator")
+    return (
+      <CreatorProfile creator={{ ...user }} refreshProfile={refreshProfile} />
+    );
+
+  return <UserProfile {...user} />;
 }

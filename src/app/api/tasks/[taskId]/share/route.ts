@@ -25,6 +25,10 @@ export async function POST(
 
     const user = await getLoggedInUser();
 
+    if (!user) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
     await TaskShare.create({
       taskId,
       platform,

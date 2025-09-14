@@ -52,12 +52,20 @@ function RefreshPage() {
         const token = await withTimeout(getAccessToken(), 4000);
         logger.log("Token fetched:", !!token);
 
+        if (token) {
+          await fetch("/api/auth/refresh", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token }),
+          });
+        }
+
         clearTimeout(timeoutScreen);
-        redirectOnce(token ? redirectUri : "/login");
+        redirectOnce(token ? redirectUri : "/auth/signin");
       } catch (err) {
         logger.error("Token fetch failed:", err);
         clearTimeout(timeoutScreen);
-        redirectOnce("/");
+        redirectOnce("/auth/signin");
       }
     };
 
@@ -80,7 +88,7 @@ function RefreshPage() {
             Go Home
           </Button>
           <Button
-            onClick={() => router.replace("/login")}
+            onClick={() => router.replace("/auth/signin")}
             className="bg-purple-600 hover:bg-purple-700"
           >
             Go to Login

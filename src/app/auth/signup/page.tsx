@@ -10,7 +10,6 @@ import { toast } from "@/hooks/use-toast";
 import Image from "next/image";
 import { logger } from "@/lib/logger";
 import WelcomeModal from "@/components/WelcomeModal";
-import { Button } from "@/components/ui/button";
 
 export default function SignUp() {
   const [step, setStep] = useState(1);

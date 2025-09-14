@@ -4,13 +4,9 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Search } from "lucide-react";
-import {
-  useConnectOrCreateWallet,
-  useCreateWallet,
-  useLogout,
-  usePrivy,
-} from "@privy-io/react-auth";
+import { usePrivy, useLogout } from "@privy-io/react-auth";
 import { Suspense, useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
@@ -21,33 +17,60 @@ import { useUserBalances } from "@/hooks/useUserBalances";
 import { toast } from "@/hooks/use-toast";
 import { logger } from "@/lib/logger";
 
+interface UserData {
+  name: string;
+  email: string;
+  avatar?: string;
+  role: string;
+}
+
+async function fetchUser(): Promise<UserData | null> {
+  try {
+    const res = await fetch("/api/user/me");
+    if (!res.ok) throw new Error("Failed to fetch user");
+    const data = await res.json();
+    if (data.success) {
+      return {
+        name: data.data.username || "User",
+        email: data.data.email || "no-email@example.com",
+        avatar: data.data.image,
+        role: data.data.role,
+      };
+    }
+    return null;
+  } catch (err) {
+    logger.error("Error fetching user:", err);
+    return null;
+  }
+}
+
 function NavbarComp() {
   const pathname = usePathname();
   const router = useRouter();
   const { ready, authenticated, user: privyUser } = usePrivy();
-
-  const [user, setUser] = useState<{
-    name: string;
-    email: string;
-    avatar?: string;
-    role: string;
-  } | null>(null);
-  const [loading, setLoading] = useState(true);
   const { balances } = useUserBalances();
 
   const searchParams = useSearchParams();
   const [search, setSearch] = useState(searchParams.get("search") || "");
-
   const [isOpen, setIsOpen] = useState(false);
 
-  const { linkWallet } = usePrivy();
   const { logout } = useLogout({
     onSuccess: () => router.push("/auth/signin"),
   });
 
+  // React Query for user
+  const { data: user, isLoading } = useQuery<UserData | null>({
+    queryKey: ["navbar-user"],
+    queryFn: fetchUser,
+    enabled: ready && authenticated,
+    staleTime: 1000 * 60,
+  });
+
   const connectWallet = () => {
     try {
-      linkWallet({
+      // linking wallet
+      // @ts-expect-error: privy types may not cover wallet linking
+      privyUser?.linkWallet?.({
         walletChainType: "solana-only",
         walletList: [
           "phantom",
@@ -56,12 +79,10 @@ function NavbarComp() {
           "solflare",
           "wallet_connect",
         ],
-        description: "Coonect your solana wallet",
+        description: "Connect your solana wallet",
       });
 
-      fetch("/api/save-wallet", {
-        method: "PATCH",
-      });
+      fetch("/api/save-wallet", { method: "PATCH" });
     } catch (error) {
       logger.error("Wallet linking failed:", error);
       toast({
@@ -72,10 +93,9 @@ function NavbarComp() {
     }
   };
 
-  const closeModal = () => {
-    setIsOpen(false);
-  };
+  const closeModal = () => setIsOpen(false);
 
+  // debounce search
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       const newParams = new URLSearchParams(window.location.search);
@@ -86,7 +106,6 @@ function NavbarComp() {
       }
       router.replace(`${pathname}?${newParams.toString()}`);
     }, 400);
-
     return () => clearTimeout(delayDebounce);
   }, [search, pathname, router]);
 
@@ -94,35 +113,6 @@ function NavbarComp() {
     const currentSearch = searchParams.get("search") || "";
     setSearch(currentSearch);
   }, [searchParams]);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      if (ready && authenticated) {
-        try {
-          const res = await fetch("/api/user/me");
-          const data = await res.json();
-          if (data.success) {
-            setUser({
-              name: data.data.username || "User",
-              email: data.data.email || "no-email@example.com",
-              avatar: data.data.image,
-              role: data.data.role,
-            });
-          } else {
-            logger.warn("User fetch error:", data);
-          }
-        } catch (err) {
-          logger.error("Error fetching user:", err);
-        } finally {
-          setLoading(false);
-        }
-      } else {
-        setLoading(false);
-      }
-    };
-
-    fetchUser();
-  }, [ready, authenticated]);
 
   if (pathname.startsWith("/auth")) return null;
 
@@ -144,6 +134,7 @@ function NavbarComp() {
         </span>
       </Link>
 
+      {/* Search bar */}
       <div className="flex-1 max-w-md mx-4 lg:mx-8 hidden md:block">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -177,7 +168,6 @@ function NavbarComp() {
                 >
                   Plant Seeds
                 </Button>
-
                 <MultiStepTaskModal isOpen={isOpen} onClose={closeModal} />
               </>
             )}
@@ -188,10 +178,10 @@ function NavbarComp() {
               onCreateWallet={connectWallet}
             />
 
-            {loading ? (
+            {isLoading ? (
               <Skeleton className="w-6 h-6 lg:w-8 lg:h-8 rounded-full" />
             ) : (
-              <UserDropdown user={user} onLogOut={logout} />
+              user && <UserDropdown user={user} onLogOut={logout} />
             )}
           </>
         )}

@@ -20,23 +20,12 @@ import { SocialCard } from "@/components/Common/SocialCard";
 import { useLinkAccount, usePrivy } from "@privy-io/react-auth";
 import { siDiscord, siX } from "simple-icons";
 import { EmailCard } from "@/components/Common/EmailCard";
-import { CreatorTaskTable } from "@/components/creator/CreatorTaskTable";
 import { MultiStepTaskModal } from "@/components/creator/task-modal/MultiStepTaskModal";
 import AvatarUploader from "@/components/Common/AvatarUploader";
 import { updateAvatar } from "@/lib/helpers/update-avatar";
 import EditableUsername from "@/components/Common/EditableUsername";
 import { logger } from "@/lib/logger";
 import DailyClaimModal from "@/components/Common/DailyClaimModal";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-
-interface Task {
-  id: string;
-  platform: string;
-  taskDetail: string;
-  category: string;
-  rewardPoints: string;
-  textStatus: "Ongoing" | "Finished";
-}
 
 interface Creator {
   id: string;
@@ -46,7 +35,6 @@ interface Creator {
   avatar: string;
   verified: boolean;
   inviteLink: string;
-  tasks: Task[];
 }
 
 const Icon = ({ icon }: { icon: { svg: string; hex: string } }) => {
@@ -62,32 +50,18 @@ const Icon = ({ icon }: { icon: { svg: string; hex: string } }) => {
   );
 };
 
-export default function CreatorProfile() {
+export default function CreatorProfile({
+  creator,
+  refreshProfile,
+}: {
+  creator: Creator;
+  refreshProfile: () => Promise<void>;
+}) {
   const router = useRouter();
   const { user: privyUser } = usePrivy();
   const [isBalanceVisible, setIsBalanceVisible] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const { showLoader, hideLoader, LoaderModal } = useLoader();
-  const queryClient = useQueryClient();
-
-  const { data: creator, isLoading } = useQuery<Creator>({
-    queryKey: ["creatorProfile"],
-    queryFn: async () => {
-      showLoader({ message: "Loading creator profile..." });
-      try {
-        const res = await fetch("/api/creator/profile");
-        if (!res.ok) throw new Error("Failed to fetch creator profile");
-        const { data } = await res.json();
-        return data as Creator;
-      } finally {
-        hideLoader();
-      }
-    },
-  });
-
-  const refreshCreator = async () => {
-    await queryClient.invalidateQueries({ queryKey: ["creatorProfile"] });
-  };
+  const { LoaderModal } = useLoader();
 
   const { linkDiscord, linkTwitter, linkEmail } = useLinkAccount({
     onSuccess: async ({ linkMethod }: { linkMethod: string }) => {
@@ -96,7 +70,7 @@ export default function CreatorProfile() {
         variant: "success",
       });
       await fetch("/api/user/verify", { method: "PATCH" });
-      await refreshCreator();
+      await refreshProfile();
     },
     onError: (error, details) => {
       toast({
@@ -119,7 +93,7 @@ export default function CreatorProfile() {
   };
 
   const handleCopyInviteLink = () => {
-    if (creator?.inviteLink) {
+    if (creator.inviteLink) {
       navigator.clipboard.writeText(creator.inviteLink);
       toast({
         title: "Invite link copied!",
@@ -128,10 +102,6 @@ export default function CreatorProfile() {
       });
     }
   };
-
-  if (isLoading || !creator) {
-    return <LoaderModal />;
-  }
 
   return (
     <div className="min-h-screen bg-background text-white p-4 lg:p-6">
@@ -183,7 +153,7 @@ export default function CreatorProfile() {
                     username={creator.username}
                     onUploadComplete={async (url) => {
                       await updateAvatar(creator.id, url, creator.avatar);
-                      refreshCreator();
+                      refreshProfile();
                     }}
                   />
 
@@ -240,9 +210,6 @@ export default function CreatorProfile() {
                 </Button>
               </div>
             </motion.div>
-
-            {/* Tasks Table */}
-            <CreatorTaskTable tasks={creator.tasks} />
           </div>
 
           {/* Right Column - Wallet & Social Accounts */}

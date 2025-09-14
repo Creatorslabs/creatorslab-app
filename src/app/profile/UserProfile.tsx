@@ -5,9 +5,7 @@ import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useLinkAccount, useLogout, usePrivy } from "@privy-io/react-auth";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { useLoader } from "@/hooks/useLoader";
 import { logger } from "@/lib/logger";
 
 import {
@@ -29,30 +27,17 @@ import { updateAvatar } from "@/lib/helpers/update-avatar";
 import EditableUsername from "@/components/Common/EditableUsername";
 import InviteLinkButton from "@/components/Common/InviteLink";
 import DailyClaimModal from "@/components/Common/DailyClaimModal";
-import ClaimCard from "@/components/Common/ClaimCard";
+import PendingClaims from "@/components/user/PendingClaims";
 
-interface PendingClaim {
-  id: string;
-  task: string;
-  amount: string;
-  platform: string;
-  canClaim: boolean;
-  isClaimed: boolean;
-  status: string;
-}
-
-interface UserProfile {
+interface UserProfileProps {
   id: string;
   name: string;
   username: string;
   avatar: string;
   verified: boolean;
-  twitterHandle: string;
-  discordHandle: string;
   email: string;
   inviteLink: string;
   balance: string;
-  pendingClaims: PendingClaim[];
 }
 
 const Icon = ({ icon }: { icon: { svg: string; hex: string } }) => {
@@ -65,74 +50,18 @@ const Icon = ({ icon }: { icon: { svg: string; hex: string } }) => {
   );
 };
 
-const fetchUserProfile = async (): Promise<UserProfile> => {
-  const res = await fetch("/api/user/profile");
-  if (!res.ok) throw new Error("Failed to fetch profile");
-  const { data } = await res.json();
-  return data;
-};
-
-const UserProfile = () => {
+const UserProfile = ({
+  id,
+  username,
+  avatar,
+  verified,
+  email,
+  inviteLink,
+  balance,
+}: UserProfileProps) => {
   const [isBalanceVisible, setIsBalanceVisible] = useState(false);
   const { user: privyUser } = usePrivy();
-  const { showLoader, hideLoader, LoaderModal } = useLoader();
   const router = useRouter();
-  const queryClient = useQueryClient();
-
-  const { logout } = useLogout({
-    onSuccess() {
-      router.push("/auth/signin");
-    },
-  });
-
-  // Fetch user profile
-  const {
-    data: user,
-    isLoading,
-    isError,
-    error,
-  } = useQuery<UserProfile, Error>({
-    queryKey: ["userProfile"],
-    queryFn: async () => {
-      showLoader({ message: "Loading your profile..." });
-      try {
-        const data = await fetchUserProfile();
-        toast({ title: "Profile loaded successfully!", variant: "success" });
-        return data;
-      } finally {
-        hideLoader();
-      }
-    },
-    retry: 1,
-  });
-
-  // Refresh user after mutations
-  const refreshUser = () =>
-    queryClient.invalidateQueries({ queryKey: ["userProfile"] });
-
-  // Claim reward mutation
-  const claimMutation = useMutation({
-    mutationFn: async (taskId: string) => {
-      const res = await fetch("/api/tasks/claim", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ taskId }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to claim reward");
-      return data;
-    },
-    onSuccess: () => {
-      toast({ title: "Reward claimed!", variant: "success" });
-      refreshUser();
-    },
-    onError: (err: any) => {
-      toast({
-        title: err.message || "Failed to claim reward",
-        variant: "error",
-      });
-    },
-  });
 
   const { linkDiscord, linkTwitter, linkEmail } = useLinkAccount({
     onSuccess: async ({ linkMethod }: { linkMethod: string }) => {
@@ -141,7 +70,6 @@ const UserProfile = () => {
         variant: "success",
       });
       await fetch("/api/user/verify", { method: "PATCH" });
-      refreshUser();
     },
     onError: (error, details) => {
       toast({
@@ -163,17 +91,6 @@ const UserProfile = () => {
     }
   };
 
-  if (isLoading) return <LoaderModal />;
-  if (isError) {
-    toast({ title: error.message, variant: "error" });
-    return (
-      <div className="flex items-center justify-center min-h-screen text-gray-400">
-        Failed to load profile
-      </div>
-    );
-  }
-  if (!user) return null;
-
   return (
     <div className="min-h-screen bg-background text-white p-4 lg:p-6">
       <motion.div
@@ -183,6 +100,7 @@ const UserProfile = () => {
         transition={{ duration: 0.3 }}
       >
         <div className="w-full py-4 min-h-screen">
+          {/* Header */}
           <motion.div
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -208,8 +126,8 @@ const UserProfile = () => {
             </Button>
           </motion.div>
 
-          {/* User Details */}
           <div className="grid lg:grid-cols-[minmax(425px,_1fr)_425px] gap-8 grid-cols-1">
+            {/* Left - Details */}
             <motion.div
               className="border border-border p-4 sm:p-8 rounded-xl"
               initial={{ y: 20, opacity: 0 }}
@@ -219,20 +137,16 @@ const UserProfile = () => {
               <div className="flex flex-col md:flex-row items-center md:items-start justify-between flex-wrap gap-4">
                 <div className="flex gap-6 flex-col md:items-start items-center">
                   <AvatarUploader
-                    currentAvatar={user.avatar}
-                    username={user.username}
+                    currentAvatar={avatar}
+                    username={username}
                     onUploadComplete={async (url) => {
-                      await updateAvatar(user.id, url, user.avatar);
-                      refreshUser();
+                      await updateAvatar(id, url, avatar);
                     }}
                   />
                   <div className="flex flex-col items-center md:items-start text-center md:text-left space-y-2">
-                    <EditableUsername
-                      initialName={user.username}
-                      userId={user.id}
-                    />
+                    <EditableUsername initialName={username} userId={id} />
                     <div className="flex items-center gap-2 bg-card px-3 py-1 rounded-md">
-                      {user.verified ? (
+                      {verified ? (
                         <>
                           <BadgeCheck className="w-4 h-4 text-blue-500" />
                           <span className="text-white text-sm font-medium">
@@ -250,8 +164,7 @@ const UserProfile = () => {
                     </div>
                   </div>
                 </div>
-
-                <InviteLinkButton inviteLink={user.inviteLink} />
+                <InviteLinkButton inviteLink={inviteLink} />
               </div>
 
               <hr className="border-border my-8" />
@@ -264,15 +177,16 @@ const UserProfile = () => {
                     icon={<Icon icon={siX} />}
                     platform="Twitter"
                     linked={!!privyUser?.twitter}
-                    handle={privyUser?.twitter?.username}
+                    handle={privyUser?.twitter?.username || ""}
                     action={linkSocial}
                   />
-
                   <SocialCard
                     icon={<Icon icon={siDiscord} />}
                     platform="Discord"
                     linked={!!privyUser?.discord}
-                    handle={privyUser?.discord?.username?.replace(/#\d+$/, "")}
+                    handle={
+                      privyUser?.discord?.username?.replace(/#\d+$/, "") || ""
+                    }
                     action={linkSocial}
                   />
                 </div>
@@ -284,13 +198,11 @@ const UserProfile = () => {
                 <span className="text-[#787878] text-xs mb-2 block">
                   Link your Email to get latest updates on Creatorslab
                 </span>
-                <div className="flex gap-6">
-                  <EmailCard email={user.email} action={() => linkEmail()} />
-                </div>
+                <EmailCard email={email} action={() => linkEmail()} />
               </div>
             </motion.div>
 
-            {/* Wallet & Tasks */}
+            {/* Right - Wallet & Claims */}
             <motion.div
               initial={{ x: 20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
@@ -316,7 +228,7 @@ const UserProfile = () => {
                         exit={{ opacity: 0, scale: 0.9 }}
                         transition={{ duration: 0.2 }}
                       >
-                        {isBalanceVisible ? user.balance : "****"}
+                        {isBalanceVisible ? balance : "****"}
                       </motion.span>
                     </AnimatePresence>
                     <button onClick={() => setIsBalanceVisible((v) => !v)}>
@@ -327,7 +239,6 @@ const UserProfile = () => {
                       )}
                     </button>
                   </p>
-
                   <div className="flex gap-2 font-semibold text-base">
                     <button className="px-6 py-2 rounded-lg bg-gradient-to-r from-[#5d3fd1] to-[#03abff] text-white">
                       Buy $CLS
@@ -336,24 +247,7 @@ const UserProfile = () => {
                   </div>
                 </div>
               </div>
-              <div className="border border-border p-6 rounded-xl mt-6 overflow-y-auto max-h-[400px] scrollbar-hide">
-                <p className="text-lg mb-2">My Rewards</p>
-                <div className="space-y-3">
-                  {user.pendingClaims.map((claim, index) => (
-                    <ClaimCard
-                      key={claim.id}
-                      claim={claim}
-                      index={index}
-                      onClaim={(id) => claimMutation.mutate(id)}
-                    />
-                  ))}
-                  {user.pendingClaims.length === 0 && (
-                    <div className="text-center py-8 text-gray-400">
-                      <p>No pending claims</p>
-                    </div>
-                  )}
-                </div>
-              </div>
+              <PendingClaims />
             </motion.div>
           </div>
         </div>

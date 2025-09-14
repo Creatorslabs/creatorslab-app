@@ -3,16 +3,8 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
+import { ArrowRight, Mail, Wallet2, ArrowLeft } from "lucide-react";
 import {
-  ArrowRight,
-  Twitter,
-  MessageSquare,
-  Mail,
-  Wallet2,
-  ArrowLeft,
-} from "lucide-react";
-import {
-  useConnectWallet,
   useLogin,
   useLoginWithEmail,
   useLoginWithOAuth,

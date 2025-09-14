@@ -58,7 +58,7 @@ export async function GET(req: NextRequest) {
       compiled: "0",
       sol: "0",
       usdc: "0",
-      cls: localUser.balance?.toString() || "0",
+      cls: localUser.balance?.toFixed(2).toString() || "0",
     };
 
     const walletAddress = privyUser.wallet?.address;
