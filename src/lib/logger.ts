@@ -44,6 +44,7 @@ function log(level: LogLevel, ...args: any[]) {
     }
   } else {
     // send to DB in production
+    if (level === "log" || level === "info") return; // skip less important logs
     sendToServer(level, message, args);
   }
 }
