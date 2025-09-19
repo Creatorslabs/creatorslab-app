@@ -23,9 +23,17 @@ async function sendToServer(level: LogLevel, message: string, meta?: any) {
 
 function log(level: LogLevel, ...args: any[]) {
   const prefix = `[${isBrowser ? "CLIENT" : "SERVER"} ${level.toUpperCase()}]`;
-  const message = args
-    .map((a) => (typeof a === "string" ? a : JSON.stringify(a)))
-    .join(" ");
+
+  // serialize args safely
+  const serializedArgs = args.map((a) => {
+    try {
+      return typeof a === "string" ? a : JSON.stringify(a);
+    } catch {
+      return String(a); // fallback if circular
+    }
+  });
+
+  const message = serializedArgs.join(" ");
 
   if (isDev) {
     switch (level) {
@@ -45,7 +53,7 @@ function log(level: LogLevel, ...args: any[]) {
   } else {
     // send to DB in production
     if (level === "log" || level === "info") return; // skip less important logs
-    sendToServer(level, message, args);
+    sendToServer(level, message, serializedArgs);
   }
 }
 
