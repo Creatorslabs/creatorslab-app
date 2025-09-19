@@ -140,7 +140,7 @@ export default function SignIn() {
   const handleSocialLogin = async (provider: "twitter" | "discord") => {
     setIsLoading(true);
     try {
-      await initOAuth({ provider });
+      await initOAuth({ provider, disableSignup: true });
       router.push("/");
     } catch (error) {
       toast({
